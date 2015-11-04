@@ -8,52 +8,22 @@
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
    width="3171"
    height="717.14282"
-   id="svg2"
-   version="1.1"
-   inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="banner.svg"
-   inkscape:export-filename="/home/max/www/images/banner.png"
-   inkscape:export-xdpi="90"
-   inkscape:export-ydpi="90">
+   id="svg2">
   <defs
      id="defs4">
     <clipPath
-       clipPathUnits="userSpaceOnUse"
        id="clipPath3104">
       <rect
-         id="rect3106"
          width="3291.4285"
          height="717.14282"
          x="-1225.7142"
-         y="169.50504" />
+         y="169.50504"
+         id="rect3106" />
     </clipPath>
   </defs>
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="0.35"
-     inkscape:cx="1546.2144"
-     inkscape:cy="354.28568"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     inkscape:window-width="1600"
-     inkscape:window-height="854"
-     inkscape:window-x="0"
-     inkscape:window-y="24"
-     inkscape:window-maximized="1"
-     fit-margin-top="0"
-     fit-margin-left="0"
-     fit-margin-right="0"
-     fit-margin-bottom="0" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -67,56 +37,47 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(1171.2144,-169.50504)">
+     transform="translate(1171.2144,-169.50504)"
+     id="layer1">
     <image
-       y="146.00504"
-       x="-1171.2144"
+       xlink:href="./banner_base.jpg"
        id="image3047"
-       xlink:href="file:///home/max/www/images/banner_base.jpg"
+       clip-path="url(#clipPath3104)"
        height="927"
        width="3171"
-       clip-path="url(#clipPath3104)" />
+       y="146.00504"
+       x="-1171.2144" />
     <text
-       xml:space="preserve"
-       style="font-size:72px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Georgia"
-       x="-1091.4287"
-       y="292.36221"
+       x="-1142.8573"
+       y="295.21936"
        id="text3050"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
+       xml:space="preserve"
+       style="font-size:72px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Georgia"><tspan
+         x="-1142.8573"
+         y="295.21936"
          id="tspan3052"
-         x="-1091.4287"
-         y="292.36221"
          style="font-size:72px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia;-inkscape-font-specification:Georgia">21st -23rd</tspan><tspan
-         sodipodi:role="line"
-         x="-1091.4287"
-         y="382.36221"
+         x="-1142.8573"
+         y="385.21936"
          id="tspan3054"
          style="font-size:72px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia;-inkscape-font-specification:Georgia">September 2016</tspan><tspan
-         sodipodi:role="line"
-         x="-1091.4287"
-         y="472.36221"
+         x="-1142.8573"
+         y="475.21936"
          id="tspan3056"
          style="font-size:72px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia;-inkscape-font-specification:Georgia">Cambridge, UK</tspan></text>
     <text
-       xml:space="preserve"
-       style="font-size:72px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Georgia"
        x="-74.618294"
        y="298.18359"
        id="text3050-1"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
+       xml:space="preserve"
+       style="font-size:72px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Georgia"><tspan
          x="-74.618294"
          y="298.18359"
          id="tspan3056-0"
-         style="font-size:72px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia;-inkscape-font-specification:Georgia">14th Conference on </tspan><tspan
-         sodipodi:role="line"
+         style="font-size:72px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia;-inkscape-font-specification:Georgia">14th International Conference on </tspan><tspan
          x="-74.618294"
          y="388.18359"
-         style="font-size:72px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia;-inkscape-font-specification:Georgia"
-         id="tspan3090">Computational Methods in Systems Biology</tspan></text>
+         id="tspan3090"
+         style="font-size:72px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Georgia;-inkscape-font-specification:Georgia">Computational Methods in Systems Biology</tspan></text>
   </g>
 </svg>
