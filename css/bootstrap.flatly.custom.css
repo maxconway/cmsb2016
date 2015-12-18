@@ -53,6 +53,10 @@ padding: 30px 0;
   font-size: 20px;
 }
 
+.affix {
+  position: fixed;
+}
+
 body {
   margin: 0;
 }
@@ -6581,9 +6585,7 @@ button.close {
 .hidden {
   display: none !important;
 }
-.affix {
-  position: fixed;
-}
+
 @-ms-viewport {
   width: device-width;
 }

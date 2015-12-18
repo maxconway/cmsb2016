@@ -18,7 +18,14 @@
       <script src="htt
       ps://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-
+  <style>
+  /* Note: Try to remove the following lines to see the effect of CSS positioning */
+  .affix {
+  	position: fixed;
+      top: 0;
+      width: 100%;
+  }
+  </style>
   </head>
   <body style='overflow-y:scroll'>
    <div class="splash">
@@ -30,7 +37,7 @@
       </div>
 
     <!--img src='images/banner1.png' class="img-responsive"-->
-      <nav class="navbar navbar-default navbar-static-top" role="navigation">
+      <nav class="navbar navbar-default navbar-static-top" role="navigation" data-spy="affix" data-offset-top="250">
         <div class='container-fluid'>
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
             <span class="sr-only">Toggle navigation</span>
