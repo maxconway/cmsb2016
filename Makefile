@@ -7,7 +7,7 @@ ALL : index.html organization.html registration.html call_papers.html call_poste
 
 
 CLEAN : 
-	rm *.html
+	rm -f *.html
 
 SERVE :
 	python -m SimpleHTTPServer
