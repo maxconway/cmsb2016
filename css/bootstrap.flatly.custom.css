@@ -17,6 +17,9 @@ html {
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
 }
+span.papertitle{
+    font-weight: bold;
+}
 .just{
 text-align: justify;
 }
@@ -5319,8 +5322,10 @@ button.list-group-item .list-group-item-heading {
 }
 a.list-group-item:hover,
 button.list-group-item:hover,
+li.list-group-item:hover,
 a.list-group-item:focus,
-button.list-group-item:focus {
+button.list-group-item:focus,
+li.list-group-item:focus {
   text-decoration: none;
   color: #555555;
   background-color: #ecf0f1;
