@@ -1,0 +1,65 @@
+% This is LLNCS.DEM the demonstration file of
+% the LaTeX macro package from Springer-Verlag
+% for Lecture Notes in Computer Science,
+% version 2.4 for LaTeX2e as of 16. April 2010
+%
+\documentclass{llncs}
+%
+\usepackage{makeidx}  % allows for indexgeneration
+ \usepackage{amsmath}
+ \usepackage{graphicx}
+%
+\begin{document}
+%
+\frontmatter          % for the preliminaries
+%
+\pagestyle{headings}  % switches on printing of running heads
+\addtocmark{Revealing Biomarker Mixtures in Lipid Pools from large-scale Lipidomics} % additional mark in the TOC
+
+%
+
+%
+\mainmatter              % start of the contributions
+%
+\title{Revealing Biomarker Mixtures in Lipid Pools from large-scale Lipidomics}
+%
+\titlerunning{Revealing Biomarker Mixtures in Lipid Pools from large-scale Lipidomics}  % abbreviated title (for running head)
+%                                     also used for the TOC unless
+%                                     \toctitle is used
+%
+\author{Kai Loell\inst{1},  Albert Koulman\inst{2}  James Smith \inst{1,2,3}\\ 
+\texttt{10311kai@gmail.com, ak675@cam.ac.uk, j.smith252@leeds.ac.uk}}
+\authorrunning{Kai et al.} % abbreviated author list (for running head)
+%
+%%%% list of authors for the TOC (use if author list has to be modified)
+%\tocauthor{Kai Loell, Albert Koulman, and James Smith}
+%
+\institute{Cambridge Computational Biology Institute,  
+Department of Applied Mathematics and Theoretical Physics, Centre for Mathematical Sciences, University of Cambridge, Wilberforce Rd, Cambridge CB3 0WA, U.K.
+\and
+MRC Elsie Widdowson Laboratory, (Formerly) MRC Human Nutrition Research, 120 Fulbourn Rd, Cambridge CB1 9NL, U.K.
+\and
+School of Food Science and Nutrition, Faculty of Mathematics and Physical Sciences, University of Leeds, Leeds LS2 9JT, U.K.
+}
+\maketitle              % typeset the title of the contribution
+\vbox{}
+\begin{abstract}
+Lipids are key structural elements, energy sources, and components for intracellular signalling and metabolic processes. 
+Their constituents are a small number of fatty acids (FAs), indicators of metabolic health and nutrition and biomarkers for disease risk. 
+Lipids contain singlet, doublet and triplet combinations of FAs. Different combinations of FAs can have equivalent configurations that in aggregate are observed as lipid mixture pools. 
+Traditionally, the lipid pools have been considered to be biomarkers, however it is now recognised that sub-populations of explicit lipid species are more informative. 
+Lipid biomarkers for metabolic states, so far, come from the latent (hidden) structure of sub-populations in the pools and this needs to be addressed.
+
+Epidemiological high-resolution lipidomics data is required to derive the \textit{mixtures} of lipid species contributing to lipid pools. 
+FA signals are acquired using gas chromatography and lipid profiling performed by direct infusion high resolution mass spectrometry. 
+Profiling identifies lipid mixture pools as spectral peaks separated by their $m/z$ ratio. However, not all constituent lipid sub-populations are easily distinguished. 
+Furthermore, the data generated is \textit{compositional} with the signals of FAs and lipid pools normalised separately.
+
+Our approach to this problem uses both lipid pool and FA data. Lipid data is re-scaled to account for the combinations of FAs required in each observed pool. 
+A linear algebra Gauss-Jordan reduction algorithm is applied to the stoichiometry of FAs incorporated in the explicit lipid species and the combinations of lipid species in every pool.  
+The method solves the contributing lipid species sub-populations, that is, the representative combinations of FAs that form the pools. 
+Abundances of explicit FA combinations not only improve lipid biomarker identification but also provide a more detailed picture of metabolic responses.
+
+\begin{keywords}compositional mixture modelling, optimisation, biomarkers, metabolic states, big data, lipidomics \end{keywords}
+\end{abstract}
+\end{document}

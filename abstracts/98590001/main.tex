@@ -1,0 +1,140 @@
+\documentclass{llncs}
+
+%\usepackage{times}
+\usepackage{epsfig}
+\usepackage{ifpdf}
+
+\usepackage{array}
+\usepackage{amsmath,amssymb,amscd,amstext}
+% *** MATH PACKAGES ***
+\usepackage{mathrsfs}
+\usepackage{dsfont}
+\usepackage{amsbsy}
+\usepackage{stmaryrd}
+
+\usepackage{subfigure}
+
+%\usepackage{tocloft}
+\usepackage{setspace}
+%\usepackage{proof}
+\usepackage{fancyhdr} 
+\usepackage{hyperref}
+\usepackage{lastpage}
+%\usepackage{pslatex}
+
+\usepackage[displaymath,textmath,sections,graphics,floats,graphicx,color]{preview}
+%\newcommand{\tuple}[1]{\langle #1\rangle}
+\def  \Nat      {\mathbb{N}}   % naturals
+\def  \Int      {\mathbb{Z}}     % integers
+\def  \Real     {\mathbb{R}}  % reals
+\def  \Bool     {\mathbb{B}}
+\def  \Complex  {\mathbb{C}}
+\def  \T        {\mathbb{T}}
+\def  \Domain   {\mathbb{D}}
+
+\def  \om       {\omega}
+\def  \hf       {\hat{f}}
+\def  \hx       {\hat{x}}
+\def  \ft#1     {\footnote{#1} }
+\def  \f        {\varphi}
+\def  \ni       {\noindent}
+\def  \t        {\tau}
+\def  \s        {\sigma}
+
+\renewcommand{\i}{\mathbf{i}}
+%\newcommand{\ev}{\Diamond}
+%\renewcommand{\next}{\bigcirc}
+%\newcommand{\always}{\square}
+%\newcommand{\untz}{~\mathcal{U}~}   % no argument
+%\newcommand{\unti}[1]{~\mathcal{U}_{#1}}
+%\newcommand{\untii}[2]{~\mathcal{U}_{[#1,#2]}}
+\newcommand{\sncz}{~\mathcal{S}~}   % no argument
+\newcommand{\snci}[1]{~\mathcal{S}_{#1}}
+\newcommand{\sncii}[2]{~\mathcal{S}_{[#1,#2]}}
+\newcommand{\hz}{\mbox{Hz}}
+\newcommand{\pitch}{\mathop{\text{pitch}}}
+
+
+\newcommand{\lts}[1]{\ensuremath{\stackrel{#1}{\rightarrow}}}
+
+
+\newcommand{\until}[1]{\ensuremath{\mathbf{U}_{#1}}}
+\newcommand{\nxt}[1]{\ensuremath{\mathbf{X}_{#1}}}
+\newcommand{\always}[1]{\ensuremath{\mathbf{G}_{#1}}}
+\newcommand{\eventually}[1]{\ensuremath{\mathbf{F}_{#1}}}
+\newcommand{\true}{\mathtt{true}}
+\newcommand{\false}{\mathtt{false}}
+
+\usepackage{tikz}
+
+\usepackage{pdflscape}
+
+
+
+%\newcommand{\infrule}[1]{\scriptstyle\it{#1}}
+
+
+\usetikzlibrary{arrows,positioning,automata}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+%\theoremstyle{definition}
+\newtheorem{defn}[thm]{\ \\Definition}
+%\theoremstyle{remark}
+\newtheorem{rem}[thm]{\ \\Remark}
+
+\renewcommand{\theequation}{\thesection.\arabic{equation}}
+\newcommand{\red}{\textcolor{red}}
+
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\renewcommand{\cal}[1]{\mathcal{#1}}
+\newcommand{\bb}[1]{\mathbb{#1}}
+\renewcommand{\phi}{\varphi}
+\newcommand{\xx}{\mathbf{x}}
+
+%\newcommand{\change}[1]{\textcolor{red}{#1}}
+%replace with the following one to remove the red color
+\newcommand{\change}[1]{#1}
+
+% \pr(A \cond B) denotes a conditional probability
+\newcommand{\cond}{\mathrel{|}}
+% \pr(A \joint B) denotes a joint probability
+\newcommand{\joint}{\cap}
+
+
+\begin{document}
+
+\input{macros}
+
+
+\title{\bf Morphisms of Reaction Networks}
+
+
+\author{
+ Luca Cardelli\inst{1,2} 
+}
+
+\institute{
+Microsoft Research, Cambridge, UK
+\and
+Department of Computer Science, University of Oxford, UK
+}
+
+\maketitle
+
+\begin{abstract}
+ The mechanisms underlying complex biological systems are routinely represented as networks, and their kinetics is widely studied. It turns out that relationships between network structures can reveal similarity of mechanism. We define morphisms (mappings) between reaction networks that establish structural connections between them. Some morphisms imply kinetic similarity, and yet their properties can be checked statically on the structure of the networks. In particular we can determine statically that a complex network will emulate a simpler network: it will reproduce its kinetics for all corresponding choices of reaction rates and initial conditions. We use this property to relate the kinetics of many common biological networks of different sizes, also relating them to a fundamental population algorithm. Thus, structural similarity between reaction networks can be revealed by network morphisms, elucidating mechanistic and functional aspects of complex networks in terms of simpler networks In recent joint work, we established a correspondence between network emulation and a notion of backward bisimulation for continuous systems. An emulation morphism establishes a bisimulation relation over the union of two networks, and a bisimulation relation over a network can be seen as an emulation morphism from the full network to the reduced network of its equivalence classes. Along this correspondence, we obtain minimization algorithms for chemical reaction networks, which are of interest for model execution, and algorithms to discover morphisms between networks, which are of interest for model understanding. 
+\end{abstract}
+
+
+\bibliographystyle{splncs03}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

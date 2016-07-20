@@ -1,0 +1,355 @@
+%%%%%%%%%%%%%%%%%%%%%%% file main.tex %%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Article à déposer pour CMSB 2016
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\documentclass[runningheads,a4paper]{llncs}
+
+\usepackage{amssymb}
+\setcounter{tocdepth}{3}
+\usepackage{graphicx}
+
+\usepackage{url}
+
+%%%%%%%%%%%%%%%%%% Packages %%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{hyperref}
+
+
+\usepackage{amsmath}  % Maths
+\usepackage{amsfonts} % Maths
+\usepackage{amssymb}  % Maths
+\usepackage{stmaryrd} % Maths (crochets doubles)
+\usepackage{ dsfont }
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+%%% ILP TONY
+\usepackage{latexsym}
+\usepackage{epic,eepic}
+%\usepackage{times}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{xcolor,colortbl}
+\usepackage{ulem}
+\usepackage{moresize}
+\usepackage{tabularx}
+%\usepackage{caption}
+%\usepackage{multicol}
+%\usepackage{makecell}
+%\usepackage{setspace}
+%\usepackage[justification=centering]{caption}
+%\usepackage{array}
+%%%
+
+%%% Marge
+\newenvironment{changemargin}[2]{\begin{list}{}{%
+\setlength{\topsep}{0pt}%
+\setlength{\leftmargin}{0pt}%
+\setlength{\rightmargin}{0pt}%
+\setlength{\listparindent}{\parindent}%
+\setlength{\itemindent}{\parindent}%
+\setlength{\parsep}{0pt}%
+\addtolength{\leftmargin}{#1}%
+\addtolength{\rightmargin}{#2}%
+}\item }{\end{list}}
+
+%%%%%%%%%%%%%%%%%%%%
+\usepackage{listings}
+% Définition du langage ASP
+\lstdefinelanguage{ASP}{%
+literate={:-}{$\leftarrow$}1,
+morekeywords={not},
+numbers=left,
+escapeinside={\%}{\^^M}
+}
+
+% Définition des styles de tous les listings du document
+\lstset{language=ASP,
+basicstyle=\small,
+columns=flexible,
+keywordstyle=\bfseries,
+firstnumber=last
+}
+\renewcommand{\thelstnumber}{\the\value{lstnumber}}
+%% fin définition
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{enumerate} % Personnalisation de la numérotation des listes
+\usepackage{url}     % Mise en forme + liens pour URLs
+\usepackage{array}   % Tableaux évolués
+\usepackage{comment}
+\usepackage{moresize}
+\usepackage{setspace}
+
+\usepackage{prettyref}
+\newrefformat{def}{Definition~\ref{#1}}
+\newrefformat{fig}{Figure~\ref{#1}}
+\newrefformat{pro}{Property~\ref{#1}}
+\newrefformat{pps}{Proposition~\ref{#1}}
+\newrefformat{lem}{Lemma~\ref{#1}}
+\newrefformat{th}{Theorem~\ref{#1}}
+\newrefformat{sec}{Section~\ref{#1}}
+%\newrefformat{subsec}{Subsect.~\ref{#1}}
+\newrefformat{suppl}{Appendix~\ref{#1}}
+\newrefformat{eq}{Eq.~\eqref{#1}}
+\def\pref{\prettyref}
+
+
+\usepackage{tikz}
+\newdimen\pgfex
+\newdimen\pgfem
+\usetikzlibrary{arrows,shapes,shadows,scopes}
+\usetikzlibrary{positioning}
+\usetikzlibrary{matrix}
+\usetikzlibrary{decorations.text}
+\usetikzlibrary{decorations.pathmorphing}
+
+%\input{macros/macros}
+
+%%%%%
+% Macros générales
+\def\Pint{\textsc{PINT}}
+
+
+% Notations spécifiques à ce papier
+\newcommand{\PHdirectpredec}[1]{\PHs^{-1}(#1)}
+\newcommand{\PHpredec}[1]{\f{pred}(#1)}
+\newcommand{\PHpredecgene}[1]{\f{reg}({#1})}
+\newcommand{\PHpredeccs}[1]{\PHpredec{#1} \setminus \Gamma}
+
+\tikzstyle{boxed ph}=[]
+\tikzstyle{sort}=[fill=lightgray,rounded corners]
+\tikzstyle{process}=[circle,draw,minimum size=15pt,fill=white,
+font=\footnotesize,inner sep=1pt]
+\tikzstyle{black process}=[process, fill=black,text=white, font=\bfseries]
+\tikzstyle{gray process}=[process, draw=black, fill=lightgray]
+\tikzstyle{current process}=[process, draw=black, fill=lightgray]
+\tikzstyle{process box}=[white,draw=black,rounded corners]
+\tikzstyle{tick label}=[font=\footnotesize]
+\tikzstyle{tick}=[black,-]%,densely dotted]
+\tikzstyle{hit}=[->,>=angle 45]
+\tikzstyle{selfhit}=[min distance=30pt,curve to]
+\tikzstyle{bounce}=[densely dotted,->,>=latex]
+\tikzstyle{hl}=[font=\bfseries,very thick]
+\tikzstyle{hl2}=[hl]
+\tikzstyle{nohl}=[font=\normalfont,thin]
+
+
+\tikzstyle{aS}=[every edge/.style={draw,->,>=stealth}]
+\tikzstyle{Asol}=[draw,circle,minimum size=5pt,inner sep=0,node distance=1.5cm]
+\tikzstyle{Aproc}=[draw,node distance=1.2cm]
+\tikzstyle{Aobj}=[node distance=1.5cm]
+\tikzstyle{Anos}=[font=\Large]
+
+%\tikzstyle{AprocPrio}=[Aproc,double]
+\tikzstyle{AsolPrio}=[Asol,double]
+\tikzstyle{AprocPrio}=[Aproc,double]
+\tikzstyle{aSPrio}=[aS,double]
+
+% Commandes À FAIRE
+%\usepackage{color} % Couleurs du texte
+%\newcommand{\todo}[1]{\textcolor{red}{\textbf{[[#1]]}}}
+%\newcommand{\TODO}{\todo{TODO}}
+
+%%%%%
+% Id est
+%\newcommand{\ie}{\textit{i.e.} }
+\newcommand{\ie}{i.e.\ }
+\newcommand{\resp}{resp.\ }
+
+% Césures
+\hyphenation{pa-ra-me-tri-za-tion}
+\hyphenation{pa-ra-me-tri-za-tions}
+
+%%% A ENLEVER pour les modifications en Rouge
+\usepackage{color}
+\newcommand{\Emna}[1]{\textcolor{red}{#1}}
+\newcommand{\Morgan}[1]{\textcolor{blue}{#1}}
+\newcommand{\EmnaRq}[1]{\textcolor{green}{#1}}
+
+% Normal emph
+\usepackage{ulem}
+\normalem
+
+\input{macros/macros}
+\input{macros/macros-ph}
+\input{macros/tikzstyles2.tex}
+\input{macros/macros-abstr}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%\urldef{\mailsa}\path|{emna.ben-abdallah, tony.ribeiro, morgan.magnin, olivier.roux}@irccyn.ec-nantes.fr|    
+%\urldef{\mailsb}\path|{inoue}@nii.ac.jp|    
+%\newcommand{\keywords}[1]{\par\addvspace\baselineskip
+%\noindent\keywordname\enspace\ignorespaces#1}
+
+\begin{document}
+
+\mainmatter  % start of an individual contribution
+
+\title{Inference of Delayed Biological Regulatory Networks from Time Series Data
+}
+
+
+% a short form should be given in case it is too long for the running head
+\titlerunning{Inference of DBRNs from time series data}
+
+
+\author{Emna Ben Abdallah\inst{1} \and  Tony Ribeiro\inst{1}  \and Morgan Magnin\inst{1,2} \and Olivier Roux\inst{1}, \\ and Katsumi Inoue \inst{2}}
+
+\authorrunning{E. Ben Abdallah, T. Ribeiro, M. Magnin, O.Roux, K. Inoue}
+% (feature abused for this document to repeat the title also on left hand pages)
+
+% the affiliations are given next; don't give your e-mail address
+ %unless you accept that it will be published
+\institute{LUNAM Universit\'e, \'Ecole Centrale de Nantes,
+ IRCCyN UMR CNRS 6597\\ (Institut de Recherche en Communications et Cybern\'etique de Nantes), \\
+  1 rue de la No\"{e}, 44321 Nantes, France. \\
+\and
+National Institute of Informatics, \\
+2-1-2, Hitotsubashi, Chiyoda-ku, Tokyo 101-8430, Japan.
+}
+
+%\mailsa\\
+%\mailsb
+
+%
+% NB: a more complex sample for affiliations and the mapping to the
+% corresponding authors can be found in the file "llncs.dem"
+% (search for the string "\mainmatter" where a contribution starts).
+% "llncs.dem" accompanies the document class "llncs.cls".
+%
+
+\toctitle{Inference of delayed biological regulatory networks from time series data}
+\tocauthor{Authors' Instructions}
+\maketitle
+%\vspace{-0.4cm}
+\begin{abstract}
+The modeling of Biological Regulatory Networks (BRNs) relies on background knowledge, deriving either from literature and/or the analysis of biological observations.
+But with the development of high-throughput data, there is a growing need for methods that automatically generate admissible models.
+Our research aim is to provide a logical approach to infer BRNs based on given time series data and known influences amoung genes.
+In this paper, we propose a new methodology for models expressed through a timed extension of the Automata Networks (well suited for biological systems). The main purpose is to have a resulting network as consistent as possible with the observed datasets. The originality of our work consists in the integration of quantitative time delays directly in our learning approach. 
+We show the benefits of such automatic approach on dynamical biological models, the DREAM4 datasets, a popular reverse-engineering challenge, in order to discuss the precision and the computational performances of our algorithm. 
+
+\keywords{inference model, dynamic modeling, delayed biological regulatory networks, automata network, time series data.}
+\end{abstract}
+
+  \input{parts/intro}
+  \input{parts/automata-network}
+
+  \input{parts/Generation-PH}
+  \input{parts/case_study}
+
+  \input{parts/DREAM}
+  \input{parts/concl}
+%\section*{Acknowledgment}
+%This paper is based upon work supported by the Agence Nationale de la Recherche for the HyClock project under Grant No. ANR-14-CE09-0011.
+\clearpage
+  \bibliographystyle{plain}
+  \bibliography{biblio}
+%\section*{Appendix: Springer-Author Discount}
+
+\clearpage
+\appendix
+
+\section{Appendixes}
+
+\subsection{Proof of Theorem \ref{th:correct}}
+
+	\begin{theorem}[Completeness]% and Correctness]
+		Let $\AN=(\ANsort,\ANstate,\ANtrans)$ be a Timed Automata Network, $\Gamma$ be a chronogram of the components of $\AN$, $i \in \mathsf{N}$ and $R \in \ANtrans$ be the set of timed local transitions that realized the chronogram $\Gamma$ such that $(a_i,l,a_j,\delta) \in R \implies |l| \leq i$.
+    	Let $\chi$ be the regulation influences of all $a \in \ANsort$.
+		Let $\AN'=(\ANsort,\ANstate,\emptyset)$ be a Timed Automata Network.
+    	% and $\varphi'$ be the set of timed local transitions of $\AN$ such that $\varphi' \subseteq \varphi$.
+		Given $\AN'$, $\Gamma$, $\chi$ and $i$ as input, Algorithm \ref{alg:MoT-AN} is complete:
+		it will output a set of Timed Automata Network $\phi$,
+		such that $\exists \AN''=(\ANsort,\ANstate,\varphi') \in \phi$ with $R \subseteq \varphi'$.
+
+		\begin{proof}
+		Let us suppose that the algorithm is not complete, then there is a timed local transition $h \in R$ that realized $\Gamma$ and $h \not \in \varphi'$.
+		In Algorithm \ref{alg:MoT-AN}, after step $1$, $\varphi$ contains all timed local transitions that can realize each change of the chronogram $\Gamma$.
+		Here there is no timed local transition $h \in R$ that realizes $\Gamma$ which is not generated by the algorithm, so $h \in \varphi$.
+		Then it implies that at step 2, $\forall \varphi', h \not \in \varphi'$.
+		But since $h$ realizes one of the change of $\Gamma$ and $h$ is generated at step 1, then it will be present in one of the minimal subset of timed local transitions.
+		Such that $h$ will be in one of the networks outputted by the algorithm.
+		%It means that there is a time step $t$ where $a$ is applicable, but in the chronogram $C$ there is no gene change at $t$.
+		%But since $a \in A$, a change should have occurs at $t$, this is a contradiction.
+		%So there is no $a \in A$ that could be remove from $A''$ at step 2, the algorithm is complete.
+		$\qed$
+		%
+		%The algorithm is also correct and this conclusion is trivial from the operation of step 2.
+		%If it was not correct, then there is an action $a \in A''$ that is not consistent with $C$.
+		%But all such action are removed at step 2.
+		%So that the algorithm output is correct.
+		%
+		%All action of the outputted Process Hitting $PH'$ are consistent with the input chronogram $C$.
+		\end{proof}
+	\end{theorem}
+    
+\subsection{Proof of Theorem \ref{th:complexity}}
+	
+	\begin{theorem}[Complexity]
+		Let $\AN=(\ANsort,\ANstate,\ANtrans)$ be a Timed Automata Network,
+        $|\ANsort|$ be the number of automaton of $\AN$ and $\eta$ be the total number of local state of a automaton of $\AN$.
+		Let $\Gamma$ be a chronogram of the components of $\AN$ over $\tau$ units of time, such that $c$ is the number of changes of $\Gamma$.
+		%The complexity of completing $PH$ by generating actions from the observations of $C$ with Algorithm \ref{alg:PHC} belongs to $O(c\cdot i^S + (T-c) \cdot  P \cdot  i^S)$ that is bound by
+		%$O(T^2\cdot P^{S+2})$.
+		The memory use of Algorithm \ref{alg:MoT-AN} belongs to $O(\tau \cdot i^{|\ANsort|+1} \cdot  2^{\tau\cdot i^{|\ANsort|+1})}$
+		that is bounded by $O(\tau \cdot |\ANsort|^{T\cdot  |\ANsort|^{|\ANsort|+1}})$.
+		The complexity of learning $\AN$ by generating timed local transitions from the observations of $\Gamma$ with Algorithm \ref{alg:MoT-AN} belongs to
+		$O(c\cdot i^{|\ANsort|+1} + 2^{2\cdot \tau \cdot  i^{|\ANsort|+1}} + $c$ \cdot  2^{\tau \cdot i^{|\ANsort|+1}})$,
+        that is bounded by $O(\tau \cdot 2^{3\cdot \tau \cdot |\ANsort|^{|\ANsort|+1}})$.
+		\begin{proof}
+			% Memory
+			Let $i$ be the maximal indegree of a timed local transition in $\AN$, $0 \leq i \leq |\ANsort|$.
+			Let $p$ be an automaton local state of $\AN$ then $|\ANsort|$ is maximal the number of automaton that can influence $p$.
+			There is $i^{|\ANsort|}$ possible combinations of those regulators that can influences $p$ at the same time forming a timed local transition.
+			There is at most $\tau$ possible delays,
+			so that there are $\tau \cdot |\ANsort| \cdot i^{|\ANsort|}$ possibles timed local transitions,
+			thus in Algorithm \ref{alg:MoT-AN} at step 1, the memory is bounded by $O(\tau \cdot i^{|\ANsort|+1})$,
+			which belongs to $O(\tau \cdot |\ANsort|^{|\ANsort|+1})$ since $0 \leq i \leq |\ANsort|$.
+			Generating all minimal subsets of timed local transitions $\varphi$ of $\AN$ that can realize $\Gamma$ can require to generate at most $2^{\tau \cdot  |\ANsort| \cdot  i^{|\ANsort|+1}}$ set of rules.
+			Thus, the memory of our algorithm belongs to $O(\tau \cdot  i^{|\ANsort|+1} \cdot  2^{\tau \cdot  i^{|\ANsort|+1}})$
+			and is bounded by $O(\tau \cdot  |\ANsort|^{|\ANsort|+1} \cdot  2^{\tau \cdot  |\ANsort|^{|\ANsort|+1}})$.
+			% Run time
+			%At each time step, atmost one gene can change its value in the chronogram $C$.
+			%Atmost $i^S$ actions can be produced for each gene change, the complexity of step 1 is then $O(c \cdot  i^S)$.
+			%In step 2 of Algorithm \ref{alg:PHC} at each time step where there is no gene change, it checks all actions generated so far.
+			%Since there is $T \cdot  P \cdot  i^S$ possibles actions, this operation complexity is $O( (T-c) \cdot  T \cdot  P \cdot  i^S)$.
+			%Then the complexity of Algorithm \ref{alg:PHC} is $O(c\cdot i^S + (T-c) \cdot  T \cdot  P \cdot  i^S)$.
+			%Since $0 \leq i \leq P$ and $0 \leq c \leq T$ the complexity belongs to $O(T\cdot P^S + T^2 \cdot  P^{S+1})$ and is bound by $O(T^2\cdot P^{S+2})$.
+		
+			%Sampling the chronogram (step 1) is linear in the number of time step and then bound by $O(T)$.
+			%Merging the actions at step 2 is polynomial in the number of actions and the complexity of this operation belongs to $O((T\cdot P\cdot i^S)^2)$.
+			The complexity of this algorithm belongs to $O(c \cdot i^|\ANsort|+1)$.
+			Since $0 \leq i \leq |\ANsort|$ and $0 \leq c \leq \tau$ the complexity of Algorithm \ref{alg:MoT-AN} is bounded by $O(\tau \cdot |\ANsort|^{|\ANsort|+1}))$.
+		
+			Generating all minimal subsets of timed local transitions $\varphi$ of $\AN'$ that realize $\Gamma$ can require to generate at most $2^{\tau \cdot i^{|\ANsort|+1}}$ set of timed local transitions.
+			Each set has to be compared with the others to keep only the minimal ones, which costs $O(2^{2\cdot \tau \cdot i^{|\ANsort|+1}})$.
+			Furthermore, each set of timed local transitions has to realize each change of $\Gamma$, it requires to check $c$ changes and it costs $O(c \cdot  2^{\tau \cdot i^{|\ANsort|+1}})$.
+			Finally, the total complexity of learning $\AN$ by generating timed local transitions from the observations of $\Gamma$ belongs to
+			$O(c\cdot i^{|\ANsort|+1} + 2^{2\cdot \tau\cdot i^{|\ANsort|+1}} + c \cdot  2^{\tau \cdot  i^{|\ANsort|+1}})$.
+			that is bounded by $O(3\tau \cdot 2^{2\cdot \tau \cdot |\ANsort|^{|\ANsort|+1}})$.
+			%that is bounded by $O(T\times |\ANsort|^{|\ANsort|} + (\tau \times |\ANsort|^{|\ANsort|+1})^2 + 2^{2\times \tau \times |\ANsort|^{|\ANsort|+1}} + \tau \times 2^{\tau \times |\ANsort|^{|\ANsort|+1}})$
+			$\qed$
+		\end{proof}
+	\end{theorem}
+    
+    \subsection{DREAM4: Influence network}
+    
+The figure \ref{fig:influence-graph-DREAM4} presents the regulatory graph that we are based on to identify the signs (negative or positive), the thresholds and the quantitative time delays of the learned transitions.
+    \begin{figure}[h]\centering
+\includegraphics[width =0.6\linewidth]{images/Dream4-100.png}
+\caption{The influence network of the DREAM4 challenge model (100 genes) given by GeneNetWeaver (GNW) data generator \cite{schaffter2011genenetweaver}. Each node is a gene and each edge is an influence from the source to the target gene.}
+\label{fig:influence-graph-DREAM4}
+\end{figure}
+
+\end{document}

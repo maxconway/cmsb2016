@@ -1,0 +1,18 @@
+% vim:set spell spelllang=en_gb:
+\begin{abstract}
+We consider networks of finite-state machines having local transitions
+conditioned by the current state of other automata.
+In this paper, we introduce a reduction procedure tailored for
+reachability properties of the form ``from global state $s$,
+there exists a sequence of transitions leading to a state where an automaton
+$g$ is in a local state $\top$''.
+By analysing the causality of transitions within the individual automata,
+the reduction identifies local transitions which can be removed while preserving
+\emph{all} the minimal traces satisfying the reachability property.
+The complexity of the procedure is polynomial with the total number of local
+transitions, and exponential with the maximal number of local states within an
+automaton.
+Applied to Boolean and multi-valued networks modelling dynamics of biological systems,
+the reduction can shrink down significantly the reachable
+state space, enhancing the tractability of the model-checking of large networks.
+\end{abstract}

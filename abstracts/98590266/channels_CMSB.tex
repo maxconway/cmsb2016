@@ -1,0 +1,1213 @@
+% This is LLNCS.DOC the documentation file of
+% the LaTeX2e class from Springer-Verlag
+% for Lecture Notes in Computer Science, version 2.4
+\documentclass{llncs}
+\usepackage{pgfplots}
+\usepackage{subfigure}
+\usepackage[margin=1.5in]{geometry}
+
+\usetikzlibrary{external}
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=figures/external/]
+%\newcommand\tikzsetnextfilename[1]{}
+
+\usepackage{placeins}
+\usepackage{llncsdoc}
+
+\usepackage{graphicx}
+\usepackage[linesnumbered,tworuled,vlined]{algorithm2e}
+\usepackage{amsmath}
+\usepackage{amssymb,dsfont}
+\usepackage{bm,color}
+
+
+\DeclareMathAlphabet{\mathonebb}{U}{bbold}{m}{n}
+\newcommand{\one}{\ensuremath{\mathonebb{1}}}
+
+%\usepackage{pgf,pgfarrows,pgfnodes,tikz,color,tkz-berge}
+%\usetikzlibrary{arrows,shapes,snakes,automata,backgrounds,petri,topaths,calc}
+
+
+
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+
+\newcommand{\vect}[1]{\ensuremath{  #1 } }
+\newcommand{\ord}[1]{ {\mathcal o}( #1 )}
+\newcommand{\Ord}[1]{ {O}( #1 )}
+\newcommand{\R}{{\mathbb R}}
+\newcommand{\Z}{{\mathbb Z}}
+\newcommand{\N}{{\mathbb N}}
+\newcommand{\D}[2]{ \ensuremath{ \frac{\mathrm{d} #1 }{\mathrm{d} #2 } }}
+\newcommand{\DP}[2]{ \ensuremath{ \frac{\partial #1 }{\partial #2 } } }
+\newcommand{\Pred}{\mathrm{Pred}}
+\newcommand{\Succ}{\mathrm{Succ}}
+
+
+
+%\newtheorem{definition}{Definition}[section]
+
+%\newtheorem{theorem}{Theorem}[section]
+%\newtheorem{lemma}[theorem]{Lemma}
+%\newtheorem{proposition}[theorem]{Proposition}
+%\theoremstyle{definition}
+%\newtheorem{definition}[theorem]{Definition}
+%\theoremstyle{remark}
+%\newtheorem{remark}[theorem]{Remark}
+
+
+%%%%%%% equation numbering in inline - to conserve space but not too good idea
+\makeatletter
+\newcommand*{\inlineequation}[2][]{%
+  \begingroup
+    % Put \refstepcounter at the beginning, because
+    % package `hyperref' sets the anchor here.
+    \refstepcounter{equation}%
+    \ifx\\#1\\%
+    \else
+      \label{#1}%
+    \fi
+    % prevent line breaks inside equation
+    \relpenalty=10000 %
+    \binoppenalty=10000 %
+    \ensuremath{%
+      % \displaystyle % larger fractions, ...
+      #2%
+    }%
+    ~\@eqnnum
+  \endgroup
+}
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand{\corr}[1]{ {\color{red} \bf #1} }
+
+%\renewcommand{\corr}[1]{ {#1} }
+
+\begin{document}
+
+%%%
+\abovedisplayskip=3pt
+\belowdisplayskip=3 pt
+\abovedisplayshortskip=0pt
+\belowdisplayshortskip=0pt
+%%%%%
+
+\title{Hybrid Reductions of Computational Models of Ion Channels Coupled
+to Cellular Biochemistry}
+\author{
+Jasha Sommer-Simpson \inst{2}
+\and
+John Reinitz \inst{2,3}
+\and
+Leonid Fridlyand \inst{4}
+\and
+Louis Philipson \inst{4}
+\and
+Ovidiu Radulescu \inst{1}
+}
+\institute{
+DIMNP UMR CNRS 5235, University of Montpellier, Montpellier, France;\\
+\email{ovidiu.radulescu@univ-montp2.fr}
+\and
+Department of Statistics, University of Chicago, Chicago, USA
+\and
+Department  of Ecology and Evolution, Department of
+Molecular Genetics and Cell Biology, University of Chicago, Chicago, USA
+\and
+Department of Medicine and Pediatrics, University of Chicago, Chicago, USA
+}
+\maketitle
+
+\sloppy
+
+\begin{abstract}
+Computational models of cellular physiology are often too complex to be analyzed with currently available tools. By model
+reduction we produce simpler models with less variables and parameters, that can be more easily simulated and
+analyzed. We propose a reduction method that applies to ordinary differential equations models of
+voltage and ligand gated ion channels coupled to
+signaling and metabolism. These models are used for studying various biological functions such as neuronal and cardiac activity, or insulin production by pancreatic beta-cells.
+%We argue that
+Models of ion channels coupled to cell biochemistry share a common structure. For
+such models we identify fast and slow sub-processes, driving and slaved variables,
+as well as a set of reduced models.
+Various reduced models are valid locally and can change
+on a trajectory. The resulting reduction is hybrid, implying transitions from
+one reduced model (mode) to another one.
+\end{abstract}
+
+\section{Introduction}
+
+Ion channels are essential in biological
+processes that involve fast modifications of cell physiology. They control
+the flows and the gradients of ions across the plasma membrane, as well as the membrane potential. Ion channels
+can open and close  as a function of the  membrane potential
+and/or of the concentrations of ligands such as ATP. The multiple control of ion channels
+implies positive and negative feed-back loops that are responsible for rapid bursts and
+oscillations of the electrical activity of the cells. Excitability of parts or of entire plasma
+membrane allows the generation and  propagation of
+action potentials needed for communication between neurons, for muscle
+contraction, or for endocrine secretion by specialized cells such as
+pancreatic beta cells \cite{hille2001ion,fridlyand2009model,fridlyand2013ion}.
+The dynamics of ion channels can be very intricate. Firstly, there are many types of
+interacting ion channels, each channel having several subunits that react to voltage and
+ligands. Secondly, ion channels are integrated in the cell's physiology and
+interact strongly with metabolism and signaling.
+For these reasons, models of virtual cells and organs should necessarily include ion channels
+especially for functions such as nervous impulse transmission, muscle and cardiac activity \cite{iyer2004computational}, or
+insulin secretion by pancreatic islets \cite{fridlyand2016pancreatic}. Biological function is often not a property of
+a single cell but an emerging property of interacting cells. Therefore, realistic
+models of physiology are necessarily multicellular and should contain hundreds or
+thousands of cells that are coupled together electrically and biochemically.
+Such models can be computationally expensive if the dynamics of single cells contain
+many variables and parameters. Model reduction is useful for
+building virtual physiology models that are both realistic and computationally
+tractable. By model reduction, one can coarse grain
+fast variables dynamics whose computation is expensive, while
+keeping accurate descriptions of the dynamics of slower, driving variables.
+ {Such a strategy has already been used to model spiral wave dynamics in
+cardiac tissue \cite{bueno2008minimal}.}
+
+Several model reduction methods where proposed to reduce ion channel models
+\cite{biktasheva2006asymptotic,suckley2003asymptotic,grosu2011cardiac,murthy2012approximate}.
+All these methods contain at least one ad hoc stage
+in the choice of fast parameters or of small parameters needed for singular
+perturbation approximations.
+Some attempts to develop automatic model reduction techniques
+ based on sensitivity analysis were proposed in \cite{clewley2004dominant,clewley2005computational}.
+In previous work, we have developed model reduction methods
+for biochemical reactions networks,
+based on tropical geometry \cite{NGVR12sasb,radulescu2012frontiers,Noel2013a,soliman2014constraint,radulescu2015symbolic,radulescu2015,samal2015geometric}
+allowing the automatic determination of time scales
+and of small parameters.
+These methods work
+for polynomial or rational ordinary differential equations and need to be
+extended in order to cope with ion channel models that contain
+transcendental functions.
+
+In this paper we propose an extension to ion channels models of reduction methods based on equilibration and
+time scales. The concept of equilibration of polynomial dominant terms
+used in model reduction by tropical approaches is generalized to situations when
+these terms are rational or even transcendental functions. The possibility of
+such reductions follows from the property of  ion channels dynamics
+to have multiple time scales ranging from milliseconds to minutes (or even to hours in models involving changes of gene expression) \cite{keener1998mathematical}. As is the case for polynomial systems \cite{radulescu2015symbolic},
+the time scales of variables are state dependent and can change on a trajectory.
+Therefore, a hybrid reduction is appropriate: the coarse
+grained dynamics consists in piecewise smooth reduced modes and discrete
+transitions between modes. The definition of the
+modes and the transitions between them can be justified in the framework of matched
+asymptotic expansions from singular perturbations.
+
+ {To obtain such approximations we will employ a mathematical technique called
+matched-asymptotic expansion. This singular perturbation technique provides
+several approximations, neither of which is uniformly valid, but which have
+overlapping domains of validity \cite{lagerstrom1972basic,holmes2012introduction}.
+The lack of uniformity could pose problems when the solutions of the full and
+reduced models are compared. For instance, the reduction can slightly change the period of
+periodic solutions, which leads to large differences at large times.
+In order to compare the full and reduced model solutions it is therefore
+appropriate to minimize such discrepancies via parameter optimization of the reduced
+model. The same method can be used for learning the parameters of the reduced model
+from a given data set. }
+
+%Contrary to  standard implementations
+%of this technique \cite{holmes2012introduction}, the small parameter  needed for the
+%analysis is not given together
+%with the problem but can be determined numerically as a ratio of time scales.
+%Reductions obtained by matched
+%
+%We  minimize the discrepancies between
+%the trajectories of the full and reduced models  by
+%optimization of the parameters of the reduced model.%, using simulated annealing.
+
+
+
+
+
+
+
+
+
+
+\section{Ion channels coupled with cell biochemistry models}
+
+
+
+These models contain several types of variables.
+
+{\em Voltage-gated channel variables.} These variables are needed for ion
+channel dynamics. They include gating variables as well as the voltage across
+the plasma membrane, which controls opening and closing of channels.  The
+simplest case is a channel that has only two states: an open state $O$
+letting current pass, and a closed state $C$ which allows for no current. For
+voltage gated channels, the probabilities per unit time $\alpha, \beta$ that a
+channel opens (its state changes from $C$ to $O$) or closes (its state changes
+from $O$ to $C$), respectively, are functions of the membrane potential $V$. As
+a consequence, the probability $p$ that the channel is open ($p$ also gives the
+proportion of open channels) obeys the differential equation
+\begin{equation}
+\D{p}{t} = \alpha(V) (1-p) - \beta(V) p. \label{eq:channel1}
+\end{equation}
+Ion channels can have several identical subunits, each of which can be closed
+or open. The number of different states for a channel with $m$ identical
+subunits is $m+1$ (with each state being represented by a number $k$ between
+$0$ and $m$, where $k$ is the number of subunits that are open). The closing and opening of subunits is
+modeled as a Markov process with a finite number of states. The Markovian dynamics are
+described by a system of ordinary differential equations, known as the
+master equation. For a two-state channel, the master equation is
+\eqref{eq:channel1}.  When the channels are identical, the master equation has permutation
+symmetries. These symmetries can be exploited to obtain
+exact reductions of the channels dynamics \cite{keener2009invariant}. As a
+result of the exact reduction, the probabilities $p_i$ that $i$ channels are
+open ($p_i$ also represents the proportion of channels with $i$ subunits open)
+are polynomial functions of a smaller number of variables that satisfy linear
+differential equations \cite{keener1998mathematical,keener2009invariant}. For
+instance, a channel with two identical subunits has three states corresponding
+to $0$,$1$,or $2$ subunits open.  {The corresponding probabilities are derived
+from the binomial distribution, namely} $p_0=(1-n)^2$, $p_1=2n(1-n)$ and $p_2=n^2$, where $n$  {is a probability }
+satisfying the ordinary differential equation
+\begin{equation}
+\D{n}{t} = \alpha(V) (1-n) - \beta(V) n, \label{eq:channel2}
+\end{equation}
+where $\alpha(V),\beta(V)$ are, respectively, the probabilities per unit time that a subunit
+opens or closes.
+%The rates $\alpha(V),\beta(V)$ follow from the Arrhenius equation and their
+%dependence on the voltage can be written as rational combinations of
+%exponentials (the hyperbolic tangent is a good approximation for this
+%dependence).
+
+Ion currents induce changes of the membrane voltage according to the classical equation
+\begin{equation}
+C \D{V}{t} = I(t) - \sum_i I_i(t)
+\end{equation}
+where $I$ is an input  {and
+output} current, the variables $I_i$ are currents through through channels of type $i$, and $C$ is the membrane capacitance.
+
+The current-voltage characteristics of a channel of a given type $i$ is affine, the current $I_i$ being proportional
+to the difference between voltage $V$ and the rest potential
+$V_i$ (defined as the equilibrium voltage corresponding
+to the zero current; these depend only on the type of ion and are
+the same for different channels of the same ion):
+\begin{equation}
+I_i = g_i p_i (V - V_i),
+\end{equation}
+where $g_i$, $p_i$ are, respectively, the open chanel conductance and the proportion
+of channels of type $i$ that are open.
+
+{\em Metabolic and signaling variables.} Metabolic and signaling pathways can
+be modeled as networks of biochemical reactions. The coupling between
+metabolic pathways and ion channel dynamics can be performed  {using the metabolite
+concentrations.} For instance,
+an increase of the ATP/ADP ratio leads to closure of ATP sensing potassium
+channels, which in turn triggers plasma membrane depolarization and opening of
+calcium voltage gated channels. This leads to an increase in cytoplasmic
+calcium, which triggers important physiological responses such as insulin
+release in pancreatic beta cells. A few signaling or metabolic and signaling
+variables (e.g. calcium) have contributions to their dynamics coming
+from the fluxes fed into and out of the cell by ion channels.
+%As a consequence, ion currents contribute to the dynamics of metabolic and
+%signaling variables.
+
+In summary, a general model of ion channels coupled to cell biochemistry is described by
+the following equations:
+
+\begin{eqnarray}\label{intro:general_model}
+\D{V}{t} &=&  (V - V_{\infty})/\tau_V (\vect{h}) \notag \\
+\D{h_i}{t} &=& (h_i - h_{i,\infty}(V,\vect{c}))/\tau_{h_i}(V,c) \notag \\
+\D{c_k}{t} &=& \sum_{j} S_{kj} R_j (\vect{c}) + \sum_{i \in I(k)} g_{i} p_{i}(h_{i}) (V-V_i) \label{full}
+\end{eqnarray}
+
+where $V_{\infty}(\vect{h},\vect{c}) = \sum_i V_i g_i p_i (h_i,\vect{c})$,
+$\tau_V(\vect{h},\vect{c}) = \sum_i g_i p_i (h_i,\vect{c})$,
+$h_{i,\infty}(V) = \alpha_{i}(V)/(\alpha_{i}(V) + \beta_{i}(V))$, and
+$\tau_{h_i}(V) = 1/(\alpha_{i}(V) + \beta_{i}(V))$.
+The $R_j$ are multivariate polynomial or rational functions of the metabolite concentrations $\vect{c}$, the
+$p_{i}$ are polynomials of the gating variables $h_i$,
+the functions $\alpha_{i}(V),\beta_{i}(V)$ are combinations of exponential functions of $V$, the $S_{kj}$
+are the entries of the stoichiometric matrix, and the set valued function $I(k)$ denotes the
+channels feeding the variable $c_k$.
+
+The voltage $V$ can take negative or positive values but its variations are
+bounded $-V_{1} < V < V_2$. The gating variables $h_i$ are also bounded $0 \leq h_i \leq 1$.
+The metabolic variables are unbounded, positive concentrations $0 < c_k$; these
+variables can have various orders of magnitude, from very small to very large.
+
+\section{Matched asymptotic method.}
+The natural framework for approximations of systems with multiple time scales
+is the theory of singular perturbations \cite{holmes2012introduction}. The classical presentation of this
+theory starts with the identification of a small parameter $\eta$ in the
+problem. We then ask: what are the asymptotic behaviors of the solutions when
+$\eta \to 0$? In certain cases, this small parameter $\eta$ can be obtained by
+nondimensionalization \cite{tang1996simplification}.
+Variables and parameters are rescaled via division by
+other variables and parameters such that the resulting quotient is unitless. A
+smallest parameter can be chosen among unitless parameters. However, the
+nondimensionalization can be done in several different ways, and the smallest
+unitless parameter is not guaranteed to be the correct small singular
+perturbations parameter (extra conditions are needed to guarantee validity of the
+approximation). For the time being we suppose that the small parameter has been
+identified. We will provide automatic methods to do this in the next sections.
+
+The rescaled equations of a system with fast variables $\vect{x}$ and slow variables $\vect{y}$ read:
+\begin{equation}
+\D{\vect{x}}{t}  = \frac{1}{\eta} \vect{f}(\vect{x},\vect{y}),
+\,\, \D{\vect{y}}{t}  =  \vect{g}(\vect{x},\vect{y}), \label{outer}
+\end{equation}
+where $\eta$ is a small positive parameter representing the ratio of fast and slow time scales.
+
+The trajectory of a slow/fast system is typically composed of an alternating
+sequence of slow parts and fast parts. Let us suppose that the slow segments
+are defined by the time intervals $(t_0,t_1)$, $(t_1,t_2)$, $\ldots$. The fast
+segments are interlaced between successive slow segments and can be
+considered as inner layer solutions placed at $t_1,t_2,\ldots$. In order to
+describe the fast inner layer solutions, let us define the variable $\tau =
+(t-t_i) / \eta$, $i=1,2,\ldots$. Note that $\tau$ changes by one when $t$
+changes by $\eta$, hence $\tau$ corresponds to
+short time scales inside the inner layers at $t=t_i$. Using this new time
+variable, the differential equations \eqref{outer} become
+\begin{equation}
+\D{\vect{x}}{\tau}  = \vect{f}(\vect{x},\vect{y}),\,\,
+\D{\vect{y}}{\tau}  = \eta  \vect{g}(\vect{x},\vect{y}). \label{inner}
+\end{equation}
+
+The \textit{inner layer approximation} is a solution
+\begin{align*}X(\tau) &= X_0(\tau) + \eta X_1(\tau) + \ldots,\\
+Y(\tau) &= Y_0(\tau) + \eta Y_1(\tau) + \ldots\end{align*}
+of the equations \eqref{inner}. We find that, at the lowest order in
+$\eta$, the inner layer solution satisfies
+\begin{equation}
+\D{\vect{X_0}}{\tau}  = \vect{f}(\vect{X}_0,\vect{Y}_0),\,\,
+\D{\vect{Y_0}}{\tau}  = 0, \label{inner0}
+\end{equation}
+which is to say that $Y_0$ is constant.
+
+The \textit{outer layer approximation} is a solution
+\begin{align*}
+x(t) &= x_0(t) + \eta x_1(t) + \ldots,\\
+y(t) &= y_0(t) + \eta y_1(t) + \ldots\end{align*}
+of the equations \eqref{outer}. At the lowest order in $\eta$ we find
+\begin{equation}
+0  = \vect{f}(\vect{x}_0,\vect{y}_0),\,\,
+\D{\vect{y_0}}{t}  = g(\vect{x}_0,\vect{y}_0). \label{outer0}
+\end{equation}
+In other words, in outer layers the fast variables are ``slaved'' by the slow
+variables.
+At lower order in $\eta$, outer layers are thus described by the
+quasi-stationary approximation. Indeed, the outer layer solution lies on a
+surface which can be approximated at lowest order by
+the equation $f(\vect{x}_0,\vect{y}_0)=0$. Provided that the stability condition
+$Re ( Spec( \DP{f}{x}(x_0,y_0) ) ) < 0$ is fulfilled
+($\DP{f}{x}$ is the Jacobian matrix
+of $f$ with respect to rapid variables $x$) the validity of the quasi-stationarity
+approximation is guaranteed by the
+Tikhonov theorem  \cite{tikhonov1952systems}.
+The surface defined by $f(\vect{x}_0,\vect{y}_0)=0$ also represents
+the lowest order approximation of an invariant manifold (low dimensional surface
+that contains the reduced dynamics). The existence
+of the invariant manifold is guaranteed by Fenichel's results
+\cite{fenichel1979geometric}.
+An invariant manifold can be stable (attractive)
+or unstable; furthermore, the same invariant manifold can have stable parts
+that become unstable at bifurcations (for instance of the saddle-node type),
+when one or several eigenvalues of  the Jacobian $\DP{f}{x}$ vanish or
+touch the pure imaginary axis of the complex plane.
+The (slow) outer solutions correspond to dynamics on the same or on different
+stable parts of the invariant manifold.
+ {We should emphasize that more complex behaviour can occur as a result of the so-called {\em canard} phenomena
+when part of the trajectory can lie for some time on the unstable manifold. Such mechanisms, identified in the Morris–-Lecar and FitzHugh–-Nagumo models of excitable systems,
+\cite{wechselberger2013canard} will not be discussed here.  }
+
+ {As well known in singular perturbation theory \cite{lagerstrom1972basic},
+neither the inner nor the outer solution has uniform validity. However, their domains of validity overlap. As a matter of fact, the two solutions}
+must agree for intermediate time scales $(t-t_i) = -\eta^{\alpha}$, $0 < \alpha < 1$.
+Hence,
+$Y^{(i)}( -\eta^{\alpha-1} ) =  y^{(i)}( t_i - \eta^{\alpha} )$, $X^{(i)}( -\eta^{\alpha-1} ) =  x^{(i)}( t_i - \eta^{\alpha} )$. By taking the limit $\eta \to 0$, we obtain the matching conditions
+ \begin{equation}
+ \lim_{\tau \to -\infty} Y_0^{(i)}( \tau ) =  y_0^{(i)}(t_i), \,\, \lim_{\tau \to -\infty} X_0^{(i)}( \tau ) =  x_0^{(i)}(t_i), \label{matching1}
+ \end{equation}
+ where $(Y_0^{(i)},X_0^{(i)})$, and $(y_0^{(i)},x_0^{(i)})$ are the lowest orders of the
+ inner and outer layer solutions at $t_i$ and on $(t_{i-1},t_i)$, respectively.
+  {For a more formal treatment of this result, the reader may consult \cite{lagerstrom1972basic}.}
+
+ Similarly,
+  \begin{equation}
+ \lim_{\tau \to \infty} Y_0^{(i)}( \tau ) =  y_0^{(i+1)}(t_i), \,\, \lim_{\tau \to \infty} X_0^{(i)}( \tau ) =  x_0^{(i+1)}(t_i), \label{matching2}
+ \end{equation}
+where  $(y_0^{(i+1)},x_0^{(i+1)})$ are the lowest orders of the outer layer solutions on $(t_{i},t_{i+1})$.
+
+In other words the boundary conditions of the outer layer solutions are the asymptotic states of the inner layer solutions (corresponding to given fixed values of the slow variables).
+
+A composite lowest order approximation combines inner and outer layers and has to subtract common terms:
+\begin{eqnarray}\label{eq:hyb}
+y(t) &\sim &\sum [ (y^{(i)}_0(t) - y_0^{(i)}(t_i)) \mathds{1}_{(t_{i-1},t_i]} + Y_0^{i}((t-t_i)/\eta)  ],\notag \\
+x(t) &\sim &\sum [ (x^{(i)}_0(t) - x_0^{(i)}(t_i)) \mathds{1}_{(t_{i-1},t_i]} + X_0^{i}((t-t_i)/\eta)  ],
+\end{eqnarray}
+where $\mathds{1}_{(t_{i-1},t_i]}$ is the indicator function for the interval $(t_{i-1},t_i]$.
+
+ {In this paper we will use only the lowest order of the matched asymptotic expansion. However, higher order
+expansions can be also obtained with this method \cite{lagerstrom1972basic,holmes2012introduction}.}
+
+ {The solution \eqref{eq:hyb}} can be seen as a hybrid approximation. The
+local dynamics are reduced  {with respect to the full model and, at lowest
+order,} are given either by the inner layer (solution of \eqref{inner0}) or by
+the outer layer (solution of \eqref{outer0}) approximation.
+%Notice that
+%the positions $t_i$ of the interior layers are constrained but not entirely
+%determined by the matching equations \eqref{matching1},\eqref{matching2}.
+%We
+%will use positions of bifurcations of the invariant manifold as initial
+%estimates for $t_i$, and further refine these values by parameter optimization.
+%For the sake of simplicity, we used an unique small scaling
+%parameter $\eta$ and slow/fast decomposition for all the slow layers. As a
+%matter of fact, both $\eta$ and the slow/fast decomposition can be layer
+%dependent.
+
+\section{Algorithm for the hybrid reduction}\label{section:Algorithm}
+The matched asymptotic expansion method justifies the possibility of hybrid
+approximations but is not a reduction algorithm per se. Several steps, namely
+the detection of slow/fast variables and the determination of the inner layer
+positions need further development.
+
+\textit{Numerical determination of time scales and outer layers.} In the full (un-reduced) model,
+each variable satisfies an ordinary differential equation (ODE) $\D{x_i}{t} = f_i(x_i,\vect{x}^{(i)})$, where  $\vect{x}^{(i)}$
+denotes all of the variables other than $x_i$.
+Let us denote by $x_i^*(t)$ the solution of $f_i(x_i,\vect{x}^{(i)}(t)) = 0$ that is closest to $x_i(t)$,
+where $(x_i(t),\vect{x}^{(i)}(t))$ is a solution of the given ODE system.
+We then define two positive indices
+\begin{equation}
+\begin{aligned}
+\tau_i(t) &=  (|f_i(x_i(t),\vect{x}^{(i)}(t))/(x_i(t)-x_i^*(t))|)^{-1}\\
+~\text{~and~}~
+s_i(t) &= | x_i(t) - x_i^*(t) |/x_{i,s}, \label{indices}
+\end{aligned}
+\end{equation}
+where $x_{i,s}$ is a positive normalizing value (a typical choice is $x_{i,s} = \max | x_i(t) - x_i^*(t) |$).
+The index $\tau_i$ is an estimate of the time scale characteristic of the
+variable $x_i$. Note that the voltage and gating variables of the
+generic ion channel model described by Eqs.~\eqref{full} are $\tau_i =\tau_V$ and
+$\tau_i = \tau_{h_i}$, respectively.  The index $s(t)$ is a measure of the
+distance between the value of $x_i$ on a trajectory and the imposed value
+$x_i^*$ that $x_i$ would have as fast variable in an outer layer solution.
+A low value of $s_i$ indicates that $x_i$ is a fast slaved variable in an outer
+layer. Variables can be fast, but not slaved, in the inner layers.
+
+\textit{Detection of fast species via sorting of timescales.}
+The value $s_i(t)$ is used to determine the intervals of time where fast
+variables are slaved; these intervals are the outer layer modes. Suppose that an
+outer layer starts at $t_i$ and ends at $t_{i+1}$.  The values $t_i, t_{i+1}$
+depend on the trajectory and will change if initial conditions are changed.  We
+should therefore look for another way  to define the limits of the outer
+layers. A convenient way to do this is to define exit from an outer layer as a condition
+on the values of one or several variables of the model, using ordinary
+differential equations together with events that trigger transitions between the modes. This is possible
+because outer layer solutions belong to invariant manifolds, and the end of a given
+outer layer is characterized by loss of stability of the invariant manifold (which
+can be written as a condition on the model's variables).
+
+Let us consider that the species time scales are sorted, so that $\tau_1(t) \leq \tau_2(t) \leq \ldots \leq \tau_n(t)$.
+The subscripts indexing the values $\tau_i$ may change order, depending on time.
+Suppose that, for a given time $t$, there is an index $k$ such that the value
+$\eta = \tau_k(t)/\tau_{k+1}(t)$ is much smaller than one.
+Then, we can use $k$ to separate fast and slow timescales, and take $\eta$ as the
+singular perturbation parameter. Let us note that the multiple timescales
+situation $\eta = \tau_k(t)/\tau_{k+1}(t) \to 0$ is covered by the second
+theorem of Tikhonov \cite{tikhonov1952systems} and also leads to the outer
+layer approximation \eqref{outer0}.
+
+The reduction algorithm is summarized by the following steps:
+\begin{enumerate}
+\item
+    Detect fast species. These have small values of $\tau_i(t)$, separated from
+    the rest of the variables by a gap. To be precise,  {choose a number $g$ larger than one. This number $g$ shall be called the \textit{gap width}.}  Define a threshold
+    function $\tau_{th}(t)$ such that\\[2pt]
+	\null\hspace{3em}\begin{minipage}{0.9\textwidth}
+	\begin{enumerate}
+	\item $\tau_{th}(t) = (\tau_{k}(t) \tau_{k+1}(t))^{1/2}$,
+	\item $\tau_{k+1}(t) / \tau_{k}(t) = \eta^{-1} > g$, and
+	\item for each $t$, $k$ is the smallest index satisfying the condition (b).
+	\end{enumerate}
+	\end{minipage}\\[2pt]
+	Then all species such that $\tau_{k}(t) <\tau_{th}(t)$ are declared fast.
+\item
+    Detect outer layers. These are defined by small values of $s_i$, smaller
+    than a fixed threshold.
+\item
+    Slow, outer layer modes are defined by Equations \eqref{outer0}. Fast, inner
+    layer modes are described by Equations \eqref{inner0}.  A slow mode is followed
+    and/or preceded by a fast mode.
+\item
+	Define conditions for exit from outer layers. These conditions depend on
+	the values of variables, and can be implemented as ODE system events
+	triggering the transition between modes.
+\item
+	The last step of the algorithm consists in parameter optimization of the
+	reduced model by simulated annealing or by other optimization method.
+	 {This step is needed for comparison of the full and reduced model
+	solutions, or for learning parameters of the reduced model from data.}
+\end{enumerate}
+
+\section{A hybrid approximation of the Hodgkin-Huxley  model}
+
+
+%%%%%%%%%%%%%%%%%%%%%
+
+% Macros and setttings
+    %%% TODO: find more accurate values for spikestart and spikeend
+
+    \newif\ifdrawextra
+    \drawextratrue
+
+    % Threshold constants
+    \def\tauRatio{3.5}
+    \def\epsiSlow{0.2}
+
+    % Shortcuts
+    \def\VBecomesFast{37.4915}
+    \def\VBecomesSlow{38.3835}
+
+    % Sequential timepoints
+    \def\Tq{\VBecomesFast}  % V becomes fast
+    \def\Tw{37.5295}        % The largest timescale gap falls below the ratio
+    \def\Te{37.5455}        % The largest timescale gap rises above the ratio
+    \def\Tr{37.627}         % max(slowness_m,slowness_V) falls below the threshold
+    \def\Tt{38.0055}        % max(slowness_m,slowness_V) rises above the threshold
+    \def\Ty{38.2630}        % max(slowness_m,slowness_V) falls below the threshold
+    \def\Tu{\VBecomesSlow}  % V becomes slow
+
+    \def\Yq{0.7021}     % new value of tau_th
+    \def\Yr{\epsiSlow}  % the slowness threshold
+    \def\Yt{\epsiSlow}  % the slowness threshold
+    \def\Yy{\epsiSlow}  % the slowness threshold
+    \def\Yu{0.3266}     % old value of tau_th
+
+    %THE BELOW ARE DEPRECATED
+    % thresholds
+        %\def\epstau{0.2}
+        \def\spikestart{\Tq}
+        \def\spikeend{\Tu}
+        \def\pTone{\spikestart}
+        \def\pTtwo{37.625}
+        \def\pTthree{37.995}
+        \def\pTfour{38.28}
+        \def\pTfive{\spikeend}
+        \def\eventVone{-51.328}
+        \def\eventmone{0.92}
+        \def\eventhone{0.1563}
+        \def\eventmtwo{0.077341}
+        \def\eventhtwo{0.72084}
+
+    % windows bounds
+    %\def\spikewindowstart{\spikestart - 0.2}
+    %\def\spikewindowend{\spikeend + 0.2}
+    \def\spikewindowstart{37.2915}
+    \def\spikewindowend{38.5835}
+    \def\shortstart{32.5}
+    \def\shortend{42.5}
+
+    \tikzset{dashdot/.style={dash pattern=on 1pt off 2pt on 8pt off 2pt}}
+    \tikzset{mydotted/.style={very thick, line cap=round, dash pattern=on 0pt off 1cm/13}}
+    \pgfplotsset{ every non boxed x axis/.append style={x axis line style=-},
+        every non boxed y axis/.append style={y axis line style=-}}
+
+
+%%%%%%%%%%%%%%%%%%%%%
+
+% Definition of HH model
+
+We have applied our algorithm to several ion channel models. To keep the
+presentation short, we illustrate our results on the well-known Hodgkin-Huxley (HH)
+model. This model is a four-variable system (\ref{HH:full_ODEs}) of ordinary
+differential equations, fitting into the general framework of equations
+(\ref{intro:general_model}) above.
+    \vspace{5pt}
+    \begin{equation}\label{HH:full_ODEs}
+      \begin{aligned} \D{V}{t}&=\frac{V-V^*(h_m,h_w,h_n)}{\tau_V(h_m,h_w,h_n)}
+      \qquad&\qquad   \D{h_m}{t}&=\frac{h_m-h_m^*(V)}{\tau_{m}(V)}
+      \\[10pt]         \D{h_w}{t}&=\frac{h_w-h_w^*(V)}{\tau_{h}(V)}
+      &               \D{h_n}{t}&=\frac{h_n-h_n^*(V)}{\tau_{n}(V)},
+      \end{aligned}
+    \end{equation}
+    \\[5pt]
+ {where $h_m$ is the sodium channel activation, $h_w$ is the sodium channel inactivation, and
+$h_n$ is the potassium channel activation.}
+    For each gating variable $x$ in the set $\{m,w,n\}$, the timescale $\tau_x$
+    and the imposed value $h_x^*$ are defined by
+    \begin{center}
+        \hfill $\tau_x(V)=\alpha_x(V)+\beta_x(V)$
+        \hfill and
+        \hfill $h_x^*(V)=\alpha_x(V)/(\alpha_x(V)+\beta_x(V)),$
+        \hfill
+    \end{center}
+    respectively, where $\alpha_x$ and $\beta_x$ are as given below.
+    \vspace{5pt}
+    \begin{align*}      \alpha_m (V) &= \frac{0.32(V+54)}{1-\exp(-(V+54)/4)}
+        \qquad&\qquad   \beta_m  (V) &= \frac{0.28(V+27)}{\exp((V+27)/5)-1}
+        \\[10pt]        { \alpha_w }(V) &= \frac{0.128}{\exp((V+50)/18)}
+        \qquad&\qquad   { \beta_w } (V) &= \frac{4}{\exp(-(V+27)/5)+1}
+        \\[10pt]        \alpha_n (V) &= \frac{0.032(V+52)}{1-\exp(-(V+52)/5)}
+        \qquad&\qquad   \beta_n  (V) &= \frac{0.5}{\exp((V+57)/40)}
+    \end{align*}
+    \\[5pt]
+    The timescale $\tau_V$ and the imposed value $V^*$ for the voltage variable
+    are defined below.
+    \vspace{0pt}
+    %\begin{equation*}
+    \begin{gather*} \tau_V(h_m,h_n) =  \frac{ {C}}{g_m  {h_w} h_m^3+g_n h_n^4+g_L},
+        \\[10pt]     V^*(h_m,h_n)    =   { \frac{g_m h_w h_m^3V_m+g_nh_n^4V_n+g_LV_L+g_Ih_I}{g_m h_w h_m^3+g_n h_n^4+g_L}} .
+    \end{gather*}
+    %\end{equation*}
+    \\[5pt]
+    The conductances $g_x$ are defined by       $ g_m(t) =    100\cdot h_w(t) $%
+                                        ,       $ g_n    =    80              $%
+                                        ,       $ g_L    =    0.1             $%
+                                        , and   $ g_I    =    0.32            $%
+                                        .
+     {The capacitance was taken to be $C = 1$.}
+    Finally, the constants $V_x$ and $h_I$
+    are set as follows:         $  V_m = 50  $%
+                      ,         $ V_n = -100 $%
+                      ,         $ V_L = -67  $%
+                      ,  and    $ h_I = 1    $%
+                      .
+     {The units of   conductance are $mS/cm^2$, those of voltage are $mV$, those of current are $\mu A/cm^2$, and those of capacitance are $\mu F/cm^2$.}
+	This model contains only a voltage variable $V$ and three gating variables
+	$h_x$, with $x$ in $\{m,w,n\}$. In essence, the equations above are the
+	same as those used in the seminal paper of Hodgkin and Huxley
+	\cite{hodgkin1952propagation} describing action potentials in the squid
+	giant axon; the organization of the equations and parameter values used are
+	adopted from \cite{clewley2004dominant}.
+
+ {The analysis and reduction of this model was performed using MATLAB \cite{MATLAB:2013}. }
+%%%%%%%%%%%%%%%%%%%%%
+
+\iffalse\FloatBarrier\fi
+\subsection{Trajectory of the HH model}
+
+    The system of ODEs described above will quickly converge to a limit
+    cycle (see Figure \ref{HH-fig-long-trajectory}).
+    We will see that the voltage $V$ is slow except for during the spikes.
+    Figure \ref{HH-fig-trajectory} plots all four variables over one period of
+    this limiting cycle.
+
+	\begin{figure}[h!]
+	\centering
+			\input{figures/long_trajectory}
+		\caption{Above, left: A plot of the voltage variable $V$ from the (non-reduced)
+					HH model, obtained by forward numerical simulation of
+					the equations (\ref{HH:full_ODEs}). With parameters as above, this
+					limiting cycle has an approximate period of $\Delta t\approx
+					49.5$.}
+	\end{figure}
+
+
+	\begin{figure}[h!]
+		\subfigure{
+			\label{HH-fig-long-trajectory}
+			\input{figures/trajectory}
+			\label{HH-fig-trajectory}
+		}%
+		~
+		\subfigure{
+    \def\thisfigxmin{\shortstart}
+    \def\thisfigxmax{\shortend}
+        \input{figures/short_imposed}
+        \label{HH-fig-short-imposed}
+		}%
+		\caption{					Above, left:
+					One period of the limiting cycle for the HH model.
+					The voltage variable is plotted on the upper axes, the middle
+					axis displays the trajectories of the gating variables, and
+					the timescales $\tau_x$ are plotted on the lower axis. A
+					larger timescale means that the given variable $x$ is slower
+					to follow its imposed value $x^*$.
+					Above, right: A comparison of each variable $x_i$ from the (non-reduced)
+                 HH model with its imposed value $x_i^*$, in a
+                 short window of time surrounding the spike. The imposed
+                 value of $x$ is given by the steady
+                 state of the equation
+                 $\D{x_i}{t} = f_i(x_i,x^{(i)})$ with $x^{(i)}$
+                 held fixed.
+					}
+	\end{figure}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%
+
+\iffalse\FloatBarrier\fi
+\subsection{Determination of the imposed values}
+
+It is convenient that in the HH model, the imposed value $x_i^*$ of
+each variable $x_i$ can be found as a closed-form function of the variables
+other than $x_i$, which are collectively denoted $x^{(i)}$. A comparison of
+each variable's trajectory with that of its imposed value can be found in
+Figure \ref{HH-fig-short-imposed}.
+
+In the case of a more complex model, it may be possible to find some of the
+imposed values $x_i^*$ via computer algebra methods (this is the usual case,
+where $f_i$ is a polynomial in $x_i$ having small degree).  {Alternatively, the
+computation of the imposed values can be performed via numerical solution of the equation
+$0=f_i(x_i^*,x^{(i)})$. In the case of multiple solutions to this equation, we choose the
+solution which provides the smallest index $s_i$ and which satisfies the
+physical variables constraints, i.e. whose chemical concentrations are positive
+and whose gating variables fall in the interval $[0,1]$. }
+%\marginpar{Maybe include something about Tikhonov's
+%theorem theorem in the references?}
+
+%    \begin{figure}[h!] \centering
+%        \input{figures/short_imposed}
+%        \caption{A comparison of each variable $x_i$ from the (non-reduced)
+%                 Hodgkin-Huxley model with its imposed value $x_i^*$, in a
+%                 short window of time surrounding the spike. The imposed
+%                 value of $x$ is given by the steady
+%                 state of the equation
+%                 $\D{x_i}{t} = f_i(x_i,x^{(i)})$ with $x^{(i)}$
+%                 held fixed.
+%                }
+%        \label{HH-fig-short-imposed}
+%    \end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%
+
+\iffalse\FloatBarrier\fi
+\subsection{Detection of fast species}
+According to Eq.\eqref{indices}, the timescale $\tau_{x_i}$  is defined as the
+absolute value of the ratio $\frac{x_i^*-x_i}{dx_i/dt}$.  Intuitively,
+$\tau_{x_i}$ is an amount of time required for the variable $x_i$ to move
+``significantly'' in the direction of its imposed value $x_i^*$. Indeed, if we
+hold constant the distance $x_i^*-x_i$ between $x_i$ and its imposed value,
+then the timescale $\tau_{x_i}$ varies inversely with the derivative
+$\D{x_i}{t}$.  Thus the ``fast'' variables are those $x$'s such that $\tau_x$
+is smaller than some given threshold, whereas the ``slow'' variables are the
+variables $x$ whose timescales $\tau_x$ are large.
+
+	The timescale threshold $\tau_{th}(t)$, which distinguishes between the
+	slow and fast variables, will be allowed to change with time.  Following
+	the algorithm in Section \ref{section:Algorithm}, we assign a number
+	between 1 and 4 to each of the timescales $\tau_V(t)$, $\tau_m(t)$,
+	$\tau_w(t)$ and $\tau_n(t)$, so that the inequality $$\tau_1(t) \leq
+	\tau_2(t) \leq \tau_3(t) \leq \tau_4(t)$$ is satisfied for each point in
+	time.  At a given point $t$, we write $k$ for the smallest integer such
+	that $1\leq k\leq4$ and such that the ratio
+	$\frac{\tau_{k+1}(t)}{\tau_k(t)}$ is larger than a chosen value $g$; we
+	have chosen $g=\tauRatio$.  Thus, $\tau_k$ is the slowest of the fast
+	variables, and $\tau_{k+1}$ is the fastest among the slow variables.  The
+	threshold $\tau_{th}$ is defined as the geometric mean
+	$(\tau_k(t)\tau_{k+1}(t))^{1/2}$, so that a variable $x$ is fast if and
+	only if $\tau_x$ is smaller than $\tau_{th}$.
+
+    See the top axis of Figure \ref{HH-fig-slowness} for a plot of the
+    timescales $\tau_x$ and the timescale threshold $\tau_{th}$. Note that the
+    variable $h_m$ is always fast, the variables $h_w$ and $h_n$ are always
+    slow, and the voltage variable $V$ is fast only during the spike (from
+    $t=\VBecomesFast$ to $t=\VBecomesSlow$).
+    % In the future, it may be fruitful to consider stratification of variables
+    % into a heirarchy of speeds, e.g. ``slow'', ``medium'', and ``fast''.
+
+%%%%%%%%%%%%%%%%%%%%%
+
+\iffalse\FloatBarrier\fi
+\subsection{Detection of outer layers}
+
+    The slowness index $s_x$ of each variable $x$ is obtained  by normalizing
+    the difference between $x_i$ and $x_i^*$, as per Eq.\eqref{indices}.
+ %       $$s_i=\frac{|x_i^*-x_i|}{\max_t|x_i^*(t)-x_i(t)|}.$$
+    The bottom axis of Figure \ref{HH-fig-slowness} displays a plot of the
+    slowness indices $s_V$ and $s_m$ corresponding to fast variables $V$ and
+    $h_m$, respectively. We have chosen $s_{th}=\epsiSlow$ as the threshold for
+    distinguishing between slaved and unslaved fast variables: say that $x_i$ is
+    slaved at time $t$ if and only if the inequality $s_i(t) \leq s_{th}$ is
+    satisfied.
+
+    The position of the outer layer solution is characterized by small values
+    $s_i$ for each of the fast variables $x_i$. Referring to the solution of the
+    full HH model in Figure \ref{HH-fig-slowness}, the outer layer
+    occurs from {\Tr} to {\Tt} and from {\Ty} to {\Tu} (during which times both
+    $V$ and $h_m$ are fast), as well as before {\Tq} and after {\Tu} (during
+    which times only $h_m$ is fast). See Table \ref{table-of-modes} for a
+    summary of information concerning the different modes (inner and outer) as
+    well as the transitions between them.
+
+ {At this point we can compare our results with similar approximations of the
+HH model. Like \cite{suckley2003asymptotic}, we identify the variable
+$h_m$ as fast everywhere. However, contrary to our approach,
+\cite{suckley2003asymptotic} considers that $h_m$ is slaved everywhere, which is not
+true at least for the parameters values that we use (similar to theirs).  Thus,
+with respect to more conventional singular perturbations methods,
+our approach has two advantages:
+it detects automatically which type of approximation should be applied  and
+it considers the possibility of inner layers where fast variables are not slaved.
+
+The approach used in \cite{clewley2004dominant,clewley2005computational} identifies slow and
+fast regimes which are equivalent to our outer and inner layers, respectively.
+However, the method in \cite{clewley2004dominant,clewley2005computational}  is based on a sensitivity study
+of the inputs of each variable rather than on direct testing of quasi-stationarity as in our
+approach. The former method requires a complex heuristic to consolidate the results, whereas in our case
+the mode decomposition is simply controlled by the two thresholds $g$ and $s_{th}$.
+ We therefore expect the method presented in this paper to be better
+terms of robustness and precision of the approximation. Indeed, for the HH model,
+\cite{clewley2005computational} finds six regimes, and the agreement between trajectories
+simulated with the full and hybrid model is only qualitative. }
+
+
+
+
+    \def\thisfigxmin{\spikewindowstart}
+    \def\thisfigxmax{\spikewindowend}
+    \def\plotheight{\textwidth/4}
+    \begin{figure}[h!] \centering
+        \input{figures/slowness}
+		\caption{Delineation of modes of the (non-reduced) HH
+			model.  The top axes show timescales $\tau_{x_i}$ of each of the
+			variables in a short window of time surrounding the voltage spike.
+			The dotted line (marked as $\tau_{th}$ in the legend) is the moving
+			threshold used for distinguishing slow variables from fast ones.
+			This timescale threshold $\tau_{th}$ is calculated as the geometric
+			mean $(\tau_{k}(t)\tau_{k+1}(t))^{1/2}$ of the smallest two
+			adjacent timescales whose ratio is larger than a chosen constant
+			value $g$.  The vertical dotted lines mark time-points where
+			variables change between slow and fast or between slaved and
+			unslaved.
+        }\label{HH-fig-slowness}
+    \end{figure}
+
+    \begin{table}[h]
+    \begin{small}
+    \begin{center}
+
+    \begin{tabular}{|c|l|l|l|l|l|l|}
+    \hline
+    \multicolumn{1}{|p{1.2cm}|}{{Region}} &
+    \multicolumn{1}{|p{1.2cm}|}{{Type  }}&
+    \multicolumn{1}{|p{1.2cm}|}{{V}}&
+    \multicolumn{1}{|p{1.5cm}|}{{$h_m$}} &
+    \multicolumn{1}{|p{1.5cm}|}{{$h_w$}} &
+    \multicolumn{1}{|p{1.5cm}|}{{$h_n$}}&
+    \multicolumn{1}{|p{1.5cm}|}{{ Exit event}}
+    \tabularnewline
+    \hline
+    \hline
+    1 & O & slow & fast/slaved & slow & slow & $V>V_1$ \tabularnewline
+    \hline
+    2 & I & fast/unslaved & fast/unslaved & slow & slow & $m>m_1$ \tabularnewline
+    \hline
+    3 & O & fast/slaved & fast/slaved & slow & slow & $h<h_1$ \tabularnewline
+    \hline
+    4 & I & fast/unslaved & fast/unslaved & slow & slow & $m<m_2$ \tabularnewline
+    \hline
+    5 & O & fast/slaved & fast/slaved & slow & slow & $h>h_2$ \tabularnewline
+    \hline
+    \end{tabular}
+
+    \def\sep{\hspace{2mm}}
+    \begin{tabular}{|l l @{\sep} | @{\sep} l @{\sep} | @{\sep} l @{\sep} l|}
+     \hline&&&&\\[-3mm]
+               Region    & 1
+                        & $h_m = h_m^*$
+                        & \parbox{0.2\textwidth}{$\displaystyle\dot x=(x-x^*)/\tau_x$}
+                        & for $x\in\{V,h_w,h_n\}$
+     \\[3mm]\hline&&&&\\[-3mm]
+     Regions   & 2 and 4
+                        & $h_w$ and $h_n$ constant
+                        & \parbox{0.2\textwidth}{$\displaystyle\dot x=(x-x^*)/\tau_x$}
+                        & for $x\in\{V,h_m\}$
+     \\[3mm]\hline&&&&\\[-3mm]
+     Regions   & 3 and 5
+                        & $h_m = h_m^*$ and $V = V^*$
+                        & \parbox{0.2\textwidth}{$\displaystyle\dot x=(x-x^*)/\tau_x$}
+                        & for $x\in\{h_w,h_n\}$
+     \\[3mm]\hline
+    \end{tabular}
+
+    \end{center}
+    \end{small}
+    \caption{\small Summary of the regions and ODEs defining the modes of the hybrid simplification
+    of the HH model. The type I stands for inner layer and O for outer layer. Slaved
+    variables are set to their quasi-stationary values. Unslaved variables follow ODE dynamics.
+    In inner layers slow variables are constant at lowest order approximation
+    and fast variables are unslaved. In outer layers fast variables are slaved and slow variables
+    are unslaved.}
+    \label{table-of-modes}
+    \end{table}
+
+%%%%%%%%%%%%%%%%%%%%%
+
+\iffalse\FloatBarrier\fi
+\subsection{Differential equations of modes,  {exit events and parameter optimization}}
+%  In practice, it is not possible to use the slowness index to trigger
+%    transitions from slaved to unslaved modes of the reduced model; because $x$
+%    is equal to $x^*$ whenever $x$ is slaved, the slowness index
+%    $s=\frac{|x^*-x|}{\max_t|x^*(t)-x(t)|}$ is uniformly zero in those regions
+%    where $x$ is slaved. This paper instead adopts the strategy of
+ As  discussed in Section \ref{section:Algorithm}, triggering transitions
+ between modes of the reduced model is performed via thresholds, listed under
+ ``Exit event'' in Table \ref{table-of-modes}. For example, the event
+ ``$V>V_1$'' is used to trigger exit from region 1, meaning that there is a
+ threshold $V_1$ such that exit from region 1 is signaled by the value of $V$
+ surpassing that of $V_1$.
+  {For each region, the thresholded variable was chosen from the {\em
+ active} ones, i.e. slow variables trigger exit from outer layers and fast
+ variables trigger exit from inner layers. If several variables are active at a
+ given time, we chose the variable whose logarithmic time derivative has the
+ largest absolute value.  The thresholds were refined in order to minimize the
+ $L^2$ distance between the trajectories generated by the full and hybrid
+ models.  Furthermore, the period of the reduced model was adjusted to match
+ that of the full model; this was achieved by adding $C$ to the list of
+ optimized parameters.  Local optimization using the  function {\em lsqnonlin}
+ of MATLAB (trust-region-reflective least square algorithm) was enough to
+ obtain a good fit.}
+     After optimization, we arrived at the
+    following parameter values: $V_1 = -46.99973,$
+                               $m_1 =   0.99496,$
+                               $h_1 =   0.03597,$
+                               $m_2 =   0.16298,$
+                               $h_2 =   0.72711,$
+                               $C = 1.00117$.
+%Furthermore, the period of the reduced model was changed to match that of the
+%full model by increasing the value of $C$ from $1$ to $1.00117$.
+For
+completeness, the equations governing the model's evolution in each of the five
+regions are detailed in Table \ref{table-of-modes}.
+%    \def\sep{\hspace{2mm}}
+%    \begin{center}
+%    \begin{tabular}{l l @{\sep} | @{\sep} l @{\sep} | @{\sep} l @{\sep} l}
+%     \hline&&&&\\[-3mm]
+%               Region    & 1
+%                        & $h_m = h_m^*$
+%                        & \parbox{0.2\textwidth}{$\displaystyle\D{x}{t}=\frac{x-x^*}{\tau_x}$}
+%                        & for $x\in\{V,h_w,h_n\}$
+%     \\[3mm]\hline&&&&\\[-3mm]
+%     Regions   & 2 and 4
+%                        & $h_w$ and $h_n$ constant
+%                        & \parbox{0.2\textwidth}{$\displaystyle\D{x}{t}=\frac{x-x^*}{\tau_x}$}
+%                        & for $x\in\{V,h_m\}$
+%     \\[3mm]\hline&&&&\\[-3mm]
+%     Regions   & 3 and 5
+%                        & $h_m = h_m^*$ and $V = V^*$
+%                        & \parbox{0.2\textwidth}{$\displaystyle\D{x}{t}=\frac{x-x^*}{\tau_x}$}
+%                        & for $x\in\{V,h_w,h_n\}$
+%     \\[3mm]\hline
+%    \end{tabular}
+%    \end{center}
+    A juxtaposition of the trajectories of the reduced and full models can be found
+    in Fig.~\ref{reduced-trajectory-faraway}.
+    % and
+    %\ref{reduced-trajectory-closeup}.
+    \begin{figure}[h!] \centering
+        \includegraphics[width=0.94\textwidth]{figures/figurex.png}
+        \caption{The trajectory of each of the four variables of the full and
+         reduced HH models.}
+        \label{reduced-trajectory-faraway}
+%        \includegraphics[width=0.94\textwidth]{figures/figurey.png}
+%        \caption{A close-up of the spike in the Hodgkin-Huxley model, comparing
+%         the trajectories of the full and reduced model for each of the four
+%         variables.}
+%        \label{reduced-trajectory-closeup}
+    \end{figure}
+
+%\FloatBarrier
+
+%\section{A more complex example}
+%
+%An example with metabolic variables: bursts and oscillations of calcium. TO DO: results can be presented
+%as supplementary material.
+
+\section{Conclusion and future work}
+We have shown how to obtain hybrid reduced models for differential equations models of
+ion channels dynamics. These hybrid reductions can be used as simplified units of
+multiscale models of tissues or organs. In certain cases, hybrid simplifications
+can relate biochemical parameters to physiological properties analytically.
+For instance, a matched asymptotic simplification of the HH model with
+one dimensional description of the slowest outer layer (coarser than the one presented here)
+can be used to find an approximate analytic expression relating the period of bursting to
+the model parameters. The details of this application will be presented elsewhere.
+
+In this paper we have presented a trajectory based method for reduction. This method has the
+advantage of generality and simplicity of implementation, but could, in certain situations,
+provide a reduction that is valid only locally in the phase and parameter spaces.
+Tropical geometry approaches, currently applied to
+polynomial and rational differential equations, do not use trajectory simulations
+and their robustness is guaranteed by replacing positive real numbers by orders
+of magnitude, i.e. valuations. In this work we borrowed equilibration ideas from tropical methods
+but we have not used orders yet. The main difficulty in computing orders
+ is the transcendental nature of some voltage dependent terms.
+ This will be overcome in future work by using an elimination method in which
+valuations are computed as a function of voltage (considered as a parameter).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\paragraph{Acknowledgments}
+This work was supported by the University of Chicago and by the FACCTS (France
+and Chicago Collaborating in The Sciences) program.  The authors express their
+gratitude to the reviewers for their many helpful comments.
+
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+
+\bibitem{biktasheva2006asymptotic}
+Biktasheva, I., Simitev, R., Suckley, R., Biktashev, V.: Asymptotic properties
+  of mathematical models of excitability. Philosophical Transactions of the
+  Royal Society of London A: Mathematical, Physical and Engineering Sciences
+  364(1842),  1283--1298 (2006)
+
+\bibitem{bueno2008minimal}
+Bueno-Orovio, A., Cherry, E.M., Fenton, F.H.: Minimal model for human
+  ventricular action potentials in tissue. Journal of theoretical biology
+  253(3),  544--560 (2008)
+
+\bibitem{clewley2004dominant}
+Clewley, R.: Dominant-scale analysis for the automatic reduction of
+  high-dimensional ode systems. ICCS 2004 Proceedings. New England: Complex
+  Systems Institute  (2004)
+
+\bibitem{clewley2005computational}
+Clewley, R., Rotstein, H.G., Kopell, N.: {A computational tool for the
+  reduction of nonlinear ODE systems possessing multiple scales}. Multiscale
+  Modeling \& Simulation  4(3),  732--759 (2005)
+
+\bibitem{fenichel1979geometric}
+Fenichel, N.: Geometric singular perturbation theory for ordinary differential
+  equations. Journal of Differential Equations  31(1),  53--98 (1979)
+
+\bibitem{fridlyand2009model}
+Fridlyand, L.E., Jacobson, D., Kuznetsov, A., Philipson, L.H.: {A model of
+  action potentials and fast Ca 2+ dynamics in pancreatic $\beta$-cells}.
+  Biophysical journal  96(8),  3126--3139 (2009)
+
+\bibitem{fridlyand2013ion}
+Fridlyand, L.E., Jacobson, D.A., Philipson, L.: {Ion channels and regulation of
+  insulin secretion in human $\beta$-cells: a computational systems analysis}.
+  Islets  5(1),  1--15 (2013)
+
+\bibitem{fridlyand2016pancreatic}
+Fridlyand, L.E., Philipson, L.H.: {Pancreatic Beta Cell G-Protein Coupled
+  Receptors and Second Messenger Interactions: A Systems Biology Computational
+  Analysis}. PloS one  11(5),  e0152869 (2016)
+
+\bibitem{grosu2011cardiac}
+Grosu, R., Batt, G., Fenton, F.H., Glimm, J., Le~Guernic, C., Smolka, S.A.,
+  Bartocci, E.: From cardiac cells to genetic regulatory networks. In:
+  International Conference on Computer Aided Verification. pp. 396--411.
+  Springer (2011)
+
+\bibitem{hille2001ion}
+Hille, B.: Ion channels of excitable membranes. Sinauer Sunderland, MA (2001)
+
+\bibitem{hodgkin1952propagation}
+Hodgkin, A., Huxley, A.: Propagation of electrical signals along giant nerve
+  fibres. Proceedings of the Royal Society of London. Series B, Biological
+  Sciences pp. 177--183 (1952)
+
+\bibitem{holmes2012introduction}
+Holmes, M.H.: Introduction to perturbation methods, vol.~20. Springer Science
+  \& Business Media (2012)
+
+\bibitem{iyer2004computational}
+Iyer, V., Mazhari, R., Winslow, R.L.: A computational model of the human
+  left-ventricular epicardial myocyte. Biophysical journal  87(3),  1507--1525
+  (2004)
+
+\bibitem{keener2009invariant}
+Keener, J.P.: Invariant manifold reductions for markovian ion channel dynamics.
+  Journal of Mathematical Biology  58(3),  447--457 (2009)
+
+\bibitem{keener1998mathematical}
+Keener, J.P., Sneyd, J.: Mathematical physiology, vol.~1. Springer (1998)
+
+\bibitem{lagerstrom1972basic}
+Lagerstrom, P., Casten, R.: Basic concepts underlying singular perturbation
+  techniques. Siam Review  14(1),  63--120 (1972)
+
+\bibitem{MATLAB:2013}
+MATLAB: {version 1.7.0$\_$11 (R2013b)}. The MathWorks Inc., Natick,
+  Massachusetts (2013)
+
+\bibitem{murthy2012approximate}
+Murthy, A., Islam, M.A., Bartocci, E., Cherry, E.M., Fenton, F.H., Glimm, J.,
+  Smolka, S.A., Grosu, R.: Approximate bisimulations for sodium channel
+  dynamics. In: Computational Methods in Systems Biology. pp. 267--287.
+  Springer (2012)
+
+\bibitem{NGVR12sasb}
+Noel, V., Grigoriev, D., Vakulenko, S., Radulescu, O.: Tropical geometries and
+  dynamics of biochemical networks application to hybrid cell cycle models. In:
+  Feret, J., Levchenko, A. (eds.) Proceedings of the 2nd International Workshop
+  on Static Analysis and Systems Biology ({SASB} 2011), Electronic Notes in
+  Theoretical Computer Science, vol. 284, pp. 75--91. Elsevier (2012)
+
+\bibitem{Noel2013a}
+Noel, V., Grigoriev, D., Vakulenko, S., Radulescu, O.: Tropicalization and
+  tropical equilibration of chemical reactions. In: Litvinov, G., Sergeev, S.
+  (eds.) Tropical and Idempotent Mathematics and Applications, Contemporary
+  Mathematics, vol. 616, pp. 261--277. American Mathematical Soc. (2014)
+
+\bibitem{radulescu2012frontiers}
+Radulescu, O., Gorban, A.N., Zinovyev, A., Noel, V.: {Reduction of dynamical
+  biochemical reactions networks in computational biology}. Frontiers in
+  Genetics  3(131) (2012)
+
+\bibitem{radulescu2015symbolic}
+Radulescu, O., Samal, S.S., Naldi, A., Grigoriev, D., Weber, A.: Symbolic
+  dynamics of biochemical pathways as finite states machines. In: Computational
+  Methods in Systems Biology. pp. 104--120. Springer (2015)
+
+\bibitem{radulescu2015}
+Radulescu, O., Vakulenko, S., Grigoriev, D.: Model reduction of biochemical
+  reactions networks by tropical analysis methods. Mathematical Model of
+  Natural Phenomena  10(3),  124--138 (2015)
+
+\bibitem{samal2015geometric}
+Samal, S.S., Grigoriev, D., Fr{\"o}hlich, H., Weber, A., Radulescu, O.: A
+  geometric method for model reduction of biochemical networks with polynomial
+  rate functions. Bulletin of mathematical biology  77(12),  2180--2211 (2015)
+
+\bibitem{soliman2014constraint}
+Soliman, S., Fages, F., Radulescu, O.: A constraint solving approach to model
+  reduction by tropical equilibration. Algorithms for Molecular Biology  9(1),
+  ~1 (2014)
+
+\bibitem{suckley2003asymptotic}
+Suckley, R., Biktashev, V.N.: {The asymptotic structure of the Hodgkin--Huxley
+  equations}. International Journal of Bifurcation and Chaos  13(12),
+  3805--3825 (2003)
+
+\bibitem{tang1996simplification}
+Tang, Y., Stephenson, J.L., Othmer, H.G.: {Simplification and analysis of
+  models of calcium dynamics based on IP3-sensitive calcium channel kinetics.}
+  Biophysical journal  70(1),  246 (1996)
+
+\bibitem{tikhonov1952systems}
+Tikhonov, A.N.: {Systems of differential equations containing small parameters
+  in the derivatives}. Matematicheskii sbornik  73(3),  575--586 (1952)
+
+\bibitem{wechselberger2013canard}
+Wechselberger, M., Mitry, J., Rinzel, J.: Canard theory and excitability. In:
+  Nonautonomous dynamical systems in the life sciences, pp. 89--132. Springer
+  (2013)
+
+\end{thebibliography}
+
+
+
+
+
+	
+
+
+\end{document}

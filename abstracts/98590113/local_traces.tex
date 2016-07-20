@@ -1,0 +1,1214 @@
+\documentclass[10pt,a4paper]{llncs}
+\usepackage[latin1]{inputenc}
+
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb,mathtools,stackengine}
+\stackMath
+\usepackage{empheq}
+\usepackage[pdftex]{graphicx}
+\usepackage{graphicx}
+\usepackage[toc,page]{appendix}
+\usepackage{subfigure}
+\usepackage{galois}
+\usepackage{paralist}
+\usepackage{stmaryrd}
+\usepackage{hyperref}
+\usepackage{kappa}
+\usepackage{xypic}
+\usepackage{picinpar}
+\usepackage{twoopt}
+\usepackage{boolean}
+\usepackage{ifthen}
+\usepackage{stmaryrd}
+
+%\usepackage{titlesec}
+%\titlespacing*{\section}{0pt}{1.1\baselineskip}{\baselineskip}
+
+
+\letboolval{\pullbackinappendix}{\TRUE}
+\letboolval{\extendedversion}{\FALSE}
+\letboolval{\longdefforcommutativity}{\FALSE}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\newcommand{\keep}[3]{#1{#2}{#3}}
+\newcommand{\ignore}[1]{}
+\newcommand{\bydef}{\stackrel{\scalebox{0.8}{\!\!$\scriptscriptstyle{\triangle}$}}{=}}
+\renewcommand{\bydef}{:=}
+\newcommand{\st}{\text{such that }}
+\newcommand{\scalefactor}{0.9}
+\newcommand{\statename}{\signaturesymb_{\textit{int}}}
+\newcommand{\agentname}{\signaturesymb_{\textit{ag}}}
+\newcommand{\sitename}{\signaturesymb_{\textit{site}}}
+\newcommand{\linksite}{\signaturesymb^{\textit{lnk}}_{\textit{ag-st}}}
+\newcommand{\statesite}{\signaturesymb^{\textit{int}}_{\textit{ag-st}}}
+\newcommand{\bothsite}{\signaturesymb_{\textit{ag-st}}}
+\newcommand{\signaturesymb}{\Sigma}
+\newcommand{\signaturetuple}{(\agentname,\sitename,\statename,\statesite,\linksite)}
+\newcommand{\graphsymb}{G}
+\newcommand{\graphtuple}[1][]{(\agents[#1],\type[#1],\sites[#1],\links[#1],\props[#1])}
+\newcommand{\graphtuplebis}[1][]{(\agents[#1]',\type[#1]',\sites[#1]',\links[#1]',\props[#1]')}
+\newcommand{\agents}[1][]{\mathcal{A}_{#1}}
+\newcommand{\type}[1][]{\textit{type}_{#1}}
+\newcommand{\sites}[1][]{\mathcal{S}_{#1}}
+\newcommand{\links}[1][]{\mathcal{L}_{#1}}
+\newcommand{\subtype}[1][G]{\leq_{#1}}
+\newcommand{\props}[1][]{p\kappa_{#1}}
+\newcommand{\ext}{\texttt{Ext}}
+\renewcommand{\ext}{\{\free,\bound{}\}}
+\newcommand{\free}{\dashv}
+\newcommand{\im}{\textit{im}}
+\newcommand{\dom}{\textit{dom}}
+\newcommand{\iso}{\approx}
+\newcommand{\identity}[1]{i_{#1}}
+\newcommand{\incbox}[3]{\scalebox{\scalefactor}{\begin{minipage}{#2}\includegraphics[width=#2,height=#1]{#3}\end{minipage}}}
+
+\newcommand{\rembedding}[1][]{\xymatrix@C=0.35cm{{}\ar@{^{(}->}[r]^{#1}&{}}}
+\newcommand{\lembedding}[1][]{\xymatrix@C=0.35cm{{}&\ar@{_{(}->}[l]_{#1}}}
+\newcommand{\rsquigarrow}[1][]{\xymatrix@C=0.7cm{\ar@{~>}[r]^{#1}&}}
+\newcommand{\lhs}{\textrm{lhs}}
+\newcommand{\rhs}{\textrm{rhs}}
+\newcommand{\rlongembedding}[1][]{\xymatrix@C=0.7cm{{}\ar@{^{(}->}[r]^{#1}&{}}}
+\newcommand{\llongembedding}[1][]{\xymatrix@C=0.7cm{{}&\ar@{_{(}->}[l]_{#1}}}
+\newcommand{\rvlongembedding}[1][]{\xymatrix@C=1cm{{}\ar@{^{(}->}[r]^{#1}&{}}}
+\newcommand{\lvlongembedding}[1][]{\xymatrix@C=1cm{{}&\ar@{_{(}->}[l]_{#1}}}
+\newcommand{\rvvlongembedding}[1][]{\xymatrix@C=1.3cm{{}\ar@{^{(}->}[r]^{#1}&{}}}
+\newcommand{\lvvlongembedding}[1][]{\xymatrix@C=1.3cm{{}&\ar@{_{(}->}[l]_{#1}}}
+\newcommand{\lvvvlongembedding}[1][]{\xymatrix@C=1.8cm{{}&\ar@{_{(}->}[l]_{#1}}}
+\newdir{|>}{!/4.5pt/\dir{|}*:(1,-.2)\dir^{>}*:(1,+.2)\dir_{>}}
+
+\newcommand{\north}{\textsc{n}}
+\newcommand{\northeast}{\textsc{ne}}
+\newcommand{\east}{\textsc{e}}
+\newcommand{\southeast}{\textsc{se}}
+
+\newcommand{\actionmap}[1][]{\xymatrix@C=0.35cm{{}\ar@{-|>}[r]^{#1}&{}}}
+\newcommand{\ie}{i.~e.~}
+\newcommand{\initstate}{\mathcal{I}}
+\newcommand{\rules}{\mathcal{R}}
+\newcommand{\pushoutcorner}[1][dr]{\save*!/#1-1.2pc/#1:(-1,1)@^{|-}\restore}
+\newcommand{\pushoutcornerbis}[1][dr]{\save*!/#1-2.2pc/#1:(-1,1)@^{|-}\restore}
+\newcommand{\states}{\mathbb{Q}}
+\newcommand{\localstates}[1][A]{\states_{#1}}
+\newcommand{\labels}{\mathbb{L}}
+\newcommand{\locallabels}[1][A]{\labels_{#1}}
+\newcommand{\freesymbol}{\dashv}
+\newcommand{\eg}{e.~g.}
+\newcommand{\init}[1][\tau]{\textrm{fst}(#1)}
+\newcommand{\final}[1][\tau]{\textrm{last}(#1)}
+\newcommand{\compose}{\smallfrown}
+\newcommand{\transitionsystemwoparentheses}{\mathcal{Q}_0,T}
+\newcommand{\transitions}[1][X]{T_{#1}}
+\newcommand{\transitionsystem}{(\transitionsystemwoparentheses)}
+\newcommand{\transitionsystemprim}{(\mathcal{Q}'_0,T')}
+\newcommand{\transitionsystems}[1][\states,\labels]{\mathbb{T}_{#1}}
+\newcommand{\traces}[1][\states,\labels]{\mathcal{T}^{\star}_{#1}}
+\newcommand{\gammatransitionsystem}[1][\states,\labels]{\gamma_{#1}}
+\newcommand{\alphatransitionsystem}[1][\states,\labels]{\alpha_{#1}}
+\newcommandtwoopt{\concreteendotransitionsystem}[2][\states,\labels][\transitionsystemwoparentheses]{\mathbb{F}_{#2}}
+\newcommandtwoopt{\abstractendotransitionsystem}[2][\states,\labels][\transitionsystemwoparentheses]{\alphacomposite \circ \concreteendotransitionsystem[#1][#2] \circ \gammacomposite}
+\newcommandtwoopt{\abstractendotype}[2][\states,\labels][\transitionsystemwoparentheses,A]{\mathbb{F}^{\sharp}_{#2}}
+\newcommandtwoopt{\macroendo}[2][\states,\labels,\states^{\sharp}][\mathcal{Q}_0,T^{\sharp}]{\mathbb{G}^{\sharp}_{#2}}
+\newcommandtwoopt{\macroendok}[2][\states,\labels,\states^{\sharp}][\mathcal{Q}_0,T^{\sharp}]{\mathbb{G}^{\sharp(k)}_{#2}}
+\newcommandtwoopt{\macroendol}[2][\states,\labels,\states^{\sharp}][\mathcal{Q}_0,T^{\sharp}]{\mathbb{G}^{\sharp(l)}_{#2}}
+\newcommand{\lfp}[1]{\textit{lfp}\;#1}
+\newcommand{\alphatraceset}{\alphacomposite}%}\alpha_{\wp(\mathcal{T}^\star)}}
+\newcommand{\gammatraceset}{\gammacomposite}%{\gamma_{\wp(\mathcal{T}^\star)}}
+\newcommand{\alphacomposite}{\alpha_{\pi}}
+\newcommand{\gammacomposite}{\gamma_{\pi}}
+
+\newcommand{\macrostates}{\states^{\sharp}}
+\newcommand{\gammamacro}{\Gamma_{\states,\states^{\sharp}}}
+\newcommand{\gammamacrotransitions}{\Gamma'_{\states,\states^{\sharp}}}
+\newcommand{\test}[1][r,n]{\textsc{test}(#1)}
+\newcommand{\modif}[1][r,n]{\textsc{mod}(#1)}
+\newcommand{\gammamacrotransitionsystem}{\Gamma_{\transitionsystemwoparentheses,\states^{\sharp}}}
+\renewcommand{\frame}[2][\lambda]{\textsc{frame}_{#1}(#2)}
+
+\setlength{\belowcaptionskip}{-8pt}
+\addtolength{\abovecaptionskip}{-3pt}
+%\setlength{\floatsep}{5pt}
+%\setlength{\textfloatsep}{18.0pt plus 2.0pt minus 4.0pt}
+
+\newcommand{\beforesection}{\vspace*{-4pt}}
+\renewcommand{\beforesection}{}
+
+\pagestyle{plain}
+%\long\def\figwindownonum[#1,#2,#3,#4] {% \begin{figwindownonum}
+%  \begin{window}[#1,#2,{#3},{\centering#4\par}] }
+%\def\endfigwindownonum{\end{window}}% \end{figwindownonum}
+
+\author{J{\'e}r{\^o}me Feret\inst{1} \and  Kim L\'y Quy\^en\inst{1}}
+
+\title{Local Traces: an Over-approximation of the Behaviour of the
+  Proteins in Rule-based Models\thanks{This material is based upon
+works partially sponsored by the Defense Advanced Research Projects Agency (DARPA) and the U. S. Army Research Office under grant number W911NF-14-1-0367,  and by the ITMO Plan Cancer 2014. The views, opinions, and/or findings contained in this article are those of the authors and should not be interpreted as representing the official views or policies, either expressed or implied, of DARPA, the U. S. Department of Defense, or ITMO.}}
+
+\institute{DI-ENS  (INRIA/{\'E}NS/CNRS/PSL$^\star$), Paris, France   \\ \email{feret@ens.fr}, \email{quyen@di.ens.fr}}
+
+
+\begin{document}
+
+\maketitle
+
+\vspace*{-8pt}
+
+\begin{abstract}
+Thanks to rule-based modelling languages, we can assemble
+large sets of mechanistic protein-protein interactions within
+integrated models. Our goal would be to understand how the behaviour
+of these systems emerges from these low-level interactions. Yet this
+is a quite long term challenge and it is desirable to offer intermediary levels of abstraction, so as to get a better
+understanding of the models and to increase our confidence within our mechanistic assumptions. %To this extend, static analysis can be used to derive various abstractions of the semantics, each of them offering new perspectives on the models.
+
+In this paper, we propose an abstract interpretation of the behaviour of each protein, in isolation.
+Given a model written in Kappa, this abstraction computes for each kind of protein a transition system that describes which conformations this protein can take and how a protein can pass from one conformation to another one. Then, we use simplicial complexes to abstract away the interleaving order of the transformations between conformations that commute. As a result, we get a compact summary of the potential behaviour of each protein of the model.
+\end{abstract}
+
+%\vspace*{-8pt}
+
+\beforesection
+
+\section{Introduction}
+
+\beforesection
+
+Thanks to rule-based modelling languages, as Kappa, one can model accurately
+the biochemical interactions between proteins involved for instance in signalling pathways, without abstracting away \emph{a priori}, when they are available, the mechanistic details about these interactions. For example, one can describe
+faithfully the formation of dimmers, scaffold proteins, and the phosphorylation of proteins on multiple sites, in a very compact way. Yet, understanding how the behaviour of the systems may emerge from these interactions remains a challenge.
+Moreover, when models become large, no matter they have been humanly written, or automatically assembled from the literature, as suggested in \cite{DARPA}, it becomes crucial to get some automatic tools to understand the content of the models and to check that what is modelled matches with what the modeller has in mind.
+
+We use the abstract interpretation framework \cite{Cousot1977,Cousot1979} to  systematically derive automatic static analyses for Kappa models.  %Each static analysis  offers new perspectives on models.
+Applications range from model debugging, to the abstraction of complex properties offering new insights to investigate the system overall behaviour. In this paper, we propose to study the behaviour of each protein in isolation. Starting from a formal definition of the trace semantics, we collect the behaviour of each kind of protein independently, and summarise
+the potential steps to reach these conformations within a transition system.
+When  proteins have too many interaction sites, it is crucial to take benefit of     the potential independence between some conformation changes in some
+protein states. Taking inspiration from simplicial complexes \cite{DBLP:conf/concur/FajstrupGR98}, we introduce the notion of macrotransition systems, in which the behaviour of different subsets of sites can be described independently, abstracting away the potential interleaving between their
+behaviour. The result is a scalable and convenient way to visualise both the different conformations that each protein may take and the causal relations among the different conformation changes.
+
+
+\keep{\extendedversion}{Our framework is integrated in an open-source static analyser \cite{KaSim}.}
+
+\paragraph{Related works.}
+A qualitative analysis is proposed in \cite{Feret-ICCMSE2007,DanosEtAl-VMCAI08}. This abstraction captures all the conformations an agent may take in a Kappa model. In the present paper, we go further and compute, for each agent, a transition system that describes the causal relationships among its
+potential conformational changes.
+
+Causality plays an important role in the understanding and the
+verification of concurrent systems, as found in Systems Biology.
+Several frameworks are available to study and understand causality,
+and to reduce the combinatorial complexity of the models, by exploiting
+pair of commutative transitions.
+Partial order reduction is broadly used in model checking  \cite{DBLP:books/sp/Godefroid96}. It consists in restricting the transitions of a concurrent system so as to force its computation  to follow a canonical order for the interleaving of commutative transitions.
+Event structures \cite{DBLP:conf/ac/Winskel86} focus on the
+causal relations between events in a concurrent system.
+In  \cite{DBLP:conf/fsttcs/DanosFFHH12}, they provide a compact description of trace samples, in which the events which are not necessary, are discarded. Yet, it is worth noting that these discarded events may have a kinetics impact. An application of event structures in static analysis can be found in \cite{CHJPS14-CMSB}. Since they focus on accumulating the effect of causally related transformations, event structures somehow obfuscate the notion of states. Our notion of macrotransition systems is inspired from simplicial complexes.
+Simplicial complexes can be used for describing concurrent systems up to the interleaving order of commutative transitions \cite{DBLP:conf/concur/FajstrupGR98}. They describe the state of the system as a point moving along a geometrical object, in which commutative transitions  are denoted by higher dimension faces. Our formalism offers a convenient compact abstraction of all the potential conformation changes of a protein, without discarding any transition.
+
+
+\paragraph{Outline. }
+In Sect.~\ref{sec:casestudies}, we introduce two case studies to motivate our framework. In Sect.~\ref{sec:kappa}, we describe Kappa.  In Sect.~\ref{sec:traces}, we define its finite trace semantics, that we
+abstract in Sect.~\ref{sec:localtraces}, by  over-approximating the behaviour of each kind of agent thanks to \emph{local} transition systems. Lastly in Sect.~\ref{sec:macro}, we explain how to abstract away the interleaving order of the transitions that commute in these local transition systems.
+
+
+
+\section{Case studies}
+\label{sec:casestudies}
+
+\beforesection
+
+So as to motivate our goal, we introduce two models as case studies.
+\begin{figure}[t]
+\begin{minipage}{\linewidth}
+\subfigure[ligand/receptor binding]{%
+\label{fig:dimmer:rules:a}\begin{minipage}{0.5\linewidth}
+\hfill\incbox{0.88cm}{4.62cm}{generated_pictures/e+r.pdf}\hfill\mbox{}
+\end{minipage}}
+\subfigure[ligand/receptor unbinding]{%
+\label{fig:dimmer:rules:b}\begin{minipage}{0.5\linewidth}
+\hfill\incbox{0.92cm}{4.83cm}{generated_pictures/e++r.pdf}\hfill\mbox{}
+\end{minipage}}
+
+\subfigure[receptor symmetric binding]{%
+\label{fig:dimmer:rules:c}
+\begin{minipage}{0.5\linewidth}
+\hfill\incbox{0.92cm}{5.75cm}{generated_pictures/r+r_cr.pdf}\hfill\mbox{}
+\end{minipage}}
+\subfigure[receptor symmetric unbinding]{%
+\label{fig:dimmer:rules:d}
+\begin{minipage}{0.5\linewidth}
+\hfill\incbox{1.16cm}{5.12cm}{generated_pictures/r++r_cr.pdf}\hfill\mbox{}
+\end{minipage}}
+
+\subfigure[receptor asymmetric binding]{%
+\label{fig:dimmer:rules:e}
+\begin{minipage}{0.5\linewidth}
+\hfill\incbox{1.16cm}{4.69cm}{generated_pictures/r+r_cn.pdf}\hfill\mbox{}
+\end{minipage}}
+\subfigure[receptor asymmetric unbinding]{%
+\label{fig:dimmer:rules:f}
+\begin{minipage}{0.5\linewidth}
+\hfill\incbox{1.16cm}{4.69cm}{generated_pictures/r++r_cn.pdf}\hfill\mbox{}
+\end{minipage}}
+\end{minipage}
+\caption{Rules for dimmer formation.}
+\label{fig:dimmer:rules}
+\end{figure}
+
+\begin{figure}[t]
+\scalebox{\scalefactor}{\begin{minipage}{\linewidth}
+\begin{equation*}
+\xymatrix@C=0.9cm@R=0.1cm{
+&&&& \incbox{1.20cm}{1.20cm}{generated_pictures/LbCRbCbNf.pdf}
+\ar@/_{0.5pc}/@{->}[dl]_{R/int}
+\cr
+\ar@{->}[r]^(0.3){\text{init}} & \incbox{1.16cm}{1.06cm}{generated_pictures/LfCRfCfNf.pdf}
+\ar@/_{0.5pc}/@{->}[r]_{E.R} & \incbox{1.16cm}{1.13cm}{generated_pictures/LbCRfCfNf.pdf}
+\ar@/_{0.5pc}/@{->}[r]_{R.R}
+\ar@/_{0.5pc}/@{->}[l]_{E/R} & \incbox{1.20cm}{1.13cm}{generated_pictures/LbCRbCfNf.pdf}
+\ar@/_{0.5pc}/@{->}[dr]_{R.int}
+\ar@/_{0.5pc}/@{->}[ur]_{R.int}
+\ar@/_{0.5pc}/@{->}[l]_{R/R}\cr
+&&&& \incbox{1.23cm}{1.13cm}{generated_pictures/LbCRbCbNf.pdf}
+\ar@/_{0.5pc}/@{->}[ul]_{R/int}
+\cr}\end{equation*}\end{minipage}}
+\caption{The local transition system of membrane receptors.}
+\label{fig:dimmer:localtrans}
+\end{figure}
+
+The first model describes the formation of some dimmers. Two kinds of proteins are involved: ligands and membrane receptors. When activated by ligands, receptors can form stable dimmers, as described by the means of the interaction rules in Fig.~\ref{fig:dimmer:rules}.  We are interested in one particular binding site in ligand proteins, and in four sites in receptor proteins.  Ligand proteins are depicted as circles, whereas receptor proteins are depicted as rectangles. Their binding sites are drawn as smaller circles.
+ Some sites are connected pair-wisely. For the others, we use the symbol '$\freesymbol$' to specify a free site and the symbol '$\bound{}$' to specify a site that is bound to an unspecified site.   By convention, the site alone on its side in a receptor protein is the one that can bind to a ligand protein; the three sites on the other side can form bonds with other receptors
+ (their order  matters).
+
+Let us now give more details about the interactions between these proteins.  A ligand protein and a receptor protein may bind to each other provided that the sites that are dedicated to this binding are both free (\eg~see Fig.~\ref{fig:dimmer:rules:a}), or detach from each other, provided that the receptor protein is not yet involved in a dimmer (\eg~see Fig.~\ref{fig:dimmer:rules:b}). Two activated receptor proteins  can form a symmetric bond by connecting their respective top-most site (\eg~see Fig.~\ref{fig:dimmer:rules:c}), or break this bond unless an asymmetric bond has been formed already (\eg~see Fig.~\ref{fig:dimmer:rules:d}). To gain stability, a dimmer with a symmetric link can form an asymmetric one by connecting one of its free site in the first receptor protein to the free site of the other kind in the second receptor protein  (\eg~see Fig.~\ref{fig:dimmer:rules:e}), or break this connection (\eg~see Fig.~\ref{fig:dimmer:rules:f}).
+
+Writing interaction rules can be error prone. Especially, which amount of information should be put in rules, is often not so clear. So as to gain confidence in our modelling process, we propose to compute, for each kind of protein, a \emph{local} transition system.
+The goal is to abstract the different conformations that each protein may take, and how a given protein may pass from one conformation to another one. As an example, the local transition system for receptor proteins is given in Fig.~\ref{fig:dimmer:localtrans} (there are two transitions for the  rule $R/Int$, since it operates differently  on the  first and on the second receptort of its left hand side; the same remark holds for the rule $R.Int$). We claim that it provides a helpful summary of the effect of the rules on the behaviour of each protein instance.
+
+\newcommand{\heightrprotein}{0.99cm}
+\newcommand{\heightrproteinbottom}{1.06cm}
+\newcommand{\heightrproteinboth}{1.09cm}
+\newcommand{\heightrproteintop}{\heightrprotein}
+%\newcommand{\widthprotein}{2.40cm}
+\newcommand{\widthrproteinright}{2.40cm}
+\newcommand{\widthrproteinleft}{\widthrproteinright}
+\newcommand{\widthrproteinboth}{2.72cm}
+
+\newcommand{\heightprotein}{\heightrproteinboth}
+\newcommand{\widthprotein}{0.46cm}
+\newcommand{\widthproteinright}{0.64cm}
+\newcommand{\widthproteinleft}{\widthproteinright}
+\newcommand{\widthproteinboth}{0.81cm}
+
+\newcommand{\heightdimmer}{1.98cm}
+\newcommand{\heightdimmerbottom}{2.01cm}
+
+\newcommand{\embedwidth}{2.22cm}
+\newcommand{\embedheight}{2.01cm}
+
+\newcommand{\widthbetaembed}{2.22cm}
+\newcommand{\heightbetaembed}{1.16cm}
+
+\begin{figure}[t]
+\scalebox{\scalefactor}{\begin{minipage}{0.711\linewidth}
+\subfigure[$a_1$ activation]{%
+\label{fig:protein:rule1}
+\begin{minipage}{0.49\linewidth}
+\hfill\incbox{\heightrproteinbottom}{\widthrproteinleft}{generated_pictures/a1+.pdf}\hfill\mbox{}
+\end{minipage}}
+\subfigure[$a_1$ deactivation]{%
+\label{fig:protein:rule2}
+\begin{minipage}{0.49\linewidth}
+\hfill\incbox{\heightrproteinbottom}{\widthrproteinleft}{generated_pictures/a1++.pdf}\hfill\mbox{}
+\end{minipage}}
+
+\subfigure[$b_1$ activation]{%
+\label{fig:protein:rule3}
+\begin{minipage}{0.49\linewidth}
+\hfill\incbox{\heightrproteinbottom}{\widthrproteinleft}{generated_pictures/b1+.pdf}\hfill\mbox{}
+\end{minipage}}
+\subfigure[$b_1$ deactivation]{%
+\label{fig:protein:rule4}
+\begin{minipage}{0.49\linewidth}
+\hfill\incbox{\heightrproteintop}{\widthrproteinleft}{generated_pictures/b1++.pdf}\hfill\mbox{}
+\end{minipage}}
+
+\subfigure[$a_2$ activation]{%
+\label{fig:protein:rule5}
+\begin{minipage}{0.49\linewidth}
+\hfill\incbox{\heightrproteinbottom}{\widthrproteinright}{generated_pictures/a2+.pdf}\hfill\mbox{}
+\end{minipage}}
+\subfigure[$a_2$ deactivation]{%
+\label{fig:protein:rule6}
+\begin{minipage}{0.49\linewidth}
+\hfill\incbox{\heightrproteinboth}{\widthrproteinright}{generated_pictures/a2++.pdf}\hfill\mbox{}
+\end{minipage}}
+
+\subfigure[$b_2$ activation]{%
+\label{fig:protein:rule7}
+\begin{minipage}{0.49\linewidth}
+\hfill\incbox{\heightrproteinbottom}{\widthrproteinright}{generated_pictures/b2+.pdf}\hfill\mbox{}
+\end{minipage}}
+\subfigure[$b_2$ deactivation]{%
+\label{fig:protein:rule8}
+\begin{minipage}{0.49\linewidth}
+\hfill\incbox{\heightrproteintop}{\widthrproteinright}{generated_pictures/b2++.pdf}\hfill\mbox{}
+\end{minipage}}
+\end{minipage}
+\begin{minipage}{0.40\linewidth}
+\subfigure[binding]{%
+\label{fig:protein:rule9}
+\begin{minipage}{0.99\linewidth}
+\hfill\incbox{2.01cm}{2.82cm}{generated_pictures/e+.pdf}\hfill\mbox{}
+\end{minipage}}
+\subfigure[unbinding]{%
+\label{fig:protein:rule10}
+\begin{minipage}{0.99\linewidth}
+\hfill\incbox{2.12cm}{2.08cm}{generated_pictures/e++.pdf}\hfill\mbox{}
+\end{minipage}}
+\end{minipage}}
+\caption{Rules for the protein with four phosphorylation sites.}
+\label{fig:protein:rules}
+\end{figure}
+
+\begin{figure}[t]
+\scalebox{\scalefactor}{\begin{minipage}{1.11\linewidth}\begin{equation*}
+\hspace*{1cm}\xymatrix@C=0.7cm@R=0.0cm{
+& & & & \incbox{\heightprotein}{\widthproteinright}{generated_pictures/cudpef.pdf}\ar@/_{0.5pc}/@{->}[dr]_{\text{\site{a}{}{}}^{+}_2}\ar@/_{0.5pc}/@{->}[dl]_{\text{\site{b}{}{}}^{-}_2} & & & & & & & \cr
+& & & \incbox{\heightprotein}{\widthproteinright}{generated_pictures/cuduef.pdf}\ar@/_{0.5pc}/@{->}[dr]_{\text{\site{a}{}{}}^+_2} & &\incbox{\heightprotein}{\widthproteinright}{generated_pictures/cpdpef.pdf}\ar@/_{0.5pc}/@{->}[ul]_{\text{\site{a}{}{}}^-_2}\ar@/_{0.5pc}/@{->}[dl]_{\text{\site{b}{}{}}^-_2}
+ & & & & & & \cr
+\ar@{->}[r]^(0.3){\text{init}} &
+\incbox{\heightprotein}{\widthproteinboth}{generated_pictures/aubucuduef.pdf}\ar@{<.}[r]  &  \ar@{.>}[ru]\ar@{.>}[rd] &&  \incbox{\heightprotein}{\widthproteinright}{generated_pictures/cpduef.pdf}\ar@/_{0.5pc}/@{->}[ur]_{\text{\site{b}{}{}}^+_2}\ar@/_{0.5pc}/@{->}[ul]_{\text{\site{a}{}{}}^-_2}& &  \ar@{.>}[lu] \ar@{.>}[ld]\ar@{.>}[r] & \incbox{\heightprotein}{\widthproteinboth}{generated_pictures/apbpcpdpef.pdf}\ar@/_{0.5pc}/@{->}[r]_{\agent{P}{}.\agent{K}{}} & \incbox{\heightprotein}{\widthproteinboth}{generated_pictures/apbpcpdpeb.pdf}\ar@/_{0.5pc}/@{->}[l]_{\agent{P}{}/\agent{K}{}} \cr
+& & & \incbox{\heightprotein}{\widthproteinleft}{generated_pictures/aubuef.pdf}
+\ar@/_{0.5pc}/@{->}[r]_{\text{\site{a}{}{}}^{+}_1}
+      &\incbox{\heightprotein}{\widthproteinleft}{generated_pictures/apbuef.pdf}\ar@/_{0.5pc}/@{->}[r]_{\text{\site{b}{}{}}^{+}_1}
+      \ar@/_{0.5pc}/@{->}[l]_{\text{\site{a}{}{}{}}^{-}_1}
+      &\incbox{\heightprotein}{\widthproteinleft}{generated_pictures/apbpef.pdf}\ar@/_{0.5pc}/@{->}[l]_{\text{\site{b}{}{}}^{-}_1}
+ & & & & & & & &\cr
+}
+\end{equation*}\end{minipage}}
+\caption{Local transition system for the protein with four phosphorylation sites.}
+\label{fig:protein:localtrans}
+\end{figure}
+
+
+When proteins have too many interaction sites, we can no longer describe extensively their sets of potential conformations. Our second model deals with a protein with four phosphorylation sites and a single binding site. The lower left  (resp.~lower right) site  can be phosphorylated without any condition (\eg~see Figs.~\ref{fig:protein:rule1} and \ref{fig:protein:rule5}). The upper left (resp.~upper right) site can get phosphorylated, if the lower left (resp.~lower right) site is still phosphorylated (\eg~see Fig.~\ref{fig:protein:rule3} and \ref{fig:protein:rule7}). When the four sites are all phosphorylated, the conformation of the protein changes which reveals the binding site. Then the protein can bind to another kind of protein (\eg~see Fig.~\ref{fig:protein:rule9}). This bond can be released with no condition (\eg~see Fig.~\ref{fig:protein:rule10}).  Phosphorylated sites can be dephosphorylated under the following conditions:
+as long as a protein is bound, none of its site can be dephosphorylated;
+as long as the upper left site is phosphorylated, the lower left site cannot be dephosphorylated (\eg~see Figs.~\ref{fig:protein:rule2}, \ref{fig:protein:rule4}, \ref{fig:protein:rule6}, and \ref{fig:protein:rule8}).
+
+We notice that, in a protein instance,  the potential transformations of the states of both sites  on the left \emph{commute} with the potential transformations of those of both sites on the right. Thanks to this, we can  describe the transition system between the different conformations of the protein in a more compact way (\eg~see Fig.~\ref{fig:protein:localtrans}). In this transition system, the behaviour of  the pair of sites on the left and of the pair of sites on the right is described as two independent subprocesses.  This description is inspired by simplicial complexes \cite{DBLP:conf/concur/FajstrupGR98}.
+It describes independent processes modulo the interleaving order of their execution.
+
+
+\beforesection
+
+\section{Kappa}
+\label{sec:kappa}
+
+\beforesection
+
+In this section, we describe Kappa and its single push-out (SPO) semantics.
+
+
+Firstly we define the signature of a model.
+\begin{definition}
+\label{def:signature}
+A signature is a tuple $\signaturesymb=\signaturetuple$ where: \begin{inparaenum}\item $\agentname$ is a finite set of agent types, \item $\sitename$ is a finite set of site identifiers, \item $\statename$ is a finite set of internal state identifiers, \item and $\linksite\;:\;\agentname \rightarrow \wp(\sitename)$ and  $\statesite\;:\;\agentname \rightarrow \wp(\sitename)$ are site maps.
+\end{inparaenum}\end{definition}
+
+
+Agent types in $\agentname$ denote agents of interest, as kinds of proteins for instance.
+A site identifier in $\sitename$ represents an identified locus for capability of interactions.
+Each agent type $A\in\agentname$ is associated with a set of sites which can bear an internal state $\statesite(A)$  and a set of sites which can be linked $\linksite(A)$. We assume without any loss of generality that $\linksite(A)\cap\statesite(A)=\emptyset$, for any $A\in\agentname$ and we write $\bothsite(A)$ for the set of sites $\linksite(A)\uplus\statesite(A)$.
+
+\begin{example}%[running example]
+\label{ex:signature}We define the signature for the model in the second case study as
+ $\signaturesymb\bydef\signaturetuple$ where:
+ $\agentname \bydef \{\text{\agent{P}{}},\text{\agent{K}{}}\}$;
+ $\sitename \bydef \{\text{\site{a$_1$}{}{}},\text{\site{a$_2$}{}{}}, \text{\site{b$_1$}{}{}},$ $\text{\site{b$_2$}{}{}}, \text{\site{x}{}{}}\}$;
+ $\statename \bydef \{\circ,\bullet\}$;
+ $\statesite \bydef [\text{\agent{P}{}} \mapsto \{\text{\site{a$_1$}{}{}},\text{\site{a$_2$}{}{}},\text{\site{b$_1$}{}{}},\text{\site{b$_2$}{}{}}\},\text{\agent{K}{}} \mapsto \emptyset]$;
+ $\linksite \bydef [\text{\agent{P}{}}\mapsto \{\text{\site{x}{}{}}\}, \text{\agent{K}{}} \mapsto \{\text{\site{x}{}{}}\}]$.
+  %This is the signature for the model in the second case study,  Sect.~\ref{sec:casestudies}.
+  The agent type \agent{P}{} denotes the first kind of proteins and \agent{K}{} the second one;
+  the site identifier \site{x}{}{} denotes the binding site (both in $P$ and $K$), and the site identifiers $a_1$, $a_2$, $b_1$, $b_2$ denote respectively the lower left, upper left, lower right, and upper right sites in the protein $P$.
+\end{example}
+
+\begin{figure}[t]
+%\begin{minipage}{0.49\linewidth}
+
+\hfill
+\subfigure[$\graphsymb_1$]{%
+\label{fig:gone}
+\scalebox{\scalefactor}{\begin{minipage}{1.5cm}
+\hfill\incbox{\heightdimmer}{\widthprotein}{generated_pictures/g1.pdf}\hfill\mbox{}\smallskip\\
+\end{minipage}}}
+\hfill
+\subfigure[$\graphsymb_2$]{%
+\label{fig:gtwo}
+\scalebox{\scalefactor}{\begin{minipage}{1.5cm}
+  \hfill\incbox{\heightdimmer}{\widthprotein}{generated_pictures/g2.pdf}\hfill\mbox{}\smallskip\\
+\end{minipage}}}
+\hfill\subfigure[$\graphsymb_3$]{%
+\label{fig:gthree}
+\scalebox{\scalefactor}{\begin{minipage}{1.5cm}
+  \hfill\incbox{\heightdimmerbottom}{\widthproteinboth}{generated_pictures/g3.pdf}\hfill\mbox{}\smallskip\\
+\end{minipage}}}
+\hfill\subfigure[The embedding $f\;:\;\graphsymb_1\rembedding{} \graphsymb_3$]{%
+\label{fig:embedding}
+\scalebox{\scalefactor}{\begin{minipage}{5.5cm}
+\hfill\incbox{\embedheight}{\embedwidth}{generated_pictures/embed.pdf}\hfill\mbox{}\smallskip\\
+\end{minipage}}}\hfill\mbox
+
+\caption{Three site-graphs $\graphsymb_1$, $\graphsymb_2$, and $\graphsymb_3$, and an embedding $f$.}
+\label{fig:kappa}
+\end{figure}
+
+Site-graphs describe both patterns and chemical mixtures.
+Their nodes are typed agents with some sites which can bear internal states and binding states. \begin{definition}\label{def:summary}
+A site-graph is a tuple $\graphsymb=\graphtuple$ where:
+\begin{inparaenum}
+\item $\agents\subseteq \mathbb{N}$ is a finite set of agents,
+\item $\type\;:\;\agents\rightarrow \agentname$ is a function mapping each agent to its type,
+\item $\sites$ is a set of sites such that $\sites\subseteq\{(n,i)\;|\; n\in \agents, i\in\bothsite(\type(n))\}$,
+\item $\links$ is a function between the sets $\{(n,i)\in\sites\;|\;i\in\linksite(\type(n))\}$ and  $\{(n,i)\in\sites\;|\;i\in\linksite(\type(n))\}\cup\ext$, such that for any
+two sites $(n,i),(n',i')\in\sites$, we have $(n',i')=\links(n,i)$ if and only if $(n,i)=\links(n',i')$; \item
+and $\props$ is a function between the sets $\{(n,i)\in\sites\;|\;i\in\statesite(\type(n))\}$ and  $\statename$.
+\end{inparaenum}
+\end{definition}
+
+A site $(n,i)\in\sites$ such that $i\in\statesite(\type(n))$ is called a property site, whereas a site $(n,i)\in\sites$ such that $i\in\linksite(\type(n))$ is called a binding site.
+Whenever $\links(n,i)=\free$, the binding site $(n,i)$ is free.
+Various levels of information can be given about the sites that are bound.
+Whenever $\links(n,i)=\bound{}$, the binding site $(n,i)$ is bound to an unspecified site.
+Whenever $\links(n,i)=(n',i')$ (and hence $\links(n',i')=(n,i)$), the sites $(n,i)$ and $(n',i')$ are bound together.
+
+For a site-graph $\graphsymb$, we write as $\agents[\graphsymb]$ its set of agents, $\type[\graphsymb]$ its typing function, $\sites[\graphsymb]$ its set of sites, $\links[\graphsymb]$ its set of links, and $\props[\graphsymb]$ its set of the internal states.
+
+A mixture is a site-graph in which the state of each site in each agent is documented. Formally, a site-graph $\graphsymb$ is a chemical mixture, if and only if, $\sites[\graphsymb]=\{(n,i)\;|\;n\in\agents[\graphsymb],\;i\in\bothsite(\type[\graphsymb](n))\}$.
+
+
+\begin{example}%[running example]
+Three site-graphs $\graphsymb_1$, $\graphsymb_2$, and $\graphsymb_3$ are drawn in Figs.~\ref{fig:gone}, \ref{fig:gtwo}, and \ref{fig:gthree}. For the sake of brevity, we only give the explicit definition of the first one:
+%\begin{enumerate}
+%\item
+\begin{inparaenum}
+\item $\agents[\graphsymb_1]=\{1,2\}$,
+\item $\type[\graphsymb_1]=[1 \mapsto \text{\agent{P}{}},\;2 \mapsto \text{\agent{K}{}}]$,
+\item $\sites[\graphsymb_1]=\{(1,\text{\site{x}{}{}}),(2,\text{\site{x}{}{}})\}$,
+\item $\links[\graphsymb_1]=[(1,\text{\site{x}{}{}}) \mapsto (2,\text{\site{x}{}{}}), (2,\text{\site{x}{}{}}) \mapsto (1,\text{\site{x}{}{}})]$,
+\item $\props[\graphsymb_1]=[]$;
+\end{inparaenum}
+%\item \begin{inparaenum}
+%\item $\agents[\graphsymb_2]=\{1,2\}$,
+%\item $\type[\graphsymb_2]=\type[\graphsymb_1]$,
+% \item $\sites[\graphsymb_2]=\sites[\graphsymb_1]$,  \\
+% \item $\links[\graphsymb_2]=[(1,\text{\site{x}{}{}}) \mapsto \freesymbol, (2,\text{\site{x}{}{}}) \mapsto \freesymbol]$,
+% \item $\props[\graphsymb_2]=[]$;
+% \end{inparaenum}
+%\item \begin{inparaenum}
+%\item $\agents[\graphsymb_3]=\{1,2\}$,
+%\item $\type[\graphsymb_3]=\type[\graphsymb_1]$,\\
+% \item $\sites[\graphsymb_3]=\{(1,\text{\site{x}{}{}}),(1,\text{\site{a$_1$}{}{}}),(1,\text{\site{a$_2$}{}{}}),(1,\text{\site{b$_1$}{}{}}),(1,\text{\site{b$_2$}{}{}}),
+% (2,\text{\site{x}{}{}})\}$,
+%  \item $\links[\graphsymb_3]=\links[\graphsymb_1]$,\\
+% \item $\props[\graphsymb_3]=[\text{\site{a$_1$}{}{}}\mapsto \bullet, \text{\site{a$_2$}{}{}}\mapsto \bullet, \text{\site{b$_1$}{}{}}\mapsto \bullet, \text{\site{b$_2$}{}{}}\mapsto \bullet,]$.
+% \end{inparaenum}
+%\end{enumerate}
+ %are graphically described in Figs.~\ref{fig:gone}, \ref{fig:gtwo}, and \ref{fig:gthree}.
+ Among these three site-graphs, we notice that only  $\graphsymb_3$ is a chemical mixture.
+\end{example}
+
+%\subsection{Embeddings}
+
+Two site-graphs can be related by structure-preserving injective functions, which are called embeddings. the notion of embedding is defined as follows:
+\begin{definition}%[embedding]
+ An \emph{embedding} $h\;:\;G\;\rembedding H$ between two site-graphs $G$ and $H$ is a function of agents $h\;:\;\agents[G]\rightarrow \agents[H]$ satisfying,
+for all agent identifiers $m$, $n\in\agents[G]$, for all site identifiers $i\in\bothsite(\type[G](n))$, $i'\in\bothsite(\type[G](n'))$,
+and for all internal state identifier $\iota\in\statename$: \begin{inparaenum}
+\item if $m\neq n$,  then $h(m)\neq h(n)$;
+\item $\type[G](n) = \type[H](h(n))$;
+\item if $(n,i)\in\sites[G]$, then $(h(n), i)\in\sites[H]$;
+\item if $\links(n,i)=(n',i')$, then $\links(h(n),i)=(h(n'),i')$;
+\item if $\links(n,i)=\free$, then $\links(h(n),i)=\free$;
+\item if $\links(n,i)=\bound{}$, then $\links(h(n),i)\in\{\bound{}\}\cup\sites[H]$;
+\item if $\props(n,i)=\iota$, then $\props(h(n),i)=\iota$.
+\end{inparaenum}
+\end{definition}
+
+\begin{example}%[running example]
+An embedding between
+$\graphsymb_1$ and $\graphsymb_3$, is shown in Fig.~\ref{fig:embedding}.
+\end{example}
+
+
+
+Two embeddings respectively between two site-graphs $E$ and $F$, and between the site-graph $F$ and a site-graph $G$, compose in the usual way (and form an embedding between the site-graphs $E$ and $G$). Moreover, two site-graphs $E$ and $F$, such that there exists an embedding between $E$ and $F$, and an embedding between $F$ and $E$, are said isomorphic. An embedding between two isomorphic site-graphs, is called an isomorphism.
+Given three site-graphs $L$, $R$, and $D$, a couple of embeddings respectively between the site-graphs $D$ and $L$, and between the site-graphs $D$ and $R$, is called a span %of embeddings
+between %the site-graphs
+$L$ and $R$. Besides, a couple of embeddings respectively between the site-graphs $L$ and $D$, and between the site-graphs $R$ and $D$
+is called a cospan %of embeddings
+between %the site-graphs
+$L$ and $R$.
+
+\newcommand{\pullbacklong}{%
+\begin{figure}[t]
+  \subfigure[Pull-back.]{\label{fig:pullback}
+  \begin{minipage}{0.28\linewidth}
+    \begin{equation*}\xymatrix@C=3mm@R=3mm{
+    && L \ar@{^{(}->}^{\phi_1}[rr] &&
+    && \\\\
+    && \pushoutcorner[ru]\ar@{_{(}->}^{\psi_2}[rr]\ar@{^{(}->}^{\psi_1}[uu]&&\ar@{_{(}->}_{\phi_2}[uu] R^{\;}
+    \\
+    \;^{\;}\ar@/^{1.pc}/@{^{(}->}^{\psi'_1}[rruuu]\ar@{^{(}.>}|{!}^{h}[rru]\ar@/_{1.pc}/@{_{(}->}^{\psi'_2}[rrrru]^{}
+    }\end{equation*}\end{minipage}}
+    \hfill\subfigure[Composition between a span and an embedding.]{%
+    \label{fig:composition:copan-embedding}\begin{minipage}{0.32\linewidth}\vspace*{-2mm}\begin{equation*}
+      \xymatrix@C=4mm@R=4mm{%
+      &&\\\\
+      \ar@{^{(}->}^{\phi_1}[uu]\ar@{_{(}->}_{\phi_2}[rr] && \ar@{_{(}->}_{h}[rr]&&\\
+      }\end{equation*}\vspace*{1pt}\end{minipage}}
+      \hfill\subfigure[Composition between an embedding and a span]{%
+      \label{fig:composition:embedding-span}\begin{minipage}{0.32\linewidth}\vspace*{-2mm}
+        \begin{equation*}
+        \xymatrix@C=4mm@R=4mm{%
+        \ar@{_{(}->}^{h}[rr] && \\\\
+        \ar@{^{(}->}^{\psi_1}[uu]\ar@{_{(}->}_{\psi_2}[rr]\pushoutcorner[ur] && \ar@{_{(}->}_{\phi_1}[uu]\ar@{_{(}->}_{\phi_2}[rr] &&\\
+        }\end{equation*}\vspace*{1pt}\end{minipage}
+      }
+  \caption{Composition of embeddings and spans (and conversely).}
+\end{figure}
+
+Any cospan $(\phi_1,\phi_2)$ of embeddings between two site-graphs $L$ and $R$ is associated with a span $(\psi_1,\psi_2)$ of embeddings between the site-graphs $L$ and $R$, that is defined up to isomorphism by both following properties (\eg~see Fig.~\ref{fig:pullback}): \begin{inparaenum}
+\item $\phi_1\psi_1 = \phi_2\psi_2$, and \item for any span $(\psi'_1,\psi'_2)$  of embeddings such that $\phi_1\psi'_1=\phi_2\psi'_2$, there exists a unique embedding $h$ such that: \begin{inparaenum}\item $\psi'_1 = \psi_1 h$ \item and $\psi'_2 = \psi_2 h$. \end{inparaenum}\end{inparaenum}
+The span $(\psi_1, \psi_2)$ is called the pull-back
+of the cospan $(\phi_1,\phi_2)$. Intuitively, a cospan between the site-graphs $L$ and $R$, formalises a matching relation between the agents of the site-graph $L$ and those of the site-graph $R$. The cospan is a proof that the site-graphs  $L$ and $R$ can be glued together by identifying the agents which are matched this way. Then, the pull-back encodes the biggest common site-graphs that may complete this initial gluing.
+
+A span $(\phi_1,\phi_2)$ and an embedding $h$ compose, provided that the embeddings $\phi_2$ and $h$ compose as well. In such a case, the composition is defined as the span $(\phi_1,h\phi_2)$. Moreover, an embedding $h$ and a span $(\phi_1,\phi_2)$ compose, provided that the pair $(h,\phi_1)$ is a span of embeddings. In such a case, the composition is defined up to isomorphisms as the span of embeddings  $(\psi_1,\phi_2\psi_2)$ where the pair of embeddings  $(\psi_1,\psi_2)$ is a pull-back of the cospan $(\phi_1,\phi_2)$.}
+
+\keep{\pullbackinappendix}{}{\pullbacklong}
+
+
+Transformations between site-graphs are described by rules (\eg~see Figs.~\ref{fig:dimmer:rules} and \ref{fig:protein:rules}).
+For the sake of simplicity, %we only define a fragment of Kappa here. Namely,
+we assume that rules can break and create bonds between sites, and can change the internal states of sites, but we consider neither agent degradation, nor agent creation.
+
+These requirements are formalised in the following definition:
+\begin{definition}
+A \emph{rule} is a  span of embeddings $L \llongembedding[h_L]  D \rlongembedding[h_R] R$ such that:
+\begin{inparaenum}
+\item \label{propi} $\agents[D]=\agents[L]$ and $\agents[D]=\agents[R]$;
+\item \label{propii} for all agents $n\in\agents[D]$, $h_L(n)=n$ and $h_R(n)=n$;
+\item \label{propiii} $\sites[D]=\sites[L]$ and $\sites[D]=\sites[R]$;
+\item \label{propvi} for all sites $(n,i)\in\sites[D]$, if $\links[R](n,i)=\bound{}$, then $\links[L](n,i)=\bound{}$.
+\end{inparaenum}
+\end{definition}
+Since we do consider neither agent creation, nor agent degradation, we can assume that the agents in the left hand side and in the right hand side of a rule are the same (constraint \ref{propi}) and that both embeddings preserve agent identifiers (constraint \ref{propii}). The constraint \ref{propiii} ensures that, in a rule, sites cannot be removed or added.
+Lastly, the constraint \ref{propvi} ensures that, when the binding state of a site is modified, it is not replaced with the state $\bound{}$.
+
+A rule $L \lembedding[]  D \rembedding[] R$ is usually denoted as  $L\actionmap R$\keep{\extendedversion}{ (leaving the two embeddings and the common region implicit)}.
+
+Rules can be applied to site-graphs via an embedding, by the means of a push-out construction.
+
+\begin{figure}[t]
+\subfigure[Push-out.]{%
+\begin{minipage}{0.30\linewidth}
+\begin{equation*}
+\xymatrix@C=3mm@R=3.mm{%
+& &  &\;R'' \\
+L'\;\ar@{-|>}_{r'}[rr]\ar@/^1pc/@{-|>}^{r''}[rrru] && \;R'\pushoutcorner[dl]\ar@{^{(}.>}_{h}|{!}[ru] & \\\\
+L^{\strut}\ar@{-|>}^{r}[rr]\ar@{^{(}->}^{h_{L}}[uu]&& R^{\strut}\ar@{^{(}->}^{h_{R}}[uu]\ar@/_1pc/@{^{(}->}_{h'_{R}}[uuur]  & \\
+}\end{equation*}
+\end{minipage}
+}\hfill%
+\subfigure[Application of the rule $P$/$K$ along the embedding $f$.]{%
+\label{fig:rule_application}
+\begin{minipage}{0.65\linewidth}\hspace*{5mm}%
+\scalebox{\scalefactor}{\begin{minipage}{\linewidth}\begin{equation*}
+{\xymatrix@C=1.5cm@R=1.cm{%
+    \begin{minipage}{2.4cm}
+      \hspace{2mm}\incbox{\widthproteinboth}{\heightdimmerbottom}{generated_pictures/rg3.pdf}
+    \end{minipage}
+    \ar@{-|>}[r] &  \pushoutcornerbis[dl]
+    \begin{minipage}{2.4cm}
+      \hspace{2mm}\incbox{\widthproteinboth}{\heightdimmerbottom}{generated_pictures/rg4.pdf}
+    \end{minipage}
+    \cr
+    \begin{minipage}{2.4cm}
+      \hspace*{2mm}\incbox{\widthprotein}{\heightdimmer}{generated_pictures/rg1.pdf}
+    \end{minipage}
+    \ar@{^{(}->}^{f}[u]
+    \ar@{-|>}^{\text{\agent{P}{}/\agent{K}{}}}[r]
+    &
+    \begin{minipage}{2.4cm}
+      \hspace{2mm}\incbox{\widthprotein}{\heightdimmer}{generated_pictures/rg2.pdf}
+    \end{minipage}\ar@{^{(}->}[u]
+}}\end{equation*}\end{minipage}}
+
+\vspace*{4mm}
+
+\mbox{}
+\end{minipage}
+}\caption{Rule application.}
+\end{figure}
+
+\begin{definition}[\cite{DBLP:conf/fsttcs/DanosFFHH12}]
+\label{defn:refinement}
+Let $r$ be a rule $L \actionmap R$, $L'$ be a site-graph, and $h_L$ be an embedding between the site-graphs $L$ and $L'$. Then, there exists a rule $r'$ between the site-graph $L'$ and a site-graph $R'$ and an embedding $h_R$ between the site-graphs $R$ and $R'$ such that both following properties are satisfied: \begin{inparaenum}
+ \item$h_Rr = r'h_L$; \item for all rule $r''$ between the site-graph $L'$ and a site-graph $R''$  and all embedding $h'_R$ between $R$ and $R''$ such that: $h'_Rr = r''h_L$,
+ there exists a unique embedding $h$ between $R'$ and $R''$ such that $r''=hr' $ and $h_{R''}=hh_{R'}$. \end{inparaenum}
+With these notations, we say that there is a transition from the state $L'$ into the state $R'$ via a computation step with the label $(r,h_L)$, and we write
+$L' \xrightarrow{(r,h_L)} R'$. Moreover, with the same notations, whenever the site-graph $L'$ is a chemical mixture, the site-graph $R'$ is a chemical mixture as well.
+\end{definition}
+
+\keep{\extendedversion}{%
+\keep{\pullbackinappendix}{In Def.~\ref{defn:refinement}, the compositions between a rule and an embedding (in both order) is seen as the composition of two spans of embeddings, and is defined thanks to a pull-back construction (\eg~see  App.~\ref{app:pullback}).}{}}%
+{%
+In Def.~\ref{defn:refinement}, the compositions between rules and embeddings are defined by the the means of a pull-back construction. }
+
+\begin{example}
+\label{ruleapplication}The embedding $f$ between the site-graph $\graphsymb_1$ and the left hand side of the rule $\agent{P}{}/\agent{K}{}$ induces a computation step as described in Fig.~\ref{fig:rule_application}.
+\end{example}
+
+In Kappa, a model $\mathcal{M}$ (over a given signature $\signaturesymb$) is defined as a pair $(\graphsymb_0,\mathcal{R})$
+where: \begin{inparaenum}\item $\graphsymb_0$ is a chemical mixture; \item and $\mathcal{R}$ is a set of rules.
+\end{inparaenum} The chemical mixture $\graphsymb_0$ denotes the initial state. Since we focus only on qualitative properties, we do not associate rules with kinetic rates.
+
+\beforesection
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Trace semantics}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\beforesection
+
+\label{sec:traces}
+In this section, we define the semantics of a model (written in Kappa)  as the set of the traces that is induced by the underlying transition system.
+
+We assume that we are given $\states$ a set of \emph{states} and $\labels$ a set of \emph{labels}. We call a \emph{transition} any triple $(q,\lambda,q')$ in the set $\states\times\labels\times\states$. In Kappa, states are chemical mixtures % which can be written according to the signature $\signaturesymb$
+ whereas transition labels are pairs composed of a rule and an embedding between the left hand side of this rule and a chemical mixture.
+
+
+
+A transition system is given by a set of initial states and a set of transitions, as formalised in the following definition:
+\begin{definition}[Transition system]
+\label{transitionsystem}
+A \emph{transition system} is a pair $(\mathcal{Q}_0,T)$ where:
+\begin{inparaenum}
+  \item $\mathcal{Q}_0 \subseteq \states$; \item $T\subseteq \states\times \labels\times \states$.
+\end{inparaenum}
+\end{definition}
+
+
+We denote as $\transitionsystems$ the set of all the transition systems over $\states$ and $\labels$.
+Transition systems can be ordered by the relation $\sqsubseteq$ that is defined as
+$(Q_0,T)\sqsubseteq (Q'_0, T')$ if and only if \begin{inparaenum}\item $Q_0 \subseteq Q'_0$, \item and $T\subseteq T'$. \end{inparaenum} The pair $(\transitionsystems,\sqsubseteq)$ is indeed a complete lattice. This means that any family $(T_i)_{i\in I}$  of transition systems has a least upper bound, that we denote by $\sqcup \{ T_i \;|\;i\in I\}$ (this way,  \begin{inparaenum}\item for each element $i\in I$, $T_i \sqsubseteq \sqcup \{T_i\;|\;i\in I\}$,
+\item and for any transition system $Y\in\transitionsystems$ such that $T_i \sqsubseteq Y$ for each element $i\in I$, we have $\sqcup \{T_i\;|\;i\in I\} \sqsubseteq Y$).
+\end{inparaenum}
+
+Each model $\mathcal{M}\bydef(\graphsymb_0,\mathcal{R})$ in Kappa is associated with the transition system $(\mathcal{Q}_0,T)$
+where \begin{inparaenum}\item $\mathcal{Q}_0=\{\graphsymb_0\}$; \item and $T$ is the set of the transitions $(L',(r,h_L),R')$ such that
+$L' \xrightarrow{(r,h_L)} R'$ as defined in Def.~\ref{defn:refinement}.
+\end{inparaenum}
+
+Each transition system induces a set of traces. In this paper, we focus on finite traces, that are made of an initial state followed by a (potentially empty) finite sequence of transitions, each of them starting from the state the previous transition had ended in. This is formalised in the following definition:
+\begin{definition}[Finite traces]%
+\label{def:finite_traces}
+A \emph{finite trace} is a pair $\tau=(q'_0,(q_i,\lambda_i,q'_i)_{1\leq i \leq p})$, where $q'_0$ is a state (in $\states$), and $(q_i,\lambda_i,q'_i)_{1\leq i \leq p}$ is a family of transitions (in $\states\times\labels\times\states$),  such that $q'_{i-1}=q_i$ for each integer   $i$ between $1$ and $p$.
+\end{definition}
+
+We denote as $\traces$ the set of all the traces over the sets $\states$ and $\labels$.
+
+With the notations of Def.~\ref{def:finite_traces}, we call the state $q'_0$ (resp.~$q'_p$) the initial (resp.~the final) state of the trace $\tau$ and we denote it as $\init$,  (resp.~as $\final$). When a trace is made of a single  state, we write it as $q$ instead of $(q,())$.
+Besides, any transition $t\bydef(q_{p+1},\lambda_{p+1},q'_{p+1})$ such that the state $q_{p+1}$ is equal to the final state $q'_{p}$ of the trace $\tau$, can be concatenated to the trace $\tau$. In such a case, we write
+$\tau \compose (q_{p+1},\lambda_{p+1},q'_{p+1})$ for the finite trace $(q'_0,(q_i,\lambda_i,q'_i)_{1\leq i \leq p+1})$.
+
+
+
+
+A transition system $\transitionsystem$ induces a set of traces $\gammatransitionsystem\transitionsystem$, that is defined as the set of the traces $(q'_0,(q_i,\lambda_i,q'_i)_{1\leq i \leq p})$ such that: \begin{inparaenum}
+\item the state $q'_0$ belongs to the set $\mathcal{Q}_0$;
+\item and for each integer $i$ between $1$ and $p$, the transition $(q_i,\lambda_i,q'_i)$ belongs to the set $T$.
+\end{inparaenum}
+The set of traces $\gammatransitionsystem\transitionsystem$ can also be defined as the least fix-point of the operator $\concreteendotransitionsystem$ that maps any set of traces $X\in\wp(\traces)$ into the set of traces $\{q\;|\;q\in\mathcal{Q}_0\}\cup\{\tau\compose (q,\lambda,q')\;|\;\tau\in X \wedge \; \final[\tau]=q \wedge \;(q,\lambda,q')\in T\}$.
+The operator $\concreteendotransitionsystem$ is monotonic (that is to say that,
+for any two sets of traces $X,Y\in\wp(\traces)$, if $X\subseteq Y$, then
+$\concreteendotransitionsystem(X)\subseteq\concreteendotransitionsystem(Y)$).
+By \cite{Tarski}, it follows that $\concreteendotransitionsystem$ has a fix-point that is included in any other fix-point.
+We denote this fix-point $\lfp \concreteendotransitionsystem$
+(thus, we have \begin{inparaenum}
+  \item$\lfp{\concreteendotransitionsystem}=\concreteendotransitionsystem(\lfp{\concreteendotransitionsystem})$,
+  \item and for each set $X'\subseteq \wp(\traces)$ such that $X'=\concreteendotransitionsystem(X')$, we have: $\lfp \concreteendotransitionsystem \subseteq X'$ \end{inparaenum}).
+
+Conversely, a set $X\subseteq \traces$ of finite traces can be abstracted by the transition system
+$\alphatransitionsystem(X)$ that is defined as the pair $(\mathcal{Q}_0,T)$ with:
+\begin{inparaenum}
+\item $\mathcal{Q}_0=\{\init\;|\;\tau\in X\}$;
+\item $T = \{t_i|\;\exists (q_0,(t_i)_{1\leq i \leq p})\in X, i\in \llbracket 1,p \rrbracket\}$.
+\end{inparaenum} The pair $(\alphatransitionsystem,\gammatransitionsystem)$ forms a Galois connection between
+the complete lattices  $(\wp(\traces),\subseteq)$ and
+ $(\transitionsystems,\sqsubseteq)$.
+This means that for %any set $X\subseteq \traces$ of finite traces, and
+ any transition system $\transitionsystemprim$, we have
+$\alphatransitionsystem(X)\sqsubseteq \transitionsystemprim$, if and only if,
+$X\subseteq \gammatransitionsystem\transitionsystemprim$.
+It follows (\eg~see \cite{Cousot1979}), that: \begin{inparaenum}\item functions $\alphatransitionsystem$ and $\gammatransitionsystem$ are both monotonic;
+\item the function $\alphatransitionsystem$ maps each set of finite traces to the smallest (for $\sqsubseteq$) transition system which induces this set of traces. % that is to say $\alphatransitionsystem(X)$ is the best abstraction of the set of traces $X$ as a transition system.
+\end{inparaenum}
+
+\beforesection
+
+\section{Local transition systems}
+\label{sec:localtraces}
+
+\beforesection
+
+In Sect.~\ref{sec:traces}, we have associated each model  with a transition system, that describes the set of the finite traces of this model. However, such transition systems are  usually too large to be computed, or even if they could, they are too complex to help understanding the behaviour of the models.
+We propose to simplify these transition systems by focusing on the behaviour of each protein independently, abstracting away  which proteins  are bound together. This abstraction had already been applied in \cite{Feret-ICCMSE2007,DanosEtAl-VMCAI08}, to infer the relationships among the state of sites in protein instances. Here we extend this static analysis to traces.
+
+
+Firstly  we explain how to track the behaviour of each protein independently while forgetting about the bonds between pairs of binding sites.
+For any agent identifier $n\in\mathbb{N}$, we denote by $\beta_{n}$ the function that, when  applied to a site-graph $\graphsymb$ containing an agent with identifier $n$: \begin{inparaenum}\item replaces any bond between two sites by two occurrences of the symbol `$\bound{}$'; \item restricts the site-graph $\graphsymb$  to the agent with identifier $n$; \item renames the  identifier $n$ with  $1$.  \end{inparaenum}
+More formally, the site-graph $\beta_{n}(\graphsymb)$ is defined by:
+\begin{inparaenum}
+\item $\agents[\beta_{n}(\graphsymb)]\bydef\{1\}$;
+\item $\type[\beta_{n}(\graphsymb)]\bydef[1 \mapsto \type[\graphsymb](n)]$;
+\item$\sites[\beta_{n}(\graphsymb)]\bydef\{(1,i)\;|\;(n,i)\in\sites[\graphsymb]\}$;
+\item the function $\links[\beta_{n}(\graphsymb)]$ maps each site
+$(1,i)$ such that $i\in\linksite(\type[\graphsymb](n))$
+and $(n,i)\in\sites[\graphsymb]$, to the symbol `$\free$' whenever
+  $\links[\graphsymb](n,i)=\free$, and to the symbol `$\bound{}$' otherwise; \item the function $\props[\beta_{n}(\graphsymb)]$  maps each site $(1,i)$ such that $i\in\statesite(\type[\graphsymb](n))$
+and $(n,i)\in\sites[\graphsymb]$, to $\props[\graphsymb](n,i)$.
+\end{inparaenum}
+
+\begin{figure}[t]
+%\begin{minipage}{0.49\linewidth}
+
+\hfill
+\subfigure[$\beta_1(\graphsymb_1)$]{%
+\label{fig:abstract_gone}
+\scalebox{\scalefactor}{\begin{minipage}{2cm}
+\hfill\incbox{\heightprotein}{\widthprotein}{generated_pictures/beta_g1.pdf}\hfill\mbox{}\smallskip\\
+\end{minipage}}}\hfill
+\subfigure[$\beta_1(\graphsymb_2)$]{%
+\label{fig:abstract_gtwo}
+\scalebox{\scalefactor}{\begin{minipage}{2cm}
+\hfill\incbox{\heightprotein}{\widthprotein}{generated_pictures/beta_g2.pdf}\hfill\mbox{}\smallskip\\
+\end{minipage}}}\hfill
+\subfigure[$\beta_1(\graphsymb_3)$]{%
+\label{fig:abstract_gthree}
+\scalebox{\scalefactor}{\begin{minipage}{2cm}
+  \hfill\incbox{\heightprotein}{\widthproteinboth}{generated_pictures/beta_g3.pdf}\hfill\mbox{}\smallskip\\
+\end{minipage}}}\hfill
+\subfigure[Embedding $\beta_1(\graphsymb_1)\rembedding \beta_1(\graphsymb_3)$]{%
+\label{fig:abstract_embedding}
+\scalebox{\scalefactor}{\begin{minipage}{5.5cm}\hfill\incbox{\heightbetaembed}{\widthbetaembed}{generated_pictures/beta_embed.pdf}\hfill\mbox{}\smallskip\\
+\end{minipage}}}\hfill\mbox{}
+\caption{Abstraction of the site-graphs $\graphsymb_1$, $\graphsymb_2$, $\graphsymb_3$, and of the embedding $f$.}
+\label{fig:abstract_kappa}
+\end{figure}
+
+\begin{figure}[t]
+\subfigure[Concrete push-out.]{
+\label{fig:concrete-pushout}
+\begin{minipage}{0.26\linewidth}
+\begin{equation*}
+\xymatrix@C=4mm@R=3mm{
+&&&\\
+L'\;\ar@{-|>}_{r'}[rr]\ar@/^1pc/@{-|>}[rrru]
+&& \;R'\pushoutcorner[dl]\ar@{^{(}.>}|(0.55){!}[ru]
+& \\\\
+\;^{\;}\ar@{-|>}^{r}[rr]\ar@{^{(}->}[uu]&& \;^{\;}
+\ar@{_{(}->}[uu]\ar@/_1pc/@{_{(}->}[uuur]
+& \\
+}\end{equation*}
+\end{minipage}}
+\hspace*{0.01\linewidth}
+\subfigure[Abstract push-out.]{%
+\label{fig:abstract-pushout}
+\begin{minipage}{0.33\linewidth}
+\vspace*{-3.5mm}
+
+  \begin{equation*}
+  \xymatrix@C=2.4mm@R=3mm{
+  &&& \\ \beta_{n'}(L')\;\ar@{-|>}_{\beta_{n'}(r')}^(0.74){\sharp}[rr]\ar@/^1pc/@{-|>}^(0.98){\sharp}[rrru]
+  && \;\beta_{n'}(R')\pushoutcorner[dl]\ar@{^{(}.>}|(0.55){!}[ru]
+  & \\\\
+  \ar@{-|>}^(0.92){\sharp}^{\beta_n}[rr]\ar@{^{(}->}[uu]&&
+  \;^{\;}\ar@{_{(}->}[uu]\ar@/_1pc/@{_{(}->}[uuur]
+  & \\
+  }\end{equation*}
+\end{minipage}}
+\hspace*{0.01\linewidth}
+\subfigure[Application of the abstraction of the rule $P$/$K$.]{%} along the embedding $\beta(f)$.]{%
+\label{fig:rule_application_in_the_abstract}
+\begin{minipage}{0.33\linewidth}
+\vspace*{-5mm}
+
+\hspace*{5mm}\scalebox{\scalefactor}{\begin{minipage}{\linewidth}
+%\vspace*{-12mm}
+
+\begin{equation*}
+{\hspace*{-0.6cm}\xymatrix@C=1.5cm@R=0.6cm{%
+    {\begin{minipage}{\widthproteinboth}
+           \incbox{\heightprotein}{\widthproteinboth}{generated_pictures/beta_g3.pdf}
+    \end{minipage}}
+    \ar@{-|>}^(0.8){\sharp}[r]  &  \pushoutcornerbis[dl]
+    {\begin{minipage}{\widthproteinboth}
+       \incbox{\heightprotein}{\widthproteinboth}{generated_pictures/beta_g4.pdf}
+   \end{minipage}}
+    \cr
+      {\begin{minipage}{\widthproteinboth}
+      \hspace*{1mm}\incbox{\heightprotein}{\widthprotein}{generated_pictures/beta_g1.pdf}
+    \end{minipage}}
+    \ar@{^{(}->}[u]    \ar@{-|>}^(0.48){\beta_1(\text{\agent{P}{}/\agent{K}{}})}^(0.8){\sharp}[r]
+    &
+      \hspace*{3mm}{\begin{minipage}{\widthproteinboth}\incbox{\heightprotein}{\widthprotein}{generated_pictures/beta_g2.pdf}
+    \end{minipage}}\ar@{^{(}->}[u]
+}}
+\end{equation*}
+\end{minipage}}
+\end{minipage}}
+\caption{The abstraction of a push-out (in the concrete) is a push-out (in the abstract), and application of rule (in the abstract).}
+\label{fig:abstract-rule-application}
+\end{figure}
+
+\begin{example}%[running example]
+The restriction of the site-graphs $\graphsymb_1$, $\graphsymb_2$, and $\graphsymb_3$ to their agent with identifier $1$, are depicted in Figs.~\ref{fig:abstract_gone}, \ref{fig:abstract_gtwo}, and \ref{fig:abstract_gthree}.
+For instance, the site-graph $\beta_1(\graphsymb_1)$ is equal to the tuple $(\{1\},[1\mapsto P],\{(1,x)\},[(1,x)\mapsto \bound{}],[])$. %; the site-graph  $\beta_1(\graphsymb_2)$ is equal to the tuple $(\{1\},[1\mapsto P],\{(1,x)\},[(1,x)\mapsto \free],[])$;
+%and the site-graph $\beta_1(\graphsymb_3)$ is equal to the tuple $(\{1\},[1\mapsto P],\{(1,x)\},[(1,x)\mapsto \bound],[ a_1 \mapsto \bullet, a_2 \mapsto \bullet, b_1 \mapsto \bullet,  b_2 \mapsto \bullet])$.
+Moreover, the function $[1\mapsto 1]$ induces an embedding between the site-graph $\beta_1(\graphsymb_1)$ and the site-graph $\beta_1(\graphsymb_3)$, as depicted in Fig.~\ref{fig:abstract_embedding}.
+%Lastly, the application of the abstraction of the rule $\agent{P}{}/\agent{K}{}$, on the site-graph $\beta(\graphsymb_1)$ along the embedding $\beta(f)$ is drawn in Fig.~\ref{fig:rule_application_in_the_abstract}.
+\end{example}
+
+For each agent type $A$, we define the set of the local views $\localstates$, for the agents of type $A$, as the set of the site-graphs $\graphsymb$ with only one agent of type $A$ and identifier $1$, that documents the state of all the sites in $\bothsite(A)$ (that is to say such that $\sites[\graphsymb]=\{(1,i)\;|\;i\in\bothsite(A)\})$.
+Besides, we define the set of the local transition labels  $\locallabels$ as the set of pairs $(r,n)$ where $r$ is a rule, and $n$
+is an agent identifier. Intuitively, the local transition label $(r,n)$ denotes the fact that a rule $r$ is applied along an embedding that matches  the agent with identifier $n$ in the left hand side of the rule $r$, to the local view to which we want to apply the rule.
+Given a rule  $r\;:\;L \lembedding D \rembedding R$ and an identifier $n\in\agents[L]$ of an agent in the left hand side $L$ of the rule $r$,
+we define the abstraction $\beta_{n}(r)$ of the rule $r$ as the span
+$\beta_{n}(L) \lembedding \beta_{n}(D) \rembedding \beta_{n}(R)$. In this span, both embeddings are induced by the function $[1\mapsto 1]$.
+The copsan $\beta_{n}(r)$ is not a rule in general, yet it can be applied along any embedding between its left hand side $\beta_{n}(L)$ and a site-graph $L'$ thanks to a push-out construction (\eg~see Fig.~\ref{fig:abstract-rule-application}). %Indeed, starting from a pushout in the concrete (\eg~see Fig.~\ref{fig:concrete-pushout}), in which the left embedding $h_L$ maps the agent with identifier $n$ in the left hand side of the rule, to the agent with identifier $n'$ in the site-graph $L'$, we can apply
+%the abstraction $\beta_n$ to the rule $r$, and the abstraction $\beta_{n'}$ to the rule $r'$, as a result, we get a push-out (the left and right embeddings are both induces by the function $[1\mapsto 1]$).
+In such a case, we write $L'\xrightarrow{(r,n)}{\!\!}^{\sharp} R'$ for the corresponding abstract computation step.
+Moreover, we notice that
+in an abstract computation step $q^{\sharp} \xrightarrow{(r,n)}{\!\!}^{\sharp} q^{\sharp}{}'$ if $q^{\sharp}$ is a local view in $\localstates$, then $q^{\sharp}{}'$ is a local view in $\localstates$ as well.
+
+
+\begin{example}
+The application of the abstraction $\beta_1(\agent{P}{}/\agent{K}{})$ of the rule $\agent{P}{}/\agent{K}{}$ can be applied to the site-graph $\beta_1(\graphsymb_1)$, as drawn in Fig.~\ref{fig:rule_application_in_the_abstract}.
+\end{example}
+
+The application of the function $\beta_{n}$ can be lifted to traces.  Given a trace $\tau\bydef(q'_0,(q_i,(r_i,f_i),q'_i)_{1\leq i \leq p})\in\traces$ and an agent identifier $n\in\agents[q'_0]$, we define the local trace $\beta_{n}(\tau)$ as the trace: $(\beta_n(q'_0),(\beta_n(q_{\sigma(i)}),(r_{\sigma(i)},n_i),\beta_n(q'_{\sigma(i)}{}))_{1\leq i \leq p'})$
+where \begin{inparaenum}
+\item $\sigma_1$, \ldots, $\sigma_{p'}$ is the sequence (in increasing order) of the integers $i$ between $1$ and $p$ such that $\beta_{n}(q_{i}) \neq \beta_{n}(q_{i+1})$;
+\item and for each integer $i$ between $1$ and $p'$, the integer $n_i$ is
+the unique identifier such that the embedding $f_{\sigma_i}$ maps  the agent with identifier $n_i$ in the left hand side of the rule $r_{\sigma_i}$ into the agent with identifier $n$ in the chemical mixture $q_{\sigma_i}$ (there always exists such an integer, otherwise the abstract state would not have been modified).
+\end{inparaenum}
+
+Now we  combine our abstractions to over-approximate the behaviour of each agent  as an independent \emph{local} transition system. The abstraction $\alphatraceset(X)$ of a set of traces $X\subseteq \traces$ is defined as the function mapping  each agent type $A\in\agentname$ into the local   transition system  $\alphatransitionsystem[\localstates,\locallabels](\{\beta_n(\tau) \;|\;\tau\in X,\; n\in\agents[{\init[\tau]}] \;\st \type[{\init[\tau]}](n)=A\})$ (\ie the best over-approximation, as a transition system,  of the set of the local traces that can be associated with an agent of type $A$).
+Conversely, the concretization $\gammatraceset(Y)$ of a function $Y$ between agent types and local transition systems,  is defined as the set of the traces $\tau\in\traces$ such that for each identifier  $n$ of an agent in the initial state ${\init[\tau]}$ of the trace $\tau$, the local trace $\beta_n(\tau)$ belongs to the set $\gammatransitionsystem[\localstates,\locallabels](Y(\type[{\init[\tau]}](n)))$.
+
+ By \cite{Cousot1979}, the function $\abstractendotransitionsystem$ is the best abstract counterpart to the function $\concreteendotransitionsystem$. The function $\abstractendotransitionsystem$ is monotonic and its least fix-point satisfies the inclusion:  $\lfp \concreteendotransitionsystem \subseteq \gammacomposite(\lfp \abstractendotransitionsystem)$. The least fix-point in the right hand side of the inclusion can be computed in a finite number of iterations, since the domain of $\abstractendotransitionsystem$ is finite. However computing these iterations is quite cumbersome, because it intertwines the computation of the local transition systems that are associated to each agent type. We propose to desynchronise these computations. To do this, we introduce, for each agent type $A\in\agentname$, the function $\abstractendotype$ that maps any local transition system $(\mathcal{Q}^{\sharp}_0,T^{\sharp})\in\transitionsystems[\localstates,\locallabels]$ to the local transition system $(\mathcal{Q}^{\sharp}_0{}',T^{\sharp}{}')\in\transitionsystems[\localstates,\locallabels]$
+where: \begin{inparaenum}\item $\mathcal{Q}^{\sharp}_0{}'=\mathcal{Q}^{\sharp}_0{}\cup\{\beta_n(q_0)\;|\;q_0\in \mathcal{Q}_0,\;n\in\agents[q_0],\;\type[q_0](n)=A \}$;
+\item and $T^{\sharp}{}'$ is the union between the set $T^{\sharp}$
+and the set of the transitions $(q^{\sharp},(r,n),q^{\sharp}{}')$
+such that the local view $q^{\sharp}$ is reachable in the transition system $(\mathcal{Q}^{\sharp}_0,T^{\sharp})$ and such that $q^{\sharp}  \xrightarrow{(r,n)}{\!\!}^{\sharp} q^{\sharp}{}'$.  \end{inparaenum}
+
+For any function $Y$ mapping each agent type $A\in\agentname$ to a local transition system over the states $\localstates$ and the transition labels $\locallabels$, we have $[\abstractendotransitionsystem](Y) \sqsubseteq \abstractendotype(Y)$. Moreover, for each agent type $A\in\agentname$, the function $\abstractendotype$ is monotonic. By \cite{Tarski}, for each agent type $A\in\agentname$, the function $\abstractendotype$ has a least fix-point.
+By \cite{Cousot1979}, the inclusion $\lfp \concreteendotransitionsystem\subseteq \gammacomposite([A\in\agentname \mapsto \lfp \abstractendotype(A)])$ is satisfied, which ensures the soundness of our approach.
+
+Thus, we have derived an abstraction of the finite trace semantics, as a family of local transition systems, that describes the behaviour of each particular type of agent, in isolation. Each such local transition system can be computed independently iteratively.  We can apply our framework to abstract the local transition system associated to the membrane receptors in the model of dimmer formation (\eg~see Fig.~\ref{fig:dimmer:rules}). As expected, the result is the abstract transition system that is given in Fig.~\ref{fig:dimmer:localtrans}.
+
+\beforesection
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Macrotransition systems}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:macro}
+
+\beforesection
+
+The analysis described in Sect.~\ref{sec:localtraces} can also be applied
+to our second  case study ({\eg} see Fig.~\ref{fig:protein:rules}).
+But there are too many conformations for the result to be %However the result is not
+visualisable in practice%, due to the number of potential conformations of the protein $\agent{P}{}$
+. In this section, we propose to identify which transitions commute and provide a more compact symbolic representation of local transition systems, which abstracts the interleaving order of commutative  transitions.
+
+\begin{figure}[t]
+%\begin{minipage}{0.35\linewidth}
+\subfigure[Concurrent transitions.]{
+\label{fig:concurrenttransitions}
+\begin{minipage}{0.35\linewidth}
+\xymatrix@C=0.6cm@R=0.cm{%
+                                      &&&q'_a\ar@{.>}^{\lambda_b}[rd] \cr
+    q_0 \ar@{->}^(0.9){\star}[rr]  &&  q_a\ar@{->}^{\lambda_a}[ru]\ar@{->}_{\lambda_b}[rd]  & & q'' \cr
+                                      &&& q'_b
+    %\ar@{.>}_{\lambda_a}[ru]
+}\end{minipage}}\hfill%\end{minipage}
+%\begin{minipage}{0.64\linewidth}
+  \subfigure[Consecutive transitions.]{%
+\begin{minipage}{\linewidth}
+\label{fig:consecutivetransitions}\xymatrix@C=0.6cm@R=0.cm{%
+                                      &&&q'_a\ar@{->}^{\lambda_2}[rd] &&\cr
+    q_0 \ar@{->}^(0.9){\star}[rr]  &&  q_a\ar@{->}^{\lambda_a}[ru]\ar@{.>}_{\lambda_b}[rd]  & & q'_b  \ar@{->}^(0.9){\star}[rr] && q'_p\cr
+                                      &&& q''
+    \ar@{.>}_{\lambda_a}[ru]
+}
+\end{minipage}}%\end{minipage}
+\caption{Pairs of commutative transitions.}
+\end{figure}
+
+We firstly define the notion of pairs of commutative transitions in a set of traces.  %$X\subseteq\traces$.
+Given a set $X\subseteq\traces$ of traces,
+We denote by $\transitions$ the set of the transitions that occur in $X$, \ie~$\transitions\bydef \{(q_i,\lambda_i,q'_i)\;|\;(q_0,(q_i,\lambda_i,q'_i))_{1\leq i \leq p}, 1\leq i \leq p\}$. For the sake of simplicity, and since this is the case in Kappa, we assume that any transition %that occurs in a trace $\tau$ in the set $X$,
+ is fully defined by the state it is starting from and the label of the transition. Formally, we assume that for any two transitions $(q_1,\lambda_1,q'_1),(q_2,\lambda_2,q'_2)\in\transitions$, the states $q'_1$ and $q'_2$ are equal whenever the pairs $(q_1,\lambda_1)$ and $(q_2,\lambda_2)$ are equal.
+
+%In other words, the label is used as a proof which fully identify how to apply a computation step to the current state.
+\keep{\longdefforcommutativity}%
+{\begin{definition}
+\label{def:commutativeness}We say that two transitions $(q_a,\lambda_a,q'_a)\in X$ and $(q_b,\lambda_b,q'_b)\in X$ commute in a given set  $X\subseteq \traces$ of traces, if and only if both following properties are satisfied: \begin{inparaenum}%\vspace*{-8pt}
+\item
+for any trace $\tau\in\traces$ such that the traces
+$\tau\compose (q_a,\lambda_a,q'_a)$ and $\tau\compose (q_b,\lambda_b,q'_b)$ are well defined and both belong to the set $X$,
+there exists a state $q''\in\states$, such that
+the trace $\tau\compose (q_a,\lambda_a,q'_a) \compose (q'_a, \lambda_b, q'')$ belongs to the set $X$;
+\item and for any trace $(q_0,(t_i)_{1\leq i \leq p})$ in $X$, if there exists an integer $j$ between $1$ and $p-1$ satisfying both $t_j=(q_a,\lambda_a,q'_a)$ and $t_{j+1}=(q_b,\lambda_b,q'_b)$,
+then there exists a state $q''\in\states$ such that the trace $(q_0,(t'_i)_{1\leq i \leq p})$, where $t'_i$ is defined as $(q_a,\lambda_b,q'') $ whenever $i=j$, as $ (q'',\lambda_a,q'_b)$ whenever $i=j+1$, and as $t_i$ otherwise, is well defined and belongs to the set $X$.
+\end{inparaenum}
+\end{definition}}{%
+\begin{definition}
+\label{def:commutativeness}We say that transitions with labels $\lambda_a\in\labels$ and $\lambda_b\in\labels$ commute in the set of traces $X\subseteq \traces$, if and only if both following properties are satisfied: \begin{inparaenum}%\vspace*{-8pt}
+\item
+for any trace $\tau\in\traces$, and any states
+$q,q'_a,q'_b\in\states$ such that
+$\tau\compose (q,\lambda_a,q'_a)$ and $\tau\compose (q,\lambda_b,q'_b)$ are well defined traces that both belong to the set $X$,
+there exists a state $q''\in\states$, such that
+the trace $\tau\compose (q,\lambda_a,q'_a) \compose (q'_a, \lambda_b, q'')$ belongs to the set $X$;
+\item and for any trace $(q_0,(t_i)_{1\leq i \leq p})$ in $X$, if there exists three states $q_a,q'_a,q'_b\in\states$ and an integer $j$ between $1$ and $p-1$ satisfying both $t_j=(q_a,\lambda_a,q'_a)$ and $t_{j+1}=(q'_a,\lambda_b,q'_b)$,
+then there exists a state $q''\in\states$ such that the trace $(q_0,(t'_i)_{1\leq i \leq p})$, where $t'_i$ is defined as $(q_a,\lambda_b,q'') $ whenever $i=j$, as $ (q'',\lambda_a,q'_b)$ whenever $i=j+1$, and as $t_i$ otherwise, is well defined and belongs to the set $X$.
+\end{inparaenum}
+\end{definition}}
+In Def.~\ref{def:commutativeness}, the first property entails that whenever after a given prefix of trace, two transitions that commute are enable (they necessarily starts from the same state), each transition can be followed by the other one modulo the fact that the latter transition should now start from the ending state of the former one (\eg~see Fig.~\ref{fig:concurrenttransitions}), whereas the second property entails that two consecutive transitions that commute can always be performed in the reverse  order, modulo the fact that the intermediary state has to  be modified (\eg~see Fig.~\ref{fig:consecutivetransitions}).
+
+
+\keep{\longdefforcommutativity}{%
+Given $\mathcal{C}\in\wp((\states\times\labels\times\states)^2)$ a set of pairs of transitions, we define the operator $\rho_{\mathcal{C}}$  which maps each set of traces $X\subseteq \traces$, into the smallest set of traces $\rho_{\mathcal{C}}\subseteq \traces$ that contains the set $X$ and in which each pair of transitions $(t_1,t_2)$ in the set $\mathcal{C}$ commutes.}%
+{%
+Given {$\mathcal{C}\in\wp(\labels^2)$} a set of pairs of transition labels, we define the operator $\rho_{\mathcal{C}}$  which maps each set of traces $X\subseteq \traces$, into the smallest set of traces $\rho_{\mathcal{C}}(X)\subseteq \traces$ that contains the set $X$ and in which each pair of transitions $((q_a,\lambda_a,q'_a),(q_b,\lambda_b,q'_b))\in \transitions^2$ such that
+$(\lambda_a,\lambda_b)\in\mathcal{C}$, commutes.}
+ The function $\rho_{\mathcal{C}}$ is an upper closure operator, that is to say that:% that it satisfies the following three properties:
+\begin{inparaenum}
+  \item $\rho_{\mathcal{C}}$ is monotonic;
+  \item $\rho_{\mathcal{C}}$ is idempotent (\ie~$\rho_{\mathcal{C}}\circ \rho_{\mathcal{C}} = \rho_{\mathcal{C}}$);
+  \item and $\rho_{\mathcal{C}}$ is extensive (\ie~$X \subseteq
+  \rho_{\mathcal{C}}(X)$, %for each set
+  $\forall X\subseteq \traces$% of traces
+  ).
+\end{inparaenum}
+We notice that the fix-points of the upper closure $\rho_{\mathcal{C}}$ are the set of traces $X\subseteq \traces$ such that each pair of transitions $((q_a,\lambda_a,q'_a),(q_b,\lambda_b,q'_b))\in \transitions^2$ such that
+$(\lambda_a,\lambda_b)\in\mathcal{C}$, commutes. We can use the upper closure $\rho_{\mathcal{C}}$ to accelerate the computation of the set of traces $\gammatransitionsystem\transitionsystem$
+ that is induced by a given transition system $\transitionsystem$ provided that each pair of transitions $((q_a,\lambda_a,q'_a),(q_b,\lambda_b,q'_b))\in \transitions[\gammatransitionsystem\transitionsystem]^2$ such that
+ $(\lambda_a,\lambda_b)\in\mathcal{C}$, commutes in the set of traces $\gammatransitionsystem\transitionsystem$. The function $\rho_{\mathcal{C}}\circ \concreteendotransitionsystem$ is monotonic and satisfies $\concreteendotransitionsystem(X)\subseteq [\rho_{\mathcal{C}}\circ\concreteendotransitionsystem](X))$, for any set of traces $X\subseteq \traces$. So, by \cite{Tarski}, the function
+ $\rho_{\mathcal{C}}\circ\concreteendotransitionsystem$ has a least fix-point, and by \cite{Cousot1979}, $\lfp \concreteendotransitionsystem \subseteq
+ \lfp [\rho_{\mathcal{C}} \circ \concreteendotransitionsystem]$.
+If additionally, each pair of transitions $((q_a,\lambda_a,q'_a),(q_b,\lambda_b,q'_b))\in \transitions[\gammatransitionsystem\transitionsystem]$ such that
+$(\lambda_a,\lambda_b)\in\mathcal{C}$, commutes, we get that  $\rho_{\mathcal{C}}(\lfp \concreteendotransitionsystem)=\lfp \concreteendotransitionsystem$, and thus that $\lfp \concreteendotransitionsystem = \lfp [\rho_{\mathcal{C}} \circ \concreteendotransitionsystem]$.
+
+ In Kappa, pairs of commutative local transitions can be identified  syntactically. Let us consider an agent type $A\in\agentname$.
+  Given the label $(r,n)\in\locallabels$ of a local transition, we denote as $\test$ the set of the site identifiers $i$ such that the site $(n,i)$ occurs in the domain of the rule $r$, and as $\modif$ the set of the site identifiers $i$ such that the site $(n,i)$ occurs in the domain of the rule $r$ without occurring in its left hand side.
+ Then, for any two labels $\lambda_1$, $\lambda_2\in\locallabels$ of local transitions such that both $\modif[\lambda_1]\cap\test[\lambda_2]=\emptyset$
+ and $\modif[\lambda_2]\cap\test[\lambda_1]=\emptyset$,  any pair of local transitions with the labels $\lambda_1$ and $\lambda_2$ commutes \cite{jlaurent}.
+
+
+
+
+\begin{example}
+In the rules Fig.~\ref{fig:protein:rules}, we have:
+We have: %$\test[a_1^+]=\{a_1\} $; $\mod[a_1^+]=\{a_1\} $;
+$\test[b_1^+,1]=\{a_1,b_1\} $; $\modif[b_1^+,1]=\{b_1\}$;
+%$\test[a_2^+,1=\{a_2\} ]$; $\mod[a_2^+,1]=\{a_2\}$;
+$\test[b_2^+,1]=\{a_2,b_2\} $; $\modif[b_2^+,1]=\{b_2\}$.
+As a consequence any two  local transitions with respective labels
+$(b_1^+,1)$ and $(b_2^+,1)$ commute.
+\end{example}
+
+Given a local view $v\in\localstates$, we consider the set
+$\Lambda(v)$ as the set of all the transitions labels $\lambda$ such that there exists a local transition starting from the view $v$ and with the label $\lambda$. We define the site-graph $\frame{v}$ as the site-graph that is obtained by removing from the site-graph $v$ any site that belongs to the set $\bigcup \{\modif[\lambda']\;|\;\lambda'\in\Lambda(v)\setminus\{\lambda\}\}$. Intuitively, $\frame{v}$ is the restriction of the local view $v$ to the sites that cannot be modified by local transitions that commute with a local transition with the label $\lambda$.
+
+
+We are left to provide a compact data-structure to  represent  transition
+systems with pairs of commutative transitions.
+We propose to use macrostates and macrotransitions. A \emph{macrostate} is a symbolic representation of a set of (micro)states (that behave similarly),
+and \emph{macrotransitions} are  transitions between macrostates, that denote some  transitions between the corresponding microstates.
+Let us assume that we are given  a set of macrostates $\macrostates$. Each macrostate $q^{\sharp}\in\macrostates$ denotes a set of microstates $\gammamacro(q^{\sharp})\subseteq \states$.
+
+A macrotransition system is defined as follows:
+\begin{definition}
+A macrotransition system is a pair $(\mathcal{Q}_0,T^{\sharp})$ where:
+\begin{inparaenum}
+\item $\mathcal{Q}_0 \subseteq \states$;
+\item $T^{\sharp} \subseteq \macrostates \times \labels \times \macrostates$.
+\end{inparaenum}
+\end{definition}
+
+A macrotransition system is made of a set of initial microstates, and a set of labelled transitions between macrostates. Each macrotransition is an implicit representation of a set of transitions between microstates. Formally, each macrotransition $(q^{\sharp},\lambda,q^{\sharp}{}')$  denotes the set of the transitions $(q,\lambda,q')\in \states\times\labels\times \states$ for which there exists a set of macrostates $X\subseteq \macrostates$ satisfying: $q = \bigcap \{\gammamacro(x)\;|\; x\in X\cup \{q^{\sharp}\}\}$ and $q' = \bigcap \{\gammamacro(x) \;|\; x \in X\cup \{q^{\sharp}{}'\}\}$.
+We denote as $\gammamacrotransitions(q^{\sharp},\lambda,q^{\sharp}{}')$ the set of the transitions denoted by the macrotransition $(q^{\sharp},\lambda,q^{\sharp}{}')$.
+ A macrotransition system $(\mathcal{Q}_0,T^{\sharp})$ is an abstraction of the transition system $(\mathcal{Q}_0,\cup \{\gammamacrotransitions(t)\;|\;t\in T^{\sharp}\})$, that we denote as $\gammamacrotransitionsystem(\mathcal{Q}_0,T^{\sharp})$.
+
+In Kappa, a macrostate is a site-graph that can be embedded in a local view. Each macrostate intentionally denotes the set of the local views it can be embedded in. Now we mimick the computation of $\abstractendotype$ in macrotransition systems.
+We define the function $\macroendo$ mapping each  macrotransition system $(\mathcal{Q}_0,T^{\sharp})$ to the macrotransition system where the set of initial states is defined as the union between $\mathcal{Q}_0$ and the set
+$\{\beta_n(q_0)\;|\;n\in\agents(q_0),\; \type[q_0](n)=A\}$;  and where the set of macrotransitions is obtained  \begin{inparaenum}\item by adding in the set $T^{\sharp}$ any transition of the form $(\frame{v},\lambda,v')$ for any local view $v\in\localstates$ such that:
+\begin{inparaenum} \item the local view $v$ is reachable in the transition system $\gammatransitionsystem[\localstates,\locallabels](\gammamacrotransitionsystem(\mathcal{Q}_0,T^{\sharp}))$; \item and $\frame{v}\xrightarrow{\lambda}{\!\!}^{\sharp}\; v'$, \end{inparaenum}\item before removing any macrotransition $t$ such that there exists a macrotransition $t'$ satisfying  $\gammamacrotransitions(t)\subset \gammamacrotransitions(t')$.
+\end{inparaenum}
+
+\newcommand{\border}{\abstractendotype(\gammamacrotransitionsystem(X^{\sharp}))}
+\newcommand{\middleterm}{\gammamacrotransitionsystem (\macroendo(X^{\sharp}))}
+
+%The function $\macroendo$ is not monotonic in general.
+For any macrotransition system $X^{\sharp}$, both following inclusions are satisfied:\\
+\begin{inparaenum}\item  $\gammatransitionsystem[\localstates,\locallabels](\border)\subseteq\gammatransitionsystem[\localstates,\locallabels](\middleterm)$ (soundness); \item
+$\gammatransitionsystem[\localstates,\locallabels](\middleterm)\subseteq
+\rho_{\mathcal{C}}(\gammatransitionsystem[\localstates,\locallabels](\border)))$ (relative completeness). \end{inparaenum}
+It follows (since $\gammamacrotransitionsystem(\emptyset,\emptyset)=(\emptyset,\emptyset))$ that, when $k\in\mathbb{N}$ increases, the sequence of the images by $[\gammatransitionsystem[\localstates,\locallabels]\circ \gammamacrotransitionsystem]$ of the iterates  $\macroendok{}(\emptyset,\emptyset)$ of the function $\macroendo$, starting from the %initial
+macrotransition system $(\emptyset,\emptyset)$, stations ultimately at the value   $\gammatransitionsystem[\localstates,\locallabels](\lfp \abstractendotype)$.
+The result of our analysis is  defined as the macrotransition system
+$\macroendol{}(\emptyset,\emptyset)$, where $l\in\mathbb{N}$ is the rank at which this limit is reached.
+
+Our analysis is integrated within an open-source static analyser \cite{KaSim}.
+It relies on binary decision diagrams, to describe implicitly  which microtransitions are not yet covered by any macrotransition (as required both in the function $\macroendo$ and to detect when to stop the iterations).
+We obtain, for the second case study in Fig.~\ref{fig:protein:rules}, the macrotransition system that is described in Fig.~\ref{fig:protein:localtrans}. We have also applied to a similar model with 5 pairs of phosphorylation sites and obtained the corresponding macrotransition system in around one second.
+\keep{\extendedversion}{More information about the implementation can be found in App.~\ref{implementation}.}
+
+\beforesection
+
+
+\section{Conclusion}
+
+\beforesection
+
+Kappa \cite{DBLP:journals/tcs/DanosL04} allows for the description of highly combinatorial systems of interactions between proteins.
+But it is not always obvious to check the consistency of the models that are written in Kappa or to get an overview of how these  models work. To cope with this issue, we have proposed an abstract interpretation framework to automatically over-approximate the behaviour of each agent of a  model, independently, by the means of a \emph{local} transition system.
+
+Since these local transition systems may remain too combinatorial when proteins have many interaction sites,
+we have designed a coarser description of the local transition systems, inspired by simplicial systems.
+This latter description abstracts away the interleaving order between commutative transitions, by the means of transitions between macrostates,
+that denotes symbolically sets of transitions between microstates. Our tool computes these macrotransitions directly.
+
+
+
+\paragraph{Acknowledgement.}
+This work has been motivated by models %respectively
+written by H{\'e}ctor Medina, and by Nathalie Th\'eret and Jean Cocquet.
+We deeply thank them, as well as Pierre Boutillier, Ioana Cristescu, Vincent Danos, Walter Fontana, Russ Harmer, Jean Krivine, Jonathan Laurent, and
+Jean Yang, for fruitful discussions.
+
+\vspace*{-5pt}
+\beforesection
+
+\bibliographystyle{splncs03}
+
+\beforesection
+
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+
+\bibitem{KaSim}
+Boutillier, P., Feret, J., Krivine, J., Q., {\relax Kim L{\'y}}.: Kasim
+  development homepage, \url{http://kappalanguage.org}
+
+\bibitem{CHJPS14-CMSB}
+Chatain, T., Haar, S., Jezequel, L., Paulev{\'e}, L., Schwoon, S.:
+  Characterization of reachable attractors using {P}etri net unfoldings. In:
+  Computational Methods in Systems Biology. LNCS, vol. 8859 (2014)
+
+\bibitem{Cousot1977}
+Cousot, P., Cousot, R.: Abstract interpretation: A unified lattice model for
+  static analysis of programs by construction or approximation of fixpoints.
+  In: Proc.~POPL'77 (1977)
+
+\bibitem{Cousot1979}
+Cousot, P., Cousot, R.: Systematic design of program analysis framework. In:
+  Proc.~POPL'79 (1979)
+
+\bibitem{DBLP:conf/fsttcs/DanosFFHH12}
+Danos, V., Feret, J., Fontana, W., Harmer, R., Hayman, J., Krivine, J.,
+  Thompson-Walsh, C.D., Winskel, G.: Graphs, rewriting and pathway
+  reconstruction for rule-based models. In: Proc.~{FSTTCS} '12. LIPIcs, vol.~18
+  (2012)
+
+\bibitem{DanosEtAl-VMCAI08}
+Danos, V., Feret, J., Fontana, W., Krivine, J.: Abstract interpretation of
+  cellular signalling networks. In: Proc.~ VMCAI$\,$'2008. LNCS, vol. 4905.
+  Springer (2008)
+
+\bibitem{DBLP:journals/tcs/DanosL04}
+Danos, V., Laneve, C.: Formal molecular biology. TCS  325(1) (2004)
+
+\bibitem{DBLP:conf/concur/FajstrupGR98}
+Fajstrup, L., Goubault, E., Rau{\ss}en, M.: Detecting deadlocks in concurrent
+  systems. In: Proc.~{CONCUR} '98. LNCS, vol. 1466 (1998)
+
+\bibitem{Feret-ICCMSE2007}
+Feret, J.: Reachability analysis of biological signalling pathways by abstract
+  interpretation. In: Proc.~ ICCMSE$\,$'2007. vol. 963.(2). AIP (2007)
+
+\bibitem{DBLP:books/sp/Godefroid96}
+Godefroid, P.: Partial-Order Methods for the Verification of Concurrent Systems
+  - An Approach to the State-Explosion Problem, LNCS, vol. 1032 (1996)
+
+\bibitem{jlaurent}
+Laurent, J.: Causal analysis of rule-based models of signaling pathways (2015)
+
+\bibitem{Tarski}
+Tarski, A.: A lattice-theoretical fixpoint theorem and its applications.
+  Pacific J.~Math.  5(2) (1955)
+
+\bibitem{DBLP:conf/ac/Winskel86}
+Winskel, G.: Event structures. In: Advances in Petri Nets. LNCS, vol. 255
+  (1987)
+
+\bibitem{DARPA}
+You, J.: Darpa sets out to automate research. Science  347 (2015)
+
+\end{thebibliography}
+
+
+\keep{\extendedversion}{%
+\clearpage
+
+\appendix
+\section{Implementation}
+\label{implementation}
+
+Our framework is integrated in the static analyser KaSa \cite{KaSim}.
+
+If \texttt{foo.ka} is a model written in Kappa, the instruction:
+\begin{verbatim}
+KaSa foo.ka --compute-local-traces
+\end{verbatim}
+will dump in the directory \texttt{output} the local transition systems of the model in the \textbf{dot} format (to be post-processed with \textit{Graphviz}).
+
+Moreover, the instruction:
+\begin{verbatim}
+KaSa foo.ka --compute-local-traces  --use-macrotransitions-in-local-traces
+\end{verbatim}
+works the same way, but it outputs macrotransition systems instead.
+
+We provide in:
+\begin{center}
+\url{http://www.di.ens.fr/~feret/local\_traces}
+\end{center}
+the source code of some Kappa model (including those of Sect.~\ref{sec:casestudies}), pointers to the binaries of the analyser, and pointers to the handbook of KaSa.
+
+\keep{\pullbackinappendix}{\section{Pull-backs and composition between embeddings and partial embeddings}
+\label{app:pullback}
+\pullbacklong}{}
+}
+
+\end{document}
+%%% Local Variables:
+%%% ispell-local-dictionary: "british"
+%%% End:

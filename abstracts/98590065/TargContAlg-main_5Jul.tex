@@ -1,0 +1,172 @@
+\documentclass[oribibl]{llncs}
+\usepackage{llncsdoc}
+%\documentclass[11pt]{article}
+\usepackage{float}
+%\usepackage[dvips]{color}
+
+%\usepackage{natbib}
+%\usepackage[square,sort,comma,numbers]{natbib}
+\usepackage{verbatim}
+\usepackage{psfrag}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+%\addtolength{\voffset}{-1cm}
+%\addtolength{\hoffset}{-1cm}
+%\addtolength{\textwidth}{2cm}
+%\addtolength{\textheight}{2cm}
+
+%\addtolength{\oddsidemargin}{-1.5cm}
+
+%\newcommand{\anne}[1]{\textcolor{blue}{#1}}
+%\newcommand{\diana}[1]{\textcolor{red}{#1}}
+%\newenvironment{definition}[1][Definition]{\begin{trivlist}
+%\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\title{Target Controllability of Linear Networks}
+\author{Eugen Czeizler\inst{1} \and Cristian Gratie\inst{1} \and Wu Kai Chiu\inst{1} \and\\ Krishna Kanhaiya\inst{1} \and Ion Petre\inst{1}}
+\institute{Computational Biomdeling Laboratory, Turku Centre for Computer Science and Department of Computer Science, {\AA}bo Akademi University, Turku, Finland}
+
+
+\begin{document}
+
+%\date{\vspace{-5ex}}
+
+\maketitle
+%\makeatother
+\begin{abstract}
+Computational analysis of the structure of intra-cellular molecular interaction networks can suggest novel therapeutic approaches for systemic diseases like cancer. Recent research in the area of network science has shown that network control theory can be a powerful tool in the understanding and manipulation of such bio-medical networks. In 2011, Liu et al. developed a polynomial time optimization algorithm for computing the size of the minimal set of nodes controlling a given linear network. In 2014, Gao et al. generalized the problem for target structural control, where the objective is to optimize the size of the minimal set of nodes controlling a given target within a linear network. The working hypothesis in this case is that partial control might be ``cheaper" (in the size of the controlling set) than the full control of a network. The authors developed a Greedy algorithm searching for the minimal solution of the structural target control problem, however, no suggestions were given over the actual complexity of the optimization problem. In here we prove that the structural target controllability problem is NP-hard when looking to minimize the number of driven nodes within the network, i.e., the first set of nodes which need to be directly controlled in order to structurally control the target. We also show that the Greedy algorithm provided by Gao et al. in 2014 might in some special cases fail to provide a valid solution, and a subsequent validation step is required. Also, we improve their search algorithm using several heuristics, obtaining in the end up to a 10-fold decrease in running time and also a significant decrease of the size of the minimal solution found by the algorithms.
+
+
+
+
+
+\end{abstract}
+
+\section{Introduction}
+
+\input{intro}
+
+\section{Background and Definitions}
+
+%
+%- Structural Controllability of Linear Dynamical Systems
+%- Target Controllability of Networks
+%- Driver Nodes vs Driven Nodes
+%- New problem: Minimizing the number of driven nodes for target controllability.
+
+\input{backgr}
+
+\section{Driven Target Control is NP-hard}
+%
+%- connection between driven total control and min. Path Covering Problem (known to be NP-hard)
+%- Proof of NP-hardness for Driven Target Control problem
+
+\input{np-hard_sketch}
+
+\section{Approximation algorithms for target control}
+%
+%- The Barabasi approach: Ba;
+%- Optimized Barabasi algorithm: OpBa;
+%- Heuristically improved (Barabasi) approaches: HeImBa1, HeImBa2, and HeImBa3
+%---HeImBa1: try to avoid looped explorations of the control path
+%---HeImBa2: include all heuristic approaches, and direct the control path over previously explored nodes
+%---HeImBa3: include all heuristic approaches, and direct the control path over previously explored edges
+
+\input{greedy-alg}
+
+\section{Results: A comparative analysis of the four algorithms}\label{results}
+
+%- What and How to do the analysis.
+
+%We analyze the 4 algorithms based on: \#targets, \#runs, average degree
+
+%--- Ba vs OpBa;
+%--- HwImBa1-3 vs OpBa.
+
+\input{results}
+
+\section {Conclusions}
+
+\input{conclusions}
+
+%\bibliographystyle{splncs}
+\begin{thebibliography}{xx}
+
+\bibitem{3}
+Ashworth A, Lord CJ, Reis-Filho JS. Genetic interactions in cancer progression and treatment. Cell 2011; 145(1):30-8.
+
+\bibitem{Gene_essentiality_2015}
+
+Blomen, Vincent A. et. al. Gene essentiality and synthetic lethality in haploid human cells. Science. 2015; 350(6264): 1092-1096.
+
+
+\bibitem{2}
+Brough et al. Searching for synthetic lethality in cancer. Curr Opinion in Genetics \& Development 2011; 21: 34-41.
+
+\bibitem{6}
+Gao J, Liu Y, D'Souza MR, Barabási LA. Target control of complex networks. Nat Comm 2014; 5415.
+
+
+\bibitem{1}
+Hopkins AL. Network pharmacology: the next paradigm in drug discovery. Nat Chem Biol 2008; 4: 682-90.
+
+\bibitem{Kal63}
+Kalman, R. E. Mathematical description of linear dynamical systems. J. Soc. Indus. Appl. Math. Ser. 1963; A 1: 152–192.
+
+
+\bibitem{COL12}
+Koh YLJ,Brown RK,Sayad A,Kasimer D,Ketela T,Moffat1 J. COLT-Cancer: functional genetic screening resource for essential genes in human cancer cell lines. Nucl. Acids Res. 2012 Jan; 40(Database issue): D957–D963. doi:10.1093/nar/gkr959
+
+\bibitem{4}
+Kolch W et al. The dynamic control of signal transduction networks in cancer cells. Nat Rev 2015; 15: 515-525.
+
+\bibitem{Lin74}
+ Lin,C.-T.Structuralcontrollability. IEEE Trans. Automat. Contr. 1974; 19: 201–208.
+
+
+\bibitem{7}
+Liu Y, Slotine j, Barabási LA. Controllability of complex networks. Nature 2011; 473: 167-73.
+
+
+\bibitem{10}
+Marcotte R, Brown RK, Suarez F et al. Essential Gene Profiles in Breast,
+Pancreatic, and Ovarian Cancer Cells. Cancer Discovery. 2012 Feb; 2(2):172-89.
+doi:10.1
+158/2159-8290
+
+\bibitem{SIG16}
+Perfetto L, Briganti L, Calderone A. SIGNOR: a database of causal relationships between biological entities. Nucl. Acids Res. 2016 Jan 4; 44(D1):D548-54. doi:10.1093/nar/gkv1048
+
+\bibitem{Polj90}
+S. Poljak. On the generic dimension of controllable subspaces. IEEE Transactions on Automatic Control. 1990; 35(3): 367-369. doi: 10.1109/9.50361
+
+
+\bibitem{Pol90}
+S. Poljak and K. Murota. Note on a graph-theoretic criterion for structural output controllability. IEEE Transactions on Automatic Control. 1990; 35: 939-942.
+
+ \bibitem{Shi76}
+Shields, R. W. and Pearson, J. B. Structural controllability of multi-input linear
+systems.
+IEEE Trans. Automat. Contr. 1976; 21: 203–212.
+
+
+
+
+\bibitem{8}
+Wang T et al. Identification and characterization of essential genes in the human genome. Science 2015; 350(6264).
+
+
+\bibitem{5}
+Za\~{n}udo JGT, Albert R. Cell Fate Reprogramming by Control of Intracellular Network Dynamics. PLoS Comput Biol 2015; 11(4).
+
+\bibitem{9}
+Zhan T, Boutros M. Towards a compendium of essential genes - From model organisms to synthetic lethality in cancer cells. Crit Rev Biochem Mol Biol 2016; 51(2): 74-85
+
+
+\end{thebibliography}
+%\newpage
+%\section{Appendix I: proof of NP-hardness theorem }
+%\input{np-hard_proof}
+
+\end{document}

@@ -1,0 +1,62 @@
+\documentclass[a4paper,10pt]{llncs}
+\pagestyle{plain}
+
+\input{defs}
+\coarsetrue
+
+\begin{document}
+
+\mainmatter  % start of an individual contribution
+
+%opening
+% title a bit too long, 
+\title{Formal Quantitative Analysis of Reaction Networks 
+      Using Chemical Organisation Theory}
+\author{Chunyan Mu\inst{1} \and Peter Dittrich\inst{2} 
+	\and David Parker\inst{1} \and Jonathan E. Rowe\inst{1}}
+\institute{$^1$ School of Computer Science, University of Birmingham\\
+	   $^2$ Institute of Computer Science, Friedrich-Schiller-University Jena}
+
+\maketitle
+
+\begin{abstract}
+Chemical organisation theory is a framework developed to simplify the
+analysis of long-term behaviour of chemical systems. 
+An organisation is a set of objects which are closed and self-maintaining. 
+In this paper, we build on these ideas to develop novel techniques 
+for formal quantitative analysis of chemical reaction networks, 
+using discrete stochastic models represented as continuous-time Markov chains. 
+We propose methods to identify organisations, 
+to study quantitative properties regarding
+movement between these organisations and to construct an
+organisation-based coarse graining of the model that can be used to
+approximate and predict the behaviour of the original reaction network.
+\end{abstract}
+
+% \keywords{
+% Stochastic reaction networks,
+% Probabilistic model checking,\\
+% Organisation theory,
+% Coarse-graining.
+% }
+
+\input{intro}  
+\input{prelim}
+\input{modelling}
+\input{analysis}
+\input{eg-model1}
+\input{eg-model2}
+\input{soundness}
+\input{application}
+\input{concl}
+
+\subsection*{Acknowledgements}
+The authors acknowledge support from the European Union through funding  
+under FP7–ICT–2011–8  project  HIERATIC (316705).
+We also thank the anonymous reviewers for their helpful and detailed comments.  
+
+\bibliographystyle{plain}
+\bibliography{BIB-org}
+
+\input{appendix}
+\end{document}

@@ -17,8 +17,10 @@ html {
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
 }
-span.papertitle{
+.papertitle{
     font-weight: bold;
+    cursor:pointer;
+    text-decoration: underline;
 }
 .just{
 text-align: justify;
@@ -59,6 +61,7 @@ padding: 30px 0;
 .affix {
   position: fixed;
 }
+
 
 body {
   margin: 0;
@@ -2382,6 +2385,8 @@ table th[class*="col-"] {
   float: none;
   display: table-cell;
 }
+
+
 .table > thead > tr > td.active,
 .table > tbody > tr > td.active,
 .table > tfoot > tr > td.active,

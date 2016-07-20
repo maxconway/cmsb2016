@@ -1,0 +1,121 @@
+\documentclass[runningheads]{llncs}
+\usepackage{epsfig}
+\usepackage{url}
+
+%
+\begin{document}
+
+\title{E-cyanobacterium.org: A Web-based Platform for Systems Biology of Cyanobacteria}
+\author{Matej Troj\'{a}k\inst{1}, David \v{S}afr\'{a}nek\inst{1}, Jakub Hrabec\inst{1},\\ Jakub \v{S}alagovi\v{c}\inst{1}, Franti\v{s}ka Romanovsk\'{a}\inst{1} and Jan \v{C}erven\'{y}\inst{2}\thanks{This work has been supported by the Czech National Infrastructure grant LM2015055 and by the Czech Science Foundation grant GA15-11089S.}}
+
+\institute{Faculty of Informatics, Masaryk University, Brno, Czech Republic
+\and
+Global Change Research Centre AS CR, v. v. i., Brno, Czech Republic}
+
+\authorrunning{Troj\'{a}k et al.}
+\titlerunning{E-cyanobacterium.org}
+
+\maketitle
+
+\begin{abstract}
+E-cyanobacterium.org is an online platform providing tools for public sharing, annotation, analysis, and visualization of dynamical models and wet-lab experiments related to cyanobacteria. The platform is unique in integrating abstract mathematical models with a precise consortium-agreed biochemical description provided in a rule-based formalism. The general aim is to stimulate collaboration between experimental and computational systems biologists to achieve better understanding of cyanobacteria.
+
+\end{abstract}
+
+\section{Introduction}
+
+The complexity of dynamical processes occurring in biology is inherent due to the fact that living cells must be responsive to a highly dynamic environment. This applies especially to the family of photosynthetic organisms such as cyanobacteria in which the biophysical processes scale from electron transfers interacting with metabolic biochemistry to genetic regulation and back. Remarkable effort towards a consistent and coherent knowledge-base of cyanobacteria modelling is one of the key activities of CyanoNetwork\footnote{\url{http://www.cyanoteam.org}}, the international network of top-leading experts on studying these unique bacteria. In cyanobacteria, biophysical processes span in vastly different time scales from femtoseconds to seasons and from individual molecules to aquatic and terrestrial ecosystems.
+
+Such a community-wide modelling effort is notably accelerated by an interactive online platform. In particular, models need to be translated into a unified format, formalised, and uniformly annotated. This allows the models to be fully understood and re-used in the original form, compared with each other, and with wet-lab experiments. To this end, one needs a unified and flexible framework to fully represent partial models and the respective biological knowledge --- the involved components as well as their interactions.  
+
+An existing resource to inspire further expansion of cyanobacteria modelling are the established web repositories of curated and well-annotated models traversing already through many branches of biology~\cite{beard2009cellml,LeNovere2006,Olivier01092004,Kanehisa04012016}.
+Unfortunately, cyanobacteria models are strongly under-represented in these repositories, probably because of the natural differences that exist between common bacteria and phototrophic bacteria. There exist several online tools presenting biological networks or genome knowledge~\cite{Croft01012014,Kanehisa04012016,go}. However, due to enormous complexity of biological processes, it is a challenge to develop tools presenting biological networks alongside with executable or mathematical models. Focusing on domain-specific organisms allows us to integrate the knowledge and present it in a concise and understandable form. This has been already proven on examples of well-known model organisms such as~\emph{E. coli}~\cite{Keseler01012013} or~\emph{C. elegans}~\cite{Harris01012010}. Nevertheless, these resources do not couple the presented knowledge with modelling.
+
+In this tool paper, we present an online platform for cyanobacteria processes --- \emph{e-cyanobacterium.org}\footnote{\url{http://www.e-cyanobacterium.org}}. The platform integrates several dedicated tools and is distinct in the following aspects: formal rule-based representation of biochemical interactions facilitated by cyanobacteria biochemical entities; repository of kinetic models providing basic analysis tools online (simulation, custom data sets, basic static analysis); integration of models within the rule-based description and export to SBML~\cite{Hucka01032003}; storage, maintenance and presentation of experimental data; 
+content visualisation (graphical presentation of models, biochemical space and modelling/experimental data).
+
+The presented release of e-cyanobacterium.org is implemented as an extension of our general database tool-kit --- the so-called \emph{comprehensive modelling platform}~\cite{cs2bio2013}. Key updates are the formal rule-based language BCSL, wet-lab experiments module, and improved analysis of models. Most importantly, several well-annotated and curated models developed by the consortium are provided within  e-cyanobacterium.org including the formalisation of the respective part of biochemical space in BCSL. 
+
+\section{Web Platform Overview}
+The platform consists of several dedicated modules (Fig.~\ref{overview}) all connected to a central module -- \emph{Biochemical Space} (BCS)~\cite{BCS} -- that is the backbone of the platform. BCS provides formal description of the biological problem and it is based on the hierarchy of selected biological processes. It is accompanied with schemas representing relevant biological processes in the context of cyanobacteria. For each process, there are presented relevant models, chemical entities, and rules. Presentation of every process includes detailed information and links to relevant internal and external sources.
+
+\begin{figure}
+\begin{center}
+\epsfig{file=scheme.eps, width=.85\textwidth}
+\end{center}
+\caption{Scheme of interconnections between modules of E-cyanobacterium.org platform.}
+\label{overview}
+\end{figure}
+
+\enlargethispage*{5mm}
+
+\subsection{Biochemical Space}
+\label{detail}
+Biochemical Space is constructed from hierarchy of entities interacting in rules formally specified in \emph{Biochemical Space Language} (BCSL). The main advantage of BCSL is the adoption of the most important aspects of rule-based features while still keeping the syntax human-readable and accessible to communities outside computer science. On the one hand, BCSL has executable semantics that allows basic analysis and consistency checking. On the other hand, the language includes constructs for detailed biological annotation reflecting the known bioinformatics databases and ontologies. BCSL is developed with the consideration of new extensions in SBML level 3. Once the SBML rule-based support becomes to be actively used in tools, our platform will provide relevant export filters. 
+
+Rule description provides details of rules, explicit enumeration of substrates and products, and available annotations. Moreover, the rule is schematically visualised~(Sec.~\ref{visual}) and presented with appropriate links to the process hierarchy.
+
+Entity description provides information about associated models and rules. Links to the process hierarchy and to external sources (UniProt~\cite{TheUniProtConsortium28012015}, Kegg~\cite{Kanehisa04012016}, GeneOnthology~\cite{go}, etc.) are available.
+
+\subsection{Model Repository}
+\label{model}
+\enlargethispage*{6mm}
+
+\emph{Model repository} is a collection of implemented mathematical models describing particular parts of biological processes. Every model is represented as a set of ordinary differential equations generated from the model reaction network. Models are integrated within BCS. In particular, each model component should be related to some BCS entity and each model reaction should be related to some BCS rule. Moreover, a model is associated with some parameter value sets (data sets) that enable simulation (Sec.~\ref{simul}) in a particular biologically-relevant scenarios. Additionally, several basic non-parameter-specific static analysis techniques (Sec.~\ref{static}) based on model stoichiometry are also provided.
+
+An implemented model then includes complete biological annotation (Sec.~\ref{anno}) of all components and reactions that is provided by mapping to BCS. This might help to find connections and overlaps among models. Further, implemented model can be exported to SBML (level 2).
+
+Currently, the repository contains two models describing circadian clock (Miyoshi et al. 2007~\cite{Miyoshi01022007}, Hertel et al. 2013~\cite{Hertel2013}) and a kinetic model of metabolism (Jablonsky et al. 2014~\cite{Jablonsky2014}). Two other models present unpublished results -- dynamics of carbon fluxes (M\"{u}ller et al.) and photosynthesis (Plyusnina et al.).
+
+\subsection{Experiments Repository}
+\emph{Experiments repository} is a tool for storage and presentation of time-series data from wet-lab experiments. Every experiment is well-grounded by precise description (device, medium, organism, etc.) and appropriate annotations. Experiments are structured -- several time series data can be attached to a single experiment. Every time series targets a specific list of measured substances together with time stamps of the individual measurements. Data can be imported/exported in simple text formats. Time series are visualised in a chart (Sec.~\ref{simul}).
+
+Registered users can add their own experiments while keeping the selected experiments private or public. For repeated experiments, annotations and details can be cloned from previously inserted experiments.
+
+\section{Website Features}
+E-cyanobacterium.org provides support for modelling and analysis of biological systems. The most important fact is that all these parts are integrated within the Biochemical Space. Therefore it is possible to reveal non-trivial relations between biochemical substances and models.
+
+\subsection{Annotation}
+\label{anno}
+Annotation is an important task in modelling of biological systems. This is how biological knowledge is mapped to the mathematical description. Our platform considers annotation as an inherent and compulsory part of the modelling procedure. The following aspects of annotation are supported:  
+
+\begin{itemize}
+\item BCS creation and maintenance,
+
+\item model annotation by mapping to BCS,
+
+\item experiment annotation.
+
+\end{itemize}
+
+BCS is being continuously extended and revised by the consortium. Researchers supplying their models are required to integrate the models within the current BCS. This gives good feedback to BCS maintainers. In the experiments repository module, emphasis is given to description of conditions under which an experiment has been performed, which is important for interpretation of the data as well as the possibility of reconstructing the measurements.  
+
+\subsection{Visualisation}
+\label{visual}
+Static visualisation is provided by means of schemas showing the process hierarchy with most important objects from BCS.
+Graphical schemes are supplied with detailed information on the visualised elements of BCS. This is achieved in the information panel below the scheme. An accompanying feature is filtering displayed data to \textit{All} or \emph{Visible} elements. The former option extends the content to all relevant entities and rules that take the part in the displayed process but are not necessarily visualised (e.g., this applies to small ``universal'' molecules such as ATP, ADP, etc.). 
+Moreover, there is a special visualisation framework for complex networks such as metabolism. This widget allows one to zoom in a specific part of the complex network. This feature is currently employed for metabolic map of cyanobacteria.  Owing to requests coming out of the consortium, we have decided to employ manually handled visualisation. In next release, we plan to provide automatically generated SBGN representation of the schemes.
+
+Rule details (Sec.~\ref{detail}) are enriched by means of automatically generated visualisation. For every rule, a graphical scheme that displays all its substrates and products is generated. 
+
+\subsection{Simulation}
+\label{simul}
+With every implemented model (Sec.~\ref{model}) it is possible to execute simulations. Registered users can change initial conditions and parameters of the model and set the simulation options (the numerical solver and its parameters). To apply such settings in the simulation, they have to be saved in terms of a \emph{custom dataset} (public or private). The simulation chart is generated for all available datasets and the platform GUI allows one to switch between them. The chart is interactive and allows one to change the axis type, zoom in the selected curves, and show a focused value on a curve. 
+
+Simulation data are accessible by exporting them in several data formats. Similar options are also available in charts visualising experimental data in the experiments repository. Additionally, the simulated model including the selected dataset can be downloaded as an Octave file~\cite{octave}. Additionally, the platform allows one to use different externally called numerical solvers for simulation. In particular, model administrators can select either Octave (default), COPASI~\cite{copasi}, or remote simulation with COPASI web services~\cite{copasiWS}.
+
+\subsection{Static analysis}
+\label{static}
+At the current stage, there are three static analysis tasks available. \emph{Matrix analysis} produces incidence matrix, \emph{Conservation analysis} produces mass conservation analysis (moiety conservation), and \emph{Modes analysis} produces elementary flux modes. For these tasks, the well-acclaimed third party tool COPASI~\cite{copasi} is used which allows one to download the task data by means of an SBRML file~\cite{SBRML}.  
+
+\section{Conclusion}
+\enlargethispage*{6mm}
+
+E-cyanobacterium.org provides several features that contribute to production and presentation of models targeting cyanobacteria. The most principal effort is to interlink biological knowledge with benefits of computational systems biology tools. This is enabled by means of a novel formal notation -- Biochemical Space -- which allows us to integrate computational models with the biological knowledge and wet-lab experiments.
+
+For future work, we plan to improve the mapping between mathematics and biology, to enhance the website with more analysis tools (currently we are implementing an interface for existing property monitoring and robustness analysis tools such as~\cite{Rizk15062009}), and to automatise the comparison of models against experimental data. Moreover, biochemical space of cyanobacteria is continuously being extended and improved with interactive visualisations of reaction networks based on formal description provided in Biochemical Space Language.
+
+\bibliographystyle{splncs03}
+\bibliography{papers}
+
+\end{document}

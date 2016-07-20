@@ -1,0 +1,148 @@
+\documentclass{llncs}
+
+%\usepackage{times}
+\usepackage{epsfig}
+\usepackage{ifpdf}
+
+\usepackage{array}
+\usepackage{amsmath,amssymb,amscd,amstext}
+% *** MATH PACKAGES ***
+\usepackage{mathrsfs}
+\usepackage{dsfont}
+\usepackage{amsbsy}
+\usepackage{stmaryrd}
+
+\usepackage{subfigure}
+
+%\usepackage{tocloft}
+\usepackage{setspace}
+%\usepackage{proof}
+\usepackage{fancyhdr} 
+\usepackage{hyperref}
+\usepackage{lastpage}
+%\usepackage{pslatex}
+
+\usepackage[displaymath,textmath,sections,graphics,floats,graphicx,color]{preview}
+%\newcommand{\tuple}[1]{\langle #1\rangle}
+\def  \Nat      {\mathbb{N}}   % naturals
+\def  \Int      {\mathbb{Z}}     % integers
+\def  \Real     {\mathbb{R}}  % reals
+\def  \Bool     {\mathbb{B}}
+\def  \Complex  {\mathbb{C}}
+\def  \T        {\mathbb{T}}
+\def  \Domain   {\mathbb{D}}
+
+\def  \om       {\omega}
+\def  \hf       {\hat{f}}
+\def  \hx       {\hat{x}}
+\def  \ft#1     {\footnote{#1} }
+\def  \f        {\varphi}
+\def  \ni       {\noindent}
+\def  \t        {\tau}
+\def  \s        {\sigma}
+
+\renewcommand{\i}{\mathbf{i}}
+%\newcommand{\ev}{\Diamond}
+%\renewcommand{\next}{\bigcirc}
+%\newcommand{\always}{\square}
+%\newcommand{\untz}{~\mathcal{U}~}   % no argument
+%\newcommand{\unti}[1]{~\mathcal{U}_{#1}}
+%\newcommand{\untii}[2]{~\mathcal{U}_{[#1,#2]}}
+\newcommand{\sncz}{~\mathcal{S}~}   % no argument
+\newcommand{\snci}[1]{~\mathcal{S}_{#1}}
+\newcommand{\sncii}[2]{~\mathcal{S}_{[#1,#2]}}
+\newcommand{\hz}{\mbox{Hz}}
+\newcommand{\pitch}{\mathop{\text{pitch}}}
+
+
+\newcommand{\lts}[1]{\ensuremath{\stackrel{#1}{\rightarrow}}}
+
+
+\newcommand{\until}[1]{\ensuremath{\mathbf{U}_{#1}}}
+\newcommand{\nxt}[1]{\ensuremath{\mathbf{X}_{#1}}}
+\newcommand{\always}[1]{\ensuremath{\mathbf{G}_{#1}}}
+\newcommand{\eventually}[1]{\ensuremath{\mathbf{F}_{#1}}}
+\newcommand{\true}{\mathtt{true}}
+\newcommand{\false}{\mathtt{false}}
+
+\usepackage{tikz}
+
+\usepackage{pdflscape}
+
+
+
+%\newcommand{\infrule}[1]{\scriptstyle\it{#1}}
+
+
+\usetikzlibrary{arrows,positioning,automata}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+%\theoremstyle{definition}
+\newtheorem{defn}[thm]{\ \\Definition}
+%\theoremstyle{remark}
+\newtheorem{rem}[thm]{\ \\Remark}
+
+\renewcommand{\theequation}{\thesection.\arabic{equation}}
+\newcommand{\red}{\textcolor{red}}
+
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\renewcommand{\cal}[1]{\mathcal{#1}}
+\newcommand{\bb}[1]{\mathbb{#1}}
+\renewcommand{\phi}{\varphi}
+\newcommand{\xx}{\mathbf{x}}
+
+%\newcommand{\change}[1]{\textcolor{red}{#1}}
+%replace with the following one to remove the red color
+\newcommand{\change}[1]{#1}
+
+% \pr(A \cond B) denotes a conditional probability
+\newcommand{\cond}{\mathrel{|}}
+% \pr(A \joint B) denotes a joint probability
+\newcommand{\joint}{\cap}
+
+
+\begin{document}
+
+\input{macros}
+
+
+\title{\bf From Artificial to Biological Neural Networks}
+
+
+\author{
+ Radu Grosu
+}
+
+\institute{
+TU Wien, Austria
+}
+
+\maketitle
+
+\begin{abstract}
+In this talk I will present our journey during the past few 
+years within the very exciting area of neural networks. I 
+will first start with artificial neurones and neural networks 
+and explain why we got interested in such networks. I 
+will then turn to the mathematical modelling of biological 
+neurones and neural networks. We will distinguish 
+between non-spiking neurones, such as the ones found
+in C. Elegans, and spiking neurones, as found in most
+of the other larger organisms. We will discuss our work
+in analysing the behaviour of such networks, the use in
+control, and the challenges and opportunities in this area.
+\end{abstract}
+
+
+\bibliographystyle{splncs03}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

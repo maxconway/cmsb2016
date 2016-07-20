@@ -1,0 +1,140 @@
+\documentclass{llncs}
+
+%\usepackage{times}
+\usepackage{epsfig}
+\usepackage{ifpdf}
+
+\usepackage{array}
+\usepackage{amsmath,amssymb,amscd,amstext}
+% *** MATH PACKAGES ***
+\usepackage{mathrsfs}
+\usepackage{dsfont}
+\usepackage{amsbsy}
+\usepackage{stmaryrd}
+
+\usepackage{subfigure}
+
+%\usepackage{tocloft}
+\usepackage{setspace}
+%\usepackage{proof}
+\usepackage{fancyhdr} 
+\usepackage{hyperref}
+\usepackage{lastpage}
+%\usepackage{pslatex}
+
+\usepackage[displaymath,textmath,sections,graphics,floats,graphicx,color]{preview}
+%\newcommand{\tuple}[1]{\langle #1\rangle}
+\def  \Nat      {\mathbb{N}}   % naturals
+\def  \Int      {\mathbb{Z}}     % integers
+\def  \Real     {\mathbb{R}}  % reals
+\def  \Bool     {\mathbb{B}}
+\def  \Complex  {\mathbb{C}}
+\def  \T        {\mathbb{T}}
+\def  \Domain   {\mathbb{D}}
+
+\def  \om       {\omega}
+\def  \hf       {\hat{f}}
+\def  \hx       {\hat{x}}
+\def  \ft#1     {\footnote{#1} }
+\def  \f        {\varphi}
+\def  \ni       {\noindent}
+\def  \t        {\tau}
+\def  \s        {\sigma}
+
+\renewcommand{\i}{\mathbf{i}}
+%\newcommand{\ev}{\Diamond}
+%\renewcommand{\next}{\bigcirc}
+%\newcommand{\always}{\square}
+%\newcommand{\untz}{~\mathcal{U}~}   % no argument
+%\newcommand{\unti}[1]{~\mathcal{U}_{#1}}
+%\newcommand{\untii}[2]{~\mathcal{U}_{[#1,#2]}}
+\newcommand{\sncz}{~\mathcal{S}~}   % no argument
+\newcommand{\snci}[1]{~\mathcal{S}_{#1}}
+\newcommand{\sncii}[2]{~\mathcal{S}_{[#1,#2]}}
+\newcommand{\hz}{\mbox{Hz}}
+\newcommand{\pitch}{\mathop{\text{pitch}}}
+
+
+\newcommand{\lts}[1]{\ensuremath{\stackrel{#1}{\rightarrow}}}
+
+
+\newcommand{\until}[1]{\ensuremath{\mathbf{U}_{#1}}}
+\newcommand{\nxt}[1]{\ensuremath{\mathbf{X}_{#1}}}
+\newcommand{\always}[1]{\ensuremath{\mathbf{G}_{#1}}}
+\newcommand{\eventually}[1]{\ensuremath{\mathbf{F}_{#1}}}
+\newcommand{\true}{\mathtt{true}}
+\newcommand{\false}{\mathtt{false}}
+
+\usepackage{tikz}
+
+\usepackage{pdflscape}
+
+
+
+%\newcommand{\infrule}[1]{\scriptstyle\it{#1}}
+
+
+\usetikzlibrary{arrows,positioning,automata}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+%\theoremstyle{definition}
+\newtheorem{defn}[thm]{\ \\Definition}
+%\theoremstyle{remark}
+\newtheorem{rem}[thm]{\ \\Remark}
+
+\renewcommand{\theequation}{\thesection.\arabic{equation}}
+\newcommand{\red}{\textcolor{red}}
+
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\renewcommand{\cal}[1]{\mathcal{#1}}
+\newcommand{\bb}[1]{\mathbb{#1}}
+\renewcommand{\phi}{\varphi}
+\newcommand{\xx}{\mathbf{x}}
+
+%\newcommand{\change}[1]{\textcolor{red}{#1}}
+%replace with the following one to remove the red color
+\newcommand{\change}[1]{#1}
+
+% \pr(A \cond B) denotes a conditional probability
+\newcommand{\cond}{\mathrel{|}}
+% \pr(A \joint B) denotes a joint probability
+\newcommand{\joint}{\cap}
+
+
+\begin{document}
+
+\input{macros}
+
+
+\title{\bf Embedding Machine Learning in Formal Stochastic Models of Biological Processes}
+
+
+\author{
+ Jane Hillston
+}
+
+\institute{
+Laboratory for Foundations of Computer Science, \\ University of Edinburgh, Edinburgh, Scotland 
+}
+
+\maketitle
+
+\begin{abstract}
+Formal modelling languages such as process algebras are effective tools in computational biological modelling. However, handling data and uncertainty in these representations in a statistically meaningful way is an open problem, severely hampering the usefulness of these elegant tools in many real biological applications. I will present ProPPA, a process algebra which incorporates uncertainty in the model description, supporting the use of Machine Learning techniques to integrate observational data in the modelling. I will explain how this is given a semantics in terms of a generalisation of Constraint Markov Chains, and demonstrate how this can be used to perform inference over biological models.
+
+
+\end{abstract}
+
+
+\bibliographystyle{splncs03}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

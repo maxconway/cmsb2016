@@ -1,0 +1,428 @@
+
+%%%%%%%%%%%%%%%%%%%%%%% file typeinst.tex %%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% This is the LaTeX source for the instructions to authors using
+% the LaTeX document class 'llncs.cls' for contributions to
+% the Lecture Notes in Computer Sciences series.
+% http://www.springer.com/lncs       Springer Heidelberg 2006/05/04
+%
+% It may be used as a template for your own input - copy it
+% to a new file with a new name and use it as the basis
+% for your article.
+%
+% NB: the document class 'llncs' has its own and detailed documentation, see
+% ftp://ftp.springer.de/data/pubftp/pub/tex/latex/llncs/latex2e/llncsdoc.pdf
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\documentclass[runningheads]{llncs}
+
+\usepackage{amssymb}
+\setcounter{tocdepth}{3}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[skip=2pt]{caption}
+\usepackage{color}
+\usepackage{url}
+\urldef{\mailsa}\path|{alfred.hofmann,ursula.barth,ingrid.beyer,natalie.brecht,|
+\urldef{\mailsb}\path|christine.guenther,frank.holzwarth,piamaria.karbach,|
+\urldef{\mailsc}\path|chiehl@andrew.cmu.edu, radum@cmu.edu|
+\newcommand{\keywords}[1]{\par\addvspace\baselineskip
+\noindent\keywordname\enspace\ignorespaces#1}
+\renewcommand\tiny{\@setfontsize\tiny{7}{8}}
+%\setlength{\abovecaptionskip}{6pt}
+\setlength{\belowcaptionskip}{-20pt}
+\begin{document}
+\mainmatter  % start of an individual contribution
+
+% first the title is needed
+\title{Autonomous and Adaptive Control of Populations of Bacteria through Environment Regulation}
+
+% a short form should be given in case it is too long for the running head
+\titlerunning{Autonomous and Adaptive Control of Populations of Bacteria}
+
+
+\author{Chieh Lo \and Radu Marculescu}
+%
+\authorrunning{}
+% (feature abused for this document to repeat the title also on left hand pages)
+
+% the affiliations are given next; don't give your e-mail address
+% unless you accept that it will be published
+\institute{Carnegie Mellon University, Pittsburgh, PA, USA\\
+\mailsc\\
+}
+
+%
+% NB: a more complex sample for affiliations and the mapping to the
+% corresponding authors can be found in the file "llncs.dem"
+% (search for the string "\mainmatter" where a contribution starts).
+% "llncs.dem" accompanies the document class "llncs.cls".
+%
+
+\toctitle{Manuscript}
+\tocauthor{Authors' Instructions}
+\maketitle
+
+
+\begin{abstract}
+The proliferation of antibiotic-resistant bacteria poses a significant threat to humans health and welfare. To reduce the bacterial pathogenesis and growth, we propose an autonomous biological controller that can adaptively generate quorum sensing inhibitors and control the iron availability in the environment. As the main theoretical contribution, we provide a detailed analysis of our proposed controller that includes model calibration, system response, and inhibitor effectiveness. We also formulate a constrained optimization problem to choose the values of the biological parameters of the proposed controller under given environment constraints. Finally, we validate our results via detailed population-level simulations and demonstrate that bacteria virulence can be significantly reduced without developing drug resistance or inducing selective pressure among bacteria wild type and mutants. This work represents a first step towards a paradigm change in reducing bacterial pathogenesis via controlling the dynamics of the cell-cell communication through environment regulation.\keywords{Quorum Sensing, Biological Controller, Pathogen, Environment Regulation, Cell-cell Communication}
+\end{abstract}
+
+
+\section{Introduction}
+The fight against bacterial virulence represents one of the big challenges of modern medicine. Indeed, due to the large-scale proliferation and inappropriate use of antibiotics, new strains antibiotic-resistant bacteria begin to emerge. These new, stronger bacteria pose a significant threat to humans health and welfare. To fight antibiotic-resistant bacteria, we propose to engineer synthetic cells, insert them in a population of bacteria, and then control the dynamics and virulence of the entire population~\cite{Fischbach2013}. We note that while previous work~\cite{Cheng2014}\cite{Yosef2015} proposed to engineer cells to kill the antibiotic-resistant bacteria, this kind of approaches may actually select strains that can survive under such therapies. In contrast, in this paper, we design an autonomous controller that can not only regulate the cell-cell communication, but also manipulate the environment signals in order to reduce bacterial virulence and prevent selective pressure among antibiotic-resistant strains.  
+
+Getting now into details, bacteria can form biofilms, express virulence, and become resistant to antibiotics after reaching a quorum through cell-cell communication. Quorum sensing (QS) is a fundamental cell-cell communication that is used by bacteria to obtain cell density information and hence, alter their genes expression~\cite{Bassler2006}. In particular, the QS system used by Gram-negative bacteria is mediated by diffusible signaling molecules, termed ``autoinducers"\footnote{Denoted as AI in this paper.}~\cite{Bassler2006}. For instance, the opportunistic human pathogen \textit{Pseudomonas aeruginosa} (PA) possess a complex QS system that regulates genes and operons which constitute over 6\% of the genome. Those genes coordinate the biofilm formation and produce large amounts of virulence factors, such as elastase, rhamnolipids, and pyocyanin~\cite{Haussler2008}.  
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.9\linewidth]{./system_plot_v7.pdf}
+\caption{(a) Interconnection of the $las$ and $pqs$ QS system of PA. The small orange circles represent autoinducer molecules (AIs) that move freely through the cell membrane; the purple circles and triangles represent the QS signals of $pqs$ QS system; the green particles represent the pyoverdine molecules. The red, orange, blue, and purple ovals represent LasR, LasI, PqsR, PqsA, and PqsE, respectively. (b) The simulation environment, where bacteria (green cells) flow in space and release the QS signals (orange circles). By placing the synthetic (red) cells in the environment, they first react to the QS signals and then express the inhibitors (purple diamonds) that can quench the communication among bacteria. (c) The diagram of the proposed control system. The environment signal ($d$) (e.g., nutrient availability) can be viewed as the input to the intracellular bacterial regulations system. The control variables ($u$) are the QSI inhibitors which can control the dynamics of bacteria. The process variable ($y$) can be detected by the synthetic controller.  }
+\label{fig:system_plot}
+\end{figure}
+
+
+
+QS regulation can be strongly affected by various environmental factors~\cite{Hazan2010}; for example, in PA, the nutrient availability have been shown to affect the expression of QS genes~\cite{Withers2001}. Several other studies have demonstrated that high iron concentrations favor the formation of biofilms and higher growth rates, but restrict the expression of QS signals~\cite{Whiteley1999}\cite{Kim2005}. On the other hand, QS also regulates bacteria access to nutrients and environmental niches that favor their growth and defense.  
+
+The intertwined regulation between QS and environmental signals enable bacteria to thrive in a stringent environment~\cite{Balasubramanian2013}\cite{Oglesby2008}; indeed, under such conditions, bacteria must coordinate the expression of related genes in order to successfully form and maintain biofilms~\cite{Oglesby-Sherrouse2014}. For example, a shortage of iron availability in the environment leads to the increased expression of iron acquisition system~\cite{Bredenbruch2006}\cite{Banin2005} 
+ and decreased activity of pathways that rely on relatively large amounts of iron~\cite{Haussler2008}. However, a rigorous mathematical model that can precisely capture the complex relationship between the QS system and bacteria growth has not yet been explored. Additionally, most studies published so far focus on observing the qualitative behaviors of bacteria and lack the ability to predict long term evolution dynamics under different environmental conditions~\cite{Schaadt2013}. 
+
+We argue that having a quantitative model of QS behavior available can not only capture the important dynamics of bacteria growth, but also give credible predictions for the long term behaviors of bacteria virulence; this analytical QS model is the first major contribution of this work. We also raise another important question: Given such an analytical (i.e., quantitative) model, what are the strategies to control bacteria virulence and growth rate, while lowering the chances of developing drug resistance or inducing selective pressure among bacteria wild type and mutants?  To address this second question, we propose an autonomous biological controller that can dynamically generate different types of inhibitors; this controller is based on genetic parts used to design genetic circuits~\cite{Arpino2013}. 
+
+
+To shed light on the complex relationship between QS and environment signals, we use the opportunistic pathogen PA as a canonical example (Fig.~\ref{fig:system_plot}(a)). PA requires an abundance of iron to produce and sustain infections. Hence, iron depletion prevents bacterial growth and affects their metabolism~\cite{Vasil1999}. By expressing siderophores, PA can sequester iron from environment and regain the ability to form biofilm~\cite{Yang2007}. Two major genetic components of QS, namely, the $las$ and $pqs$ QS systems have been identified in PA~\cite{Bredenbruch2006}. As shown in Fig.~\ref{fig:system_plot}(a), the $las$ QS system sits at the upstream of $pqs$ QS system and positively regulates the operons of the $pqs$ QS system~\cite{Balasubramanian2013}. The $pqs$ QS system produces molecules that mediate the expression of the siderophores~\cite{Bredenbruch2006}\cite{Diggle2007}. To enhance the expression of the siderophores, the upstream $las$ QS system needs to highly express proteins in order to induce the downstream $pqs$ QS system. Hence, as the iron concentration is relatively low, the $las$ QS system is highly expressed and vice versa. However, bacteria can become more virulent when the $las$ QS system strongly expresses proteins as this can regulate the virulence genes. 
+
+In summary, in an iron depletion environment, the growth of bacteria can be delayed but the virulence can actually increase~\cite{Kim2005}. To control both the virulence and the growth rate of bacteria simultaneously, we use two different kinds of inhibitors that target the $las$ QS system and the iron availability in the environment. Different types of inhibitors can have different effects on virulence and growth rate, hence, multi-inhibitor schemes can be more effective.  To synthesize inhibitors and control the iron concentration, a few simple genetic circuits can serve as the basic control units which automatically detect and react to environment changes. For example, we can construct the genetic circuits by cloning the genes in the plasmid, such as the $aiiA$ gene which expresses the enzyme that hydrolyzes the AI~\cite{Park2008} (Fig.~\ref{fig:system_plot}(b)). However, synthesizing excessive amounts of inhibitors in the environment can have toxic effects on the host. 
+ 
+ Therefore, in this paper, we propose a dynamic optimization problem that incorporates bacteria QS, growth, and control dynamics. Solving this optimization problem allows us to choose the biological parameters that can be further used to design controllers that can generate the optimal amount of inhibitors adaptively.  By placing the biological controller into the bacterial environment, it becomes possible to detect the concentration of the signaling molecules in the environment and then generate the right amount of inhibitors in real-time. Consequently, the proposed system aims at a paradigm shift from manual to autonomous control of bacteria population dynamics (Fig.~\ref{fig:system_plot}(c)). Taken together, our contribution is threefold:
+\begin{itemize}
+  \item First, we develop a new (cellular-level) ordinary differential equations (ODEs) based model of $pqs$ QS system and propose new synthetic circuitry to control bacteria virulence and growth. To the best of our knowledge, this is the first design that formally considers the autonomous control of the QS and environmental signals in populations of bacteria. 
+  \item Second, we formulate a constrained optimization problem based on the QS and control dynamics. We illustrate the design procedures for the biological controller by solving this optimization problem; this provides the theoretical basis for synthesizing the controller.    
+  \item Third, we verify our proposed controller via detailed simulations at population-level. As such, the design procedure we provide can serve as a general guideline towards \textit{in vitro} construction of synthetic cellular controllers. 
+  \end{itemize}
+
+The remainder of this paper is organized as follows. Section 2 focuses on the mathematical modeling of the QS regulation system (i.e., $las$ and $pqs$) of PA, bacteria growth, and QSI model. Section 3 analyzes the QS system response and bacteria growth model via simulation.  Section 4 formulates the constrained optimization problem for designing the biological controller and provides a design example based on the proposed design guidelines. Section 5 utilizes the bacteria simulator proposed in \cite{Wei2013} to validate the model under various scenarios that mimic realistic settings. Finally, conclusions are drawn in section 6.  
+
+
+\section{Cellular-level Mathematical Modeling}\label{Math}
+In this section, we model the dynamics of bacteria QS, growth, and inhibition systems based on ODEs. To uncover the complex interaction between the QS and environment signals (i.e., iron), we first model the $las$ and the $pqs$ QS systems and the growth of PA explicitly. Next, we calibrate our models with the reported experimental data~\cite{Kim2005}; that is, at different iron concentration levels, we calibrate the relative concentration change of the LasR protein (main receptor in $las$ QS system); this provides the basis for examining the QS system response and subsequently designing the biological controller. 
+
+ 
+\subsection{QS model of PA}
+The QS regulatory network of PA consists of two main systems: $las$ and $pqs$.  The $las$ and the $pqs$ QS systems are linked by (1) LasR-AI complex which directly \textit{up} regulates the expression of the PqsR and the PqsH proteins and (2) iron-chelated complex which \textit{down} regulates the expression of the LasR protein and then reduces the expression of the siderophore (a negative feedback loop). The entire QS system is modeled as follows:
+  
+ \begin{table}[t]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+\bf Symbol  & \bf Parameter & \bf Source\\ \hline
+\small $K$ & Half saturation concentration &  \cite{Melke2010}\cite{Fagerlind2005} \\ \hline
+\small $U$ & Utilization coefficient &  introduce in this paper \\ \hline
+\small $V$ & Maximum production rate &   \small \cite{Melke2010}\cite{Fagerlind2005} \\ \hline
+\small $b$ & Molecule decay rate &   \cite{Melke2010}\cite{Fagerlind2005} \\ \hline
+\small $c$ & Basal production rate &  \small \cite{Melke2010}\cite{Fagerlind2005} \\ \hline
+\small $d$ & Membrane diffusion rate &  \small \cite{Fagerlind2005}\\ \hline
+\small $\alpha$ & Binding rate  &  \small \cite{Melke2010}\cite{Fagerlind2005} \\ \hline
+\small $\beta$ & Enzyme production rate&  \small \cite{Melke2010}\cite{Fagerlind2005}\\ \hline
+\small $\delta$  & Unbinding rate &  \small \cite{Melke2010}\cite{Fagerlind2005} \\ \hline
+\small $\rho$  & Cell density &  \small \cite{Fagerlind2005} \\ \hline
+\small $P$  & Promoter strength &  \small \cite{Voigt2006} \\ \hline
+\small $r$  & Basal production rate &  \small \cite{Voigt2006} \\ \hline
+\end{tabular}
+\caption{\label{parameters} Table with model parameters}
+\end{table} 
+  
+\subsubsection{$las$ QS model}
+The regulatory network of the $las$ QS system has two feedback loops. As shown in Fig.~\ref{fig:system_plot}(a), the LasR-AI complex up regulates the expression of both $lasR$ and the $lasI$ genes.  Based on the ODE models proposed in~\cite{Melke2010}\cite{Williams2008}, we have the following equations for the $las$ QS system:
+\begingroup\makeatletter\def\f@size{9}\check@mathfonts
+\def\maketag@@@#1{\hbox{\m@th\small\normalfont#1}}%
+\begin{align}
+\label{AIluxI}
+\frac{d[A]}{dt} &= c_{A}+\frac{V_{A}[C]}{K_{A}+[C]} - \alpha_{RA}[R][A]+ \delta_{RA}[RA] -b_{A}[A] -\frac{d_{A}}{\rho} ([A_{EX}] - [A])\\
+\label{A1ex}
+\frac{d[A_{EX}]}{dt} &=  -b_{A_{EX}}[A_{EX}] -\frac{d_{A}}{1-\rho} ([A_{EX}] - [A])  \\
+\label{luxReq}
+\frac{d[R]}{dt} &= c_{R}+\frac{V_{R}[C]}{K_{R}+[C]} - \alpha_{RA}[R][A]+ \delta_{RA}[RA] - b_{R}[R]\\
+\label{RAformationeq}
+\frac{d[RA]}{dt} &= \alpha_{RA}[R][A]  -2\alpha_{RA^2}[RA]^{2} - \delta_{RA}[RA]  + 2\delta_{RA^2}[C]\\
+\label{Cformationeq}
+\frac{d[C]}{dt} &= \alpha_{RA^2}[RA]^{2} - \delta_{RA^2}[C]
+\end{align}\endgroup
+where $[X]$ denotes the concentration of a particular molecular species $X$. In our formulation, $A$ stands for AI, $A_{EX}$ is the extracellular AI, $R$ is LasR, $RA$ is the LasR-AI complex and $C$ is the dimerized complex.  The meaning of biological constants are listed in Table~\ref{parameters} while their numerical values are listed in Table~\ref{values} and Table~\ref{values2} in the \textbf{Appendix}. 
+
+\vspace{-10pt}
+
+
+\subsubsection{$pqs$ QS model}
+The $pqs$ QS system consists of two kinds of signaling molecules, PQS (2-heptyl-3,4-dihydroxyquinoline) and HHQ (4-hydroxy-2-heptylquinoline); in addition we have one receptor regulator PqsR. The PqsR protein can bind to the HHQ and the PQS molecules and up regulate the $pqsABCDE$ operon; this forms a positive feedback since the PqsA protein directly up regulates the synthesis of the HHQ molecules. Another signaling molecule, PQS, is converted from HHQ via PqsH protein. Therefore, $pqs$ QS system forms a second positive feedback loop. By explicitly capturing regulations among proteins and molecules based on molecular transcription and translation, we propose the following new ODEs to describe the $pqs$ QS system:
+
+\vspace{-15pt}
+\begingroup\makeatletter\def\f@size{7.5}\check@mathfonts
+\def\maketag@@@#1{\hbox{\m@th\small\normalfont#1}}
+\begin{align}
+\frac{d[pR]}{dt} &=  c_{pR} + \frac{V_{pR} [C]}{K_{pR} + [C]} \!-\! \alpha_{pR} ( [pR][A_1] + [pR][A_2] )  \!+\! \delta_{pR} ( [C_1] +  [C_2] )\! -\!b_{pR} [pR]   \\
+\frac{d[pH]}{dt} &=  c_{pH} + \frac{V_{pH} [C]}{K_{pH} + [C]} -b_{pH} [pH]   \\
+\frac{d[pA]}{dt}  &=  c_{pA} + \frac{V_{pA,1} [C_1]}{K_{pA,1} + [C_1]} \frac{V_{pA,2} [C_2]}{K_{pA,2} + [C_2]}  -b_{pA} [pA]   \\
+\frac{d[pE]}{dt} &=  c_{pE}  +  \frac{V_{pE, 1} [C_1]}{K_{pE, 1} + [C_1]} \frac{V_{pE, 1} [C_2]}{K_{pE, 1} + [C_2]} -b_{pE} [pE] \\
+\frac{d[C_1]}{dt} &= \alpha_{pR} [pR] [A_1] - \delta_{pR} [C_1] \\ 
+\frac{d[C_2]}{dt} &= \alpha_{pR} [R_2][A_2] - \delta_{pR} [C_2] \\ 
+\frac{d[A_1]}{dt} &=   \beta_{pA} [pA]\frac{K_{A_1}}{K_{A_1} \!+ \! [pE]} \! - \! \alpha_{pR} [pR][A_1] \!+\! \delta_{pR} [C_1]  \!-\! b_{A_1} [A_1] \! + \!\frac{d_{A_1}}{\rho} ([A_{1EX}] \!-\! [A_1]) \\ 
+\frac{d[A_{1EX}]}{dt} &=  -  b_{A_1} [A_{1EX}] -\frac{d_{A_1}}{1-\rho} ( [A_{1EX}  - [A_1])  \\ 
+\frac{d[A_2]}{dt} &= \beta_{pH} [pH] [A_1] \! -\! \alpha_{pR} [pR][A_2] + \delta_{pR} [C_2] - b_{A_2} [A_2]   +\frac{d_{A_2}}{\rho} ([A_{2EX}] - [A_2]) \\ 
+\frac{d[A_{2EX}]}{dt} &= -  b_{A_2} [A_{2EX}]  -\frac{d_{A_2}}{1 - \rho} ([A_{2EX}]  - [A_2])   \\ 
+\frac{d[Pyo]}{dt} &=   c_{Pyo} + \frac{V_{Pyo}  [pE]}{K_{Pyo} + [pE]} - b_{Pyo} [Pyo] +  \frac{d_{Pyo}}{\rho} ([Pyo_{EX}] -[Pyo])   \\
+\label{Irona}  
+\frac{d[Pyo_{EX}]}{dt} &=  - \alpha_{I} [Pyo_{EX}][I] - b_{Pyo_{EX}} [Pyo_{EX}] + \frac{d_{Pyo}}{1 - \rho} ([Pyo_{EX}] - [Pyo])\\ 
+\frac{d[Q]}{dt} &= - b_{Q} [Q]  + \frac{d_Q}{\rho} ([Q_{EX}] - [Q]) \\ 
+\frac{d[Q_{EX}]}{dt}  &=  \alpha_{I} [Pyo_{EX}][I] + \frac{d_{Q}}{1 - \rho} ([Q_{EX}] - [Q])   
+\label{QS_end}
+\end{align}\endgroup
+where $[X]$ denotes the concentration of a particular molecular species $X$. In our formulation, $pA$, $pE$, $pH$, and $pR$ stand for PqsA, PqsE, PqsH and PqsR, respectively. $A_1$, $A_2$, $C_1$ and $C_2$ represent HHQ, PQS, PqsR-HHQ and PqsR-PQS, respectively. $Pyo$ and $I$ represent pyoverdine and iron, respectively. $Q$ is the iron-chelated complex. 
+
+Given the $pqs$ QS system, we modify the expression of the LasR protein in (\ref{luxReq}) as follows:
+\begingroup\makeatletter\def\f@size{9}\check@mathfonts
+\def\maketag@@@#1{\hbox{\m@th\small\normalfont#1}}%
+\begin{align}
+\frac{d[R]}{dt} = c_{R}+\frac{V_{R}[C]}{K_{R}+[C]}\frac{V_{Q}K_{Q}}{K_{Q} + [Q] } - \alpha_{RA}[R][A]+ \delta_{RA}[RA] -b_{R}[R]
+\end{align}\endgroup
+where we add a new term to account for the effect of iron-chelated complex $Q$. In this equation, the parameters $V_Q$ and $K_Q$ represent the maximum production rate and Michaelis-Menten constant, respectively. 
+
+\subsection{Bacteria growth model and virulence measure}
+To describe bacteria growth, Monod introduced the concept of single nutrient controlled kinetics \cite{Monod1949}, which relates the specific growth rate ($\mu_{X}$) of a bacterium cell mass ($X$) to the substrate concentration ($S$). The kinetic parameters, i.e., maximum specific growth rate ($k_{X}$) and substrate affinity ($K_{S}$), are assumed to be constant and dependent on strain, medium, and growth conditions (e.g. temperature, pH). In our model, however, we need to consider a second nutrient source and add a new term $Q$ to describe it. However, when cells are metabolically active, but not growing or dividing, they may still take up substrate. 
+
+To address bacteria size reduction, a maintenance rate ($m$) is generally used; consequently, we improve Monod's model as follows:
+\begin{eqnarray}
+\label{eq:BioGrowthMaintenance}
+&\mu_{X} = k_{X} \cdot \frac{S+Q}{S+Q+K_{g}}& \\
+&\frac{dX}{dt} = (\mu_{X}-m)\cdot X&
+\end{eqnarray}
+
+We also define the virulence ($V$) as the concentration of LasR-AI complex as it controls the downstream virulence expressions; therefore, the total virulence (TV) of the bacteria population is defined as the product of the virulence and the number of bacteria ($N$)\footnote{Since the number of bacteria is proportional to the biomass, we use biomass and the number of bacteria to account for the total virulence interchangeably. }:
+\begin{align}
+TV = V \times N 
+\label{obj}
+\end{align}
+We note that, as discussed later in Sect.~\ref{design}, both $V$ and $N$ are variables that depend on time ($t$) and the set of biological parameters ($\mathbf{p}$).
+
+\subsection{Inhibition Model}
+We target the bacterial iron acquisition as a strategy to control the virulence of bacteria. From our previous discussion, the QS signaling pathways are the primary target. More precisely, to control the iron uptake rate of PA, we propose two strategies that can either modulate the iron uptake or inhibit the upstream $las$ QS system: 
+
+\subsubsection{AI inhibitors}
+The AI inhibitor hydrolyzes the extracellular AI molecules which can be viewed as a degradation source and assumed to follow the Michaelis-Menten kinetics. Accordingly, \eqref{A1ex} should be modified as:
+\begingroup\makeatletter\def\f@size{9}\check@mathfonts
+\def\maketag@@@#1{\hbox{\m@th\small\normalfont#1}}%
+\begin{align}
+\label{A1ex1} 
+\frac{d[A_{EX}]}{dt} &= - b_{A_{EX}} [A_{EX}]  - \frac{d_{A}}{1-\rho} ([A_{EX}]  - [A])  -  \frac{V_{E} [A_{I_{EX}}] [A_{EX}] }{K_{A_{EX}} + [A_{EX}] } 
+\end{align}\endgroup
+where $A_{I_{EX}}$ denotes the extracellular AI inhibitor. 
+
+\vspace{-10pt}
+
+\subsubsection{Iron inhibitors}
+Different species of bacteria can produce different kinds of siderophores that trap the iron from environment, e.g. $Enterobactin$ produced by $\textit{E. coli}$ cannot be up-taken by PA. If the amount of iron is limited, bacteria compete with each other in order to retain the essential resources. Therefore, we consider the siderophores produced by other bacteria as iron inhibitors that can limit the availability of iron in the environment.  The dynamics of the available iron in the environment can be simply modeled as: 
+\begingroup\makeatletter\def\f@size{9}\check@mathfonts
+\def\maketag@@@#1{\hbox{\m@th\small\normalfont#1}}%
+\begin{align}
+[I_{ava}] = [I](\frac{[Pyo_{EX}]}{[I_I] + [Pyo_{EX}]}) 
+\end{align}\endgroup
+where $I_{ava}$ denotes the available iron in the environment and $I_I$ stands for the iron inhibitor.  By replacing $I$ with $I_{ava}$ in (\ref{Irona}) and (\ref{QS_end}), we can incorporate the iron inhibitor dynamics to the QS model.     
+
+\subsection{Biological controller}
+To dynamically and autonomously generate either AI or iron inhibitors, we propose to use synthetic methods to construct the genetic circuitry. To obtain variable combinations of the inhibitors with optimal expression levels, we build two circuits separately. More precisely, to generate AI inhibitor, we can assemble the $aiiA$ genes with the $lux$ promoter to sense the concentration of LasR-AI ($C$). Similarly, the iron inhibitor circuit is built with genes that can express the competing siderophores and sense the concentration of iron-chelated complexes ($Q$). Based on the general modeling of genetic circuitry~\cite{Voigt2006}, we model the dynamics of the new biological controller with the following ODEs:
+\begingroup\makeatletter\def\f@size{7.5}\check@mathfonts
+\def\maketag@@@#1{\hbox{\m@th\small\normalfont#1}}%
+\begin{align}
+ \frac{d[A_I]}{dt} &= P_{{A_I}} (\frac{1}{r_{A_I}} + \frac{[C]^2}{K_{A_I}^2 + [C]^2 }) - b_{A_I} [A_{I}] + \frac{d_{A_I}}{\rho_{s}} ( [A_{I_{EX}}] - [A_{I}] ) \label{e1} \\ 
+ \frac{d[A_{I_{EX}}]}{dt} &=  - \frac{d_{A_{I}}}{1-\rho_{s}} ( [A_{I_{EX}}] - [A_{I}] ) -  b_{A_{I_{EX}}} [A_{I_{EX}}] \\ 
+ \frac{d[I_I]}{dt} &= P_{{I_I}} (\frac{1}{r_{I_I}} + \frac{[Q]^2}{K_{I_I}^2 + [Q]^2 }) - b_{I_I} [I_{I}] + \frac{d_{I_I}}{\rho_{s}} ( [I_{I_{EX}}] - [I_{I}] ) \label{e2} \\
+ \frac{d[I_{I_{EX}}]}{dt} &=  - \frac{d_{I_I}}{1-\rho_s} ( [I_{I_{EX}}] - [I_{I}] ) -  b_{I_{I_{EX}}} [I_{I_{EX}}] \label{e2_end}
+\end{align}\endgroup
+where $A_I$ ($I_I$) and $A_{I_{EX}}$ $(I_{I_{EX}})$ denote the intracellular and extracellular concentration of the AI (iron) inhibitors, respectively. The inhibitors production rate (second term) in (\ref{e1}) and (\ref{e2}) can be characterized by the binding of the LasR-AI and iron-chelated complex, respectively.  The product of the promoter strength ($P_{A_I}$ and $P_{I_I}$) and the basal production rate ($r_{A_1}$ and $r_{I_{I}}$) characterize the minimal expression rate when there is no LasR-AI and iron-chelated complex present, respectively\footnote{We discuss a design example for the biological parameters in subsequent sections.}. 
+\vspace{-10pt}
+\section{QS System Analysis}\label{analysis}
+In this section, we first examine the QS system responses to different chemical substances. Next, we examine the effects of substrate utilization constant on bacteria growth. Finally, we examine the effectiveness of AI and iron inhibitors. 
+\vspace{-20pt}
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{./time_series_v3.pdf}
+\caption{Simulation results of the PA QS system responses to different iron concentrations. At first, the iron concentration is 0.01 (a.u.);  later at time t = 5000 (a.u.), it is changed to 1 (a.u.). (a) As iron concentration increases, the expression of LasR proteins is repressed due to the negative feedback of iron-chelated complexes (see Fig~\ref{fig:system_plot}(a)).  (b) The concentration of the LasR-AI complex decreases accordingly. The downstream proteins (i.e., (c) PqsR, (d) PqsA, and (e) PqsE) are all positively regulated by LasR. Hence, they change in accordance with LasR protein. The (f) PqsR-HHQ and (g) PqsR-PQS concentrations also decrease due to the decrease of PqsR. (h) Pyoverdine (Pyo) concentration shows similar profile since it is positively regulated by PqsE.  (i) The concentration of iron-chelated (Pyo-Iron) complex increases due to the high affinity of pyoverdine and iron. }
+\label{fig:time_series}
+\end{figure}
+\subsection{QS System Responses}
+We first examine the responses of the $las$ and $pqs$ QS systems by varying the concentration of available iron in the environment. Fig.~\ref{fig:time_series} shows the QS system responses to several chemical substances. At first, the concentration of iron is 0.01 (arbitrary unit (a.u.)); at $t = 5000$ (a.u.), the concentration of iron is changed to 1.00 (a.u.) (i.e., one hundred fold increase). We observe that the LasR protein concentration decreases due to the increase of the iron concentration; this is discussed in~\cite{Kim2005} and illustrated with the negative feedback (see also Fig.~\ref{fig:system_plot}(a)). The other chemical substances show similar patterns except the iron-chelated complex which directly increases the growth rate. This way, the system responses confirm that our model can precisely describe the changes of chemical substance concentrations when the concentration of iron changes; this confirms the experiments in~\cite{Kim2005}. 
+
+\subsection{Growth Model: Utilization Constant}
+In Monod's bacterial growth model, bacteria consume the substrate for their growth. We assume the utilization of substrate ($U_S$) is constant under different iron concentrations. However, the exact values of the utilization constant are hard to measure and estimate experimentally. To determine the $U_S$ value, we examine the changes of total virulence and biomass under different iron concentrations. 
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=1\linewidth]{./utilization_v2.pdf}
+\caption{Substrate utilization constant ($U_s$) selection. (a) The effect of substrate utilization constant on total virulence under different iron concentrations. (b) The effect of substrate utilization constant on biomass under different iron concentrations. }
+\label{fig:no_drug}
+\end{figure}
+
+As shown in Fig.~\ref{fig:no_drug}(a), once a certain concentration of iron is reached, the larger the $U_S$, the greater the total virulence; this is because a consumption rate of substrate that is low results in a nutrient abundant environment that favors bacteria growth.  We can observe that the biomass and the total virulence are almost identical if $U_S$ is greater than 10. Hence, in the following analysis, we set $U_S$ to 10.   
+
+\subsection{Inhibitors Effectiveness}
+From Fig.~\ref{fig:time_series}(a), we note that when the iron concentration is high, the expression of the LasR is repressed (Fig.~\ref{fig:drug_1_all}(a)). On the other hand, the biomass increases due to the higher growth rate (Fig.~\ref{fig:drug_1_all}(b)).  By using (\ref{obj}), the TV increases as the concentration of iron increases as shown in Fig.~\ref{fig:drug_1_all}(c).  
+
+Figs.~\ref{fig:drug_1_all}(d)-(f) show the effect of adding the AI inhibitor into the environment, both LasR-AI complex and biomass decrease (Fig.~\ref{fig:drug_1_all}(d)(e)). Hence, the TV decreases as the amount of inhibitors increases. 
+
+Our most important observation shows that if we vary both the iron concentration and AI inhibitors, we may decrease the TV. Indeed, Fig.~\ref{fig:drug_1_all}(i) shows that TV decreases as we increase the concentration of AI inhibitors and decrease the iron concentration. The AI inhibitor and iron concentration have opposite effects on the LasR-AI complex and the biomass. More precisely, lower concentrations of iron result in higher concentrations of the LasR-AI complex (Fig.~\ref{fig:drug_1_all}(g)), but a decrease in the biomass production (Fig.~\ref{fig:drug_1_all}(h)). 
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=1\linewidth]{./drug_1_all_v8.pdf}
+\caption{The concentration changes of LasR-AI, biomass, and the TV due to the effect of different inhibitors. (a), (b), and (c) show the effect of iron concentration alone. (d), (e), and (f) show the effect of AI inhibitors alone. (g), (h), and (i) show the combined effect of iron and AI inhibitors. The set points in (c), (f), and (i) are denoted as $S_A$, $S_B$, and $S_C$, respectively; they are used to derive results in Fig.~\ref{fig:bio_p}}
+\label{fig:drug_1_all}
+\end{figure}
+
+\section{Autonomous Biological Control System}\label{design}
+The autonomous biological controller we propose can automatically detect signals, react to environment, and adaptively release chemical substances for intended objectives.  To control the TV, the objective is to find a set of biological parameters $\mathbf{p}$ that minimize~(\ref{obj}). However, this objective function is subject to various biological constraints including the bacteria QS, growth and QSI, as well as control dynamics.  Given the mathematical model in Sect.~\ref{Math}, we formulate a constrained dynamic optimization problem and solve it through numerical methods. 
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=1\linewidth]{./bio_p_v3.pdf}
+\caption{Operation points for different types of inhibitors. Different color indicates the TV of a certain combination of biological parameters (promoter strength ($P$) and basal production rate ($r$) described in (\ref{e1})-(\ref{e2_end})). (a) and (b) show the operation points $O_A$ and $O_B$ for iron and AI inhibitor alone; they can achieve TV around 0.1 and 0.001 where we choose the setting points $S_A$ and $S_B$ in Fig.~\ref{fig:drug_1_all}(c) and (f), respectively. Based on the operation points we choose, we can solve the optimization problem and obtain the corresponding biological parameters where $P = 100, r= 250$ and $P = 2, r= 250$, respectively. (c) The operation point $O_C$ for multi-inhibitors. In this case, $P = 100$ and $r= 250$. }
+\label{fig:bio_p}
+\end{figure}
+
+\subsection{Problem Formulation}
+Based on the general constrained dynamic optimization formulation and control dynamics (see \textbf{Appendix}), we can formulate our problem as follows:
+\begin{equation}
+\begin{aligned}
+\label{optimization}
+& \underset{\mathbf{p}}{\text{min}}
+& & TV_{t} = V(x_t, \mathbf{p})\times N(x_t, \mathbf{p})  \\
+& \text{subject to}
+& & \dot{x}_{t} =  f(x_t, u_t, d_t, \mathbf{p}) \   \dot{u}_t =  h(u_t, e_t, \mathbf{p}) \\
+&&& y_t =  g(x_t, \mathbf{p}) \hspace{33pt} e_t =  y_t - r_t  \hspace{30pt} \forall t \in [t_0, t_{FL}] \\
+&&& x_{t_0}(\mathbf{p}) = x_0(\mathbf{p}) \\
+&&& \mathbf{p}^L \leq \mathbf{p} \leq \mathbf{p}^U \\
+\end{aligned}
+\end{equation}
+where $t \in \mathbb{R}$ represents time, $t_0, t_{FL}$ are the initial and final time, respectively, $t_i \in [t_0, t_{FL}],$ $\mathbf{x}$ and $\mathbf{\dot{x}} \in \mathbb{R}^n$ are the state variables and their time derivatives, respectively, and $\mathbf{p} \in \mathbb{R}^r$ capture the time-invariant biological parameters that can vary within $[\mathbf{p}^L, \mathbf{p}^U]$. The functions $f$ and $h$ are QS and QSI models, respectively.   The function $g$ selects the process variables ($y$) (i.e., LasR-AI and iron-chelated complexes in our case).  The state variable $\mathbf{x}$ represents the set of concentrations of chemical substances described by (\ref{AIluxI})-(\ref{QS_end}); the environment input ($d$) describes the environment conditions such as the nutrient availability. The control variables ($u$) are the inhibitors which target the AI and iron availability. 
+
+The genetic circuit can be thought of as an integral controller which reacts to the concentration of LasR-AI and iron-chelated complexes, respectively. The error signal ($e$) is computed as the difference between the process variable and the reference signal ($r$); this then feeds back to the controller, which forms a closed loop (see Fig.~\ref{fig:system_plot}(c)).  
+  
+\subsection{Biological Parameters Design}
+To design the biological parameters for our controller, we can numerically solve the above optimization problem by sampling biological parameters within the given constraints. From our analyses in Sect.~\ref{analysis}, we notice that TV is a monotonically decreasing function (Fig.~\ref{fig:drug_1_all}(i)). Consequently, by setting (\ref{obj}) to a desired value, we can solve (\ref{optimization}) for biological parameters to fulfill the design specifications. 
+
+We now provide a design example for the control circuitry that can effectively achieve the setting objective value.  As shown in Fig.~\ref{fig:drug_1_all}(c)(f)(i), we first choose the setting points $S_A$, $S_B$, and $S_C$ for three different strategies that can achieve desired TVs (0.1, 0.001 and 0.001 in this design examples).  The biological parameters we choose to engineer are the promoter strength ($P$) and the basal production rate ($r$) in (\ref{e1})-(\ref{e2_end}) since we can tune their values through the evolution method~\cite{Arpino2013}. Next, by solving (\ref{optimization}) through varying the value of a set of biological parameters within the given constraints ([$\mathbf{p^L}, \mathbf{p^U}$]), we can obtain the most suitable combination of biological parameters that express the minimal amount of inhibitors. Fig.~\ref{fig:bio_p} shows the operation points $O_A$, $O_B$ and $O_C$ for three strategies that can achieve the setting values ($S_A$, $S_B$, and $S_C$), respectively. Based on the operation points, we obtain the set of desired biological parameters.  
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=1\linewidth]{./sim_all_v3.pdf}
+\caption{ The simulation results  for  (a) TV (b) concentration of LasR-AI complex (c) number of bacteria for four different scenarios. Note that TV is the product of the concentration of LasR-AI complex and the number of bacteria as shown in (\ref{obj}). We observe that the multi-inhibition strategy is the most effective in reducing TV.   }
+\label{fig:sim_all}
+\end{figure}
+
+\section{Population-level Simulation Results}
+In this section, we validate the proposed control system by using a 3D microfluidic environment agent-based simulator~\cite{Wei2013}. First, we explicitly apply the cellular-level model to each agent (bacterium). Next, we consider several physical and stochastic effects (physical interactions between bacteria, variation in the QS systems, growth model, etc) and examine the growth and virulence of populations of bacteria.  
+
+The environmental configurations used in these simulations are presented in the \textbf{Appendix}. As shown in Fig.~\ref{fig:sim_all}(a), for the case without inhibitors, the values of TV surpass the other strategies after 70 hrs of cultivation (i.e., the time we grow bacteria in wet-lab); this is because the bacteria growth rate ($\mu_X$ in (\ref{eq:BioGrowthMaintenance})) without inhibitors is larger compared to inhibitor schemes (Fig.~\ref{fig:sim_all}(c)).  
+If we use AI inhibitors alone, the concentration of LasR-AI complex is reduced, but this can not repress the growth of bacteria. On the contrary, the iron inhibitor alone can inhibit the bacteria growth but the LasR-AI concentration increases (Fig.~\ref{fig:sim_all}(b)). The multi-inhibitor strategy shows the best results; indeed it can lower the concentration of LasR-AI and bacteria growth simultaneously.     
+
+\vspace{-5pt}
+
+\section{Conclusion}\label{conclusion}
+In this work, we have proposed an autonomous optimal controller that incorporates the bacteria QS regulation and growth models and operates within a synthetic cell. By analyzing the system characteristics through numerical methods and simulations, we have shown that such synthetic cells can control the expression level of QS signals and cells growth. 
+
+We have also formulated a dynamic optimization problem to design the biological parameters of the proposed controller; this provides general guidelines to synthesize such optimal controllers \textit{in vitro}. The proposed autonomous controlled system represents a first step towards a paradigm change in controlling the dynamics of communicating bacteria. 
+
+\bibliographystyle{splncs03}
+\bibliography{CMSB16}
+
+\newpage
+\section*{Appendix}
+\subsection*{General form of a dynamic constrained optimization problem }
+A general dynamic optimization problem can be formulated as follows:
+\begin{equation*}
+\begin{aligned}
+& \underset{p}{\text{min}}
+& & J(x_{t},p) \\
+& \text{subject to}
+& & \dot{x}_t =  f(x_t,p) \ \forall t \in [t_0, t_{FL}] \\
+&&& x_{t_0}(p) = x_0(p) \\
+&&& p^L \leq p \leq p^U \\
+\end{aligned}
+\end{equation*}
+where $t \in R$ is time, $t_0, t_f$ are the initial and final time, respectively, $t_i \in [t_0, t_{FL}],$ $x$ and $\dot{x} \in R^n$ are the state variables and their time derivatives, respectively, and $p \in R^r$ are the time-invariant parameters and is subjected to the lower constraints $p^L$ and upper constraints $p^U$. The function $J$ is the objective that we want to minimize. $f$ describes the system dynamics.  $x_0$ is the initial conditions of the state variables. 
+
+
+
+\subsection*{Control problem formulation}
+Consider a general control system which consists of a plant and a controller (see Fig.~\ref{fig:system_plot}(c)). The plant (process) takes in the input variable ($d(t)$) and control variable (CV) ($u(t)$) generating the process variable (PV) ($y(t)$). The controller calculates an error ($e(t)$) signal as the difference between a measured process variable and a desired setpoint (SP) ($r(t)$). The controller aims at minimizing the error by adjusting the process through the control variable ($u(t)$). The  control system can be characterized by the following equations:
+\begin{small}
+\setlength{\abovedisplayskip}{2pt}
+\setlength{\belowdisplayskip}{2pt}
+\begin{align}
+\dot{x}(t) &= f(x(t),u(t),d(t)), \hspace{3pt} \dot{u}(t) =  h(e(t),u(t)) \\
+y(t) &= g(x(t)), \hspace{40pt}  e(t) = y(t) - r(t)
+\end{align}
+\end{small}
+where $f$, $g$ and $h$ are arbitrary functions. The controller, in this case, can be viewed as an integral controller since the control signal is proportional to the integral of the error signal.  
+
+
+\subsection*{Simulation Environment Configuration}
+We model bacterial growth in a 3D microfluidic environment ($100 \mu m$ x $100 \mu m$ x $100 \mu m$) that is initialized and inoculated with 1000 wild-type cells, all of which are non-overlapping and randomly attached to the substrate. We set up the simulation time up to 150 hrs in order to observe the evolution dynamics of bacteria growth. 
+
+
+
+\newpage
+\begin{table}[!h]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\bf Symbol  & Value  \\ \hline
+  $c_{A}, c_{R}$ & $1e-4/s$   \\ \hline 
+  $\alpha_{RA}, \alpha_{RA^2}$ & $1e-1$  \\ \hline
+  $\delta_{RA}, \delta_{RA^2}$ & $1e-1$  \\ \hline
+  $b_{A}, b_{R}  $ & $1e-2$  \\ \hline
+   $d_{A}$ & $1e-1$  \\ \hline
+   $V_{A}, V_{R}  $ & $2e-3$ \\ \hline
+   $K_{A}$ & $1e-6$ \\ \hline
+   $K_{R}$ & $1e-5$  \\ \hline
+\end{tabular}
+\caption{\label{values} Table with numerical values of model parameters from~\cite{Melke2010}\cite{Fagerlind2005}}
+\end{table}
+
+
+\begin{table}[!h]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\bf Symbol  & Value \\ \hline
+  $c_{pR}, c_{pH}, c_{pA}, c_{pE}, c_{Pyo}$ & $1e-7/s$  \\ \hline 
+  $\alpha_{pR}$ & $1e-1$  \\ \hline
+  $\alpha_{I}$ & $1e-2$  \\ \hline
+  $\delta_{pR}$ & $1e-1$  \\ \hline
+  $b_{pR}, b_{pH}, b_{pA}, b_{pE}, b_{A_1}, b_{A_2}  $ & $1e-2$  \\ \hline
+    $b_{A_{1_{EX}}}, b_{A_{2_{EX}}}, b_{Pyo}, b_{Pyo_{EX}}, b_{Q}  $ & $1e-1$\\ \hline
+      $d_{A_1}, d_{A_2}, d_{Pyo}, d_{Q}$ & $1e-1$  \\ \hline
+   $V_{pR}, V_{pH}, V_{pA,1}, V_{pA,2}, V_{pE,1}, V_{pE,2} V_{Pyo}  $ & $2e-3$  \\ \hline
+   $K_{pA,1}, K_{pA, 2}, K_{pE,1}, K_{pE,2}$ & $1e-6$  \\ \hline
+   $K_{A_1}$ & $1e-3$ \\ \hline
+   $K_{pR}, K_{pH}$ & $1e-1$  \\ \hline
+   $K_{Pyo}$ & $1$ \\ \hline
+   $\beta_{pA}$ & $1e-2$   \\ \hline
+   $\beta_{pH}$ & $1e-1$  \\ \hline
+\end{tabular}
+\caption{\label{values2} Table with numerical values of model parameters calibrated in this paper as explained below.}
+\end{table}
+
+
+
+
+\subsection*{Model Calibration}
+We calibrate the model parameters of the $pqs$ QS system shown in Table~\ref{values2}. We first use similar values from~\cite{Melke2010}\cite{Fagerlind2005} as our initial values. Next, we tune the model parameters to capture the behavior of the QS system. More precisely, we tune the model parameters based on the relative concentration change of the LasR protein under different iron concentration levels. 
+ 
+ As shown in Fig.~\ref{fig:time_series}, when we change the iron concentration from 0.01 (a.u.) to 1 (a.u.), the LasR concentration changes from 2 (a.u.) to 0.5 (a.u.) which preserves the fold changes reported in Fig. 4 of reference~\cite{Kim2005}.
+
+\end{document}

@@ -1,0 +1,841 @@
+
+\documentclass{llncs}
+\usepackage{graphicx}
+\usepackage[english]{babel}
+\usepackage{caption}
+\usepackage{subcaption}
+\captionsetup{compatibility=false}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage[bottom]{footmisc}
+\usepackage{wrapfig}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{scalefnt}
+%\usepackage{pslatex}
+\raggedbottom
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+\usepackage{todonotes}
+\begin{document}
+
+\newtheorem{mydef}{Definition}
+\title{A Stochastic Hybrid Approximation for Chemical Kinetics Based on the Linear Noise Approximation
+}
+%\title{A Stochastic Hybrid Model for Chemical Kinetics%\thanks{This research is supported by a Royal Society Research Professorship and ERC AdG VERIWARE.}
+
+\author{Luca Cardelli\inst{1,2} \and Marta Kwiatkowska\inst{2}  \and Luca Laurenti\inst{2} }
+
+\institute{Microsoft Research 
+\and Department of Computer Science, University of Oxford }
+
+
+
+\maketitle
+
+\begin{abstract}
+%Chemical reaction networks can be analyzed through solving the Chemical Master Equation (CME). Unfortunately, numerical solutions of the CME such as uniformisation suffer from state-space explosion. %Applying 
+The Linear Noise Approximation (LNA) is a continuous approximation of the CME, which improves scalability and is accurate for those reactions satisfying the leap conditions. We formulate a novel stochastic hybrid approximation method for chemical reaction networks based on adaptive partitioning of the species and reactions according to leap conditions into two classes, one solved numerically via the CME and the other using the LNA. The leap criteria are more general than partitioning based on population thresholds, and the method can be combined with any numerical solution of the CME. We then use the hybrid model to derive a fast approximate model checking algorithm for Stochastic Evolution Logic (SEL). Experimental evaluation on several case studies demonstrates that the techniques are able to provide an accurate stochastic characterisation for a large class of systems, especially those presenting dynamical stiffness, resulting in significant improvement of computation time while still maintaining scalability.
+
+\end{abstract}
+\section{Introduction}
+
+Biochemical systems are inherently stochastic: the time for the next reaction to occur and which reaction fires next  are both random variables. When the reactant molecules are in low number the resulting dynamic behaviour can be highly stochastic and deterministic models are unable to correctly approximate it  \cite{mcadams1997stochastic,arkin1998stochastic}. 
+%Recently, it has also been argued that noise plays a functional role in molecular processes \cite{eldar2010functional,fedoroff2002small}, and thus 
+%Recently, it has also been argued that noise (stochastic fluctuations) is essential for molecular processes
+%, and some molecular functions would be impossible in a deterministic setting
+%\cite{eldar2010functional,fedoroff2002small}, and thus 
+Thus, an accurate characterisation of stochastic fluctuations in 
+biological systems is essential \cite{Kampen1992b}.
+It is well known that a biochemical system evolving in a spatially homogeneous environment, at constant volume and temperature, can be described as a continuous-time Markov chain (CTMC) \cite{ethier2009markov} %whose states are \emph{discrete} vectors of population counts. 
+Transient analysis is generally performed through solving the Chemical Master Equation (CME) \cite{Kampen1992b} or with the Stochastic Simulation Algorithm (SSA) \cite{gillespie1977exact}. The SSA produces a single realization of the stochastic process, whereas the CME gives the probability distribution of each species over time.
+The CME can be solved numerically through solving differential equations or methods based on uniformisation, both requiring exploration of
+the reachable state space and thus infeasible for systems with large or infinite state spaces.
+%Solving the CME requires solving a differential equation for each reachable state may become infeasible when the number of reachable states can be huge or even infinite. As a consequence, solution of the CME, even numerical, is generally possible only for systems with few species and small molecular population. This represents the state space explosion problem. 
+On the other hand, the SSA is generally faster, although obtaining good accuracy necessitates potentially large numbers of simulations and can be time consuming.
+
+%An alternative is to consider instead a \emph{continuous stochastic} approximation of the CME. 
+An alternative is to approximate the CME as a \emph{continuous-state stochastic} process.
+The \emph{Linear Noise Approximation (LNA)}  is a Gaussian process which has been derived as an approximation of the CME \cite{Kampen1992b}. Thus, the LNA is inherently unimodal and not accurate for multimodal dynamics. Its solution involves a number of differential equations that is quadratic in the number of species and independent of the molecular populations. As a consequence, the LNA is generally much more scalable than a discrete stochastic representation. For these reasons, the LNA has recently been  used for model checking of large biochemical systems \cite{cardelli2015stochastic,bortolussi2013model}. The solution given by the LNA is accurate if conditions on species and reactions known as the \emph{leap conditions} are satisfied,
+which holds %These conditions are always satisfied 
+in the limit of high populations, but %in biological systems %it is quite common that 
+%these conditions are satisfied 
+typically only for a subset of species and reactions (i.e. stiff systems).
+As a result, a \emph{discrete stochastic} representation is necessary for the remaining species. A natural approach is thus to consider a \emph{stochastic hybrid} semantics that combines a continuous approximation based on the LNA for species respecting the leap conditions and maintains a discrete stochastic representation for the remaining species. Fortunately, for a large class of biological systems the species that respect the leap conditions are in high number \cite{Wallace2012}, which necessitates solving the CME only for a significantly reduced state space. 
+%which are generally in low number, 
+%and so does not suffer from state-space explosion problem. 
+%This leads us to the definition of a stochastic hybrid process, for which the LNA is used only for species respecting the leap conditions. Fortunately, for a large class of systems, these species are those in high population. This permits solving the CME only for a reduced subset of species, which generally are in low number, and so do not suffer from state space explosion problem.
+
+%\noindent
+%\textbf{Contributions.}\todo{Modify and make clearer that the main contribution is in the automated partitioning.}
+\subsubsection{Contributions.}
+We present a \emph{stochastic hybrid} model for biochemical systems, where a subset of species and reactions is treated with a \emph{continuous} state-space stochastic process, the LNA, while the remaining species are treated as a \emph{discrete} state-space stochastic process. A key advantage is that transient analysis of a discrete stochastic process is needed only for a substantially reduced set of species, ameliorating state-space explosion. %, those that really need a discrete characterization. 
+{The main novelty of our approach is that we partition species and reactions using the leap conditions. This allows us to dynamically and automatically update the partitions, which is necessary since the satisfaction of the leap conditions may change with time.} %The result is that in a lot of cases, the discrete characterization is needed only for small population species, ameliorating state space explosion.
+We derive equations for the joint and marginal probability distributions of the partitioned system. Continuous species are modelled as a mixture of Gaussian distributions, enabling us to treat multimodality.
+%[where the main challenge is to ensure that the resulting model is Markovian]. 
+%The satisfaction of the leap conditions may change with time, as a consequence 
+We present a numerical method for solving the CME, which adaptively and automatically decides for which species a discrete characterization is needed, and which species can be approximated with the LNA, thus resulting  in  significant
+improvement of computation time while still maintaining scalability. We then employ the presented hybrid semantics to build a fast and scalable probabilistic model checking algorithm for Stochastic Evolution Logic (SEL), a temporal logic presented in \cite{cardelli2015stochastic}.
+We implement the techniques and demonstrate on several case studies their ability to provide an accurate stochastic characterization of systems for which the LNA is imprecise, but full solution of the CME, even using advanced numerical techniques, is not feasible because of scalability issues.
+We emphasise that our method can be used in conjunction with any existing numerical solution of the CME. %, which would be used to solve a reduced master equation on the state space given by the discrete species. 
+%and can also be employed to speed up the SSA.
+
+%\noindent
+%\textbf{Related Work.}
+\subsubsection{Related Work.}
+The work of Henzinger et al. \cite{henzinger2010hybrid}, where a hybrid method is presented with a subset of species treated as a continuous approximation and the remaining species by solving the CME, differs from ours in at least two key aspects. 
+%The closest work to ours is due to Henzinger et al. \cite{henzinger2010hybrid}, where a hybrid method is presented with a subset of species treated as a continuous approximation and the remaining species by solving the CME. Their approach differs from ours in at least two key aspects. 
+Firstly, their continuous approximation is \emph{deterministic}, whereas ours is continuous stochastic. Secondly, they partition the species based on a \emph{threshold} on the molecular population, rather than the leap conditions, which may lead to inaccuracies, since the error of the deterministic model depends not only on the molecular population but also on model parameters \cite{ethier2009markov}. %And, as we show in the next, partitioning only considering a threshold on the population could lead to inaccurate results. 
+Our use of the leap conditions guarantees the accuracy of the stochastic approximation. % and gives a theoretical foundation for our approach.
+%in which they present an hybrid method where a subset of species is treated deterministically and for others they solve the CME. Their approach differs from ours in at least two main aspects. First of all, in their model continuous species are treated deterministically. Instead, we use a continuous state space stochastic process. Then, they partition the species based on a threshold on the molecular population. However, this is not accurate. In fact, the error of the deterministic model depends not only on the molecular population but also on the various parameters of the particular reaction network, as shown by Anderson and Kurtz \cite{anderson2015models}. And, as we show in the next, partitioning only considering a threshold on the population could lead to inaccurate results. In our model, the use of the leap conditions guarantees the quality of the approximation and gives a theoretical foundation for our approach.
+%\todo{Need to say something about Verena's moment closure, which is stochastic}
+%Regarding stochastic approximations, 
+{Thomas et al. \cite{thomas2014phenotypic} develop a conditional LNA method and apply it to gene expression networks. They approximate the probability distribution of gene expression products with the conditional LNA, while still treating promoters with the CME. Our approach is similar in the sense that we also consider the LNA for a subset of the species and a discrete-time Markov process for the remaining ones. However, it is not clear in  \cite{thomas2014phenotypic} how to partition the species. Instead, we provide criteria based on the leap conditions to automatically decide for which species the LNA is accurate, and which species instead need a discrete characterization.
+
+}
+%Their method differs in that the conditions they use are 
+%Differently form our method, their approach is specific for Gene Expression and, as a consequence, based on assumptions that
+%are accurate for those systems. 
+%Another interesting approach is the one presented 
+In \cite{hasenauer2014method}, the authors present the method of conditional moments %a moment closure 
+for approximating the moments of the solution of the CME, 
+where small populations are treated via a discrete process and high using approximate moment closure.
+%where they consider a discrete state space representation for small population species and approximate moment closure techniques for treating high population species. 
+However, %in general, 
+ how to automatically partition the species is left as an open problem. % and, as mentioned above, % which ones need a discrete representation. In fact,
+%partitioning only based a threshold %on the molecular counts 
+%can be inaccurate. 
+%Instead, in our approach, the use of the leap conditions guarantee that the CME is solved only for species for which the LNA in not accurate.  
+
+
+Partitioning of species and reactions of a reaction network for the purpose of speeding up the SSA in multi-scale systems has been explored in \cite{goutsias2005quasiequilibrium,salis2005accurate,rao2003stochastic}.
+For instance, Yao et al. introduced the slow-scale stochastic simulation algorithm \cite{cao2005slow}, where they distinguish between fast and slow species. Fast species are then treated assuming they reach equilibrium much faster than the slow ones. { Adaptive partitioning of the species has been considered in \cite{hepp2015adaptive,ganguly2015jump}. However, in both cases, the authors consider continuous models that differ from the LNA. In particular, in \cite{ganguly2015jump} the authors use a jump diffusion Markov process to approximate the original CTMC and derive error bounds to decide the species partitioning.
+
+}
+%Interesting work is also the one of 
+%Salis et al. \cite{salis2005accurate} develop a stochastic hybrid model for simulating biochemical networks, where they model discrete species with a jump Markov process and approximate fast species with a Chemical Langevin Equation (CLE) \cite{Gillespie2000}. However, solving the CLE is more complex than the LNA used in this paper.  
+
+\section{Background}
+
+\textbf{Chemical Reaction Networks.}
+A \emph{chemical reaction network (CRN)} $C=(\Lambda,R)$ is a pair of finite sets, where $\Lambda$ is the set of \emph{chemical species}, $|\Lambda|$ denotes its size, and $R$ is a set of reactions. Species in $\Lambda$ interact according to the reactions in $R$. A \emph{reaction} $\tau \in R$ is a triple $\tau=(r_{\tau},p_{\tau},k_{\tau})$, where $r_{\tau} \in  \mathbb{N}^{|\Lambda|}$ is the \emph{reactant complex}, 
+%\emph{source complex}, 
+$p_{\tau} \in  \mathbb{N}^{|\Lambda|}$ is the \emph{product complex} and $k_{\tau} \in \mathbb{R}_{>0} $ is the coefficient associated to the rate of the reaction. $r_{\tau}$ and $p_{\tau}$  represent the stoichiometry of reactants and products.
+Given a reaction $\tau_1=(  [1,1,0],[0,0,2],k_1 )$ we often refer to it as $\tau_1 : \lambda_1 + \lambda_2 \, \rightarrow^{k_1}  \,    2\lambda_3 $.
+The \emph{state change} associated to a reaction $\tau$ is defined by $\upsilon_{\tau}=p_{\tau} - r_{\tau}$. 
+Assuming well mixed environment, constant volume $V$ and temperature, a \emph{configuration} or \emph{state} $x \in \mathbb{N}^{|\Lambda|}$ of the system is given by a vector of the number of molecules of each species. 
+Given a configuration $x$ then $x(\lambda_i)$ represents the number of molecules of $\lambda_i$ in the configuration and $\frac{x(\lambda_i)}{N}$ is the concentration of $\lambda_i$ in the same configuration, where $N=V \cdot N_A$ is the volumetric factor, $V$ is the volume and $N_A$ Avogadro's number.
+The \emph{deterministic} semantics approximates the concentrations of species over time as the solution $\Phi(t)$ of a set of differential equations of the form:
+\begin{equation}
+% \frac{\mathrm d \Phi(t)}{\mathrm d t} = F(\Phi(t))
+\frac{d \Phi(t)}{dt}=F(\Phi(t))=\sum_{\tau \in R}\upsilon_{\tau}\cdot ( k_\tau \prod_{i=1}^{|\Lambda|}\Phi_{i}^{r_{i,\tau}}(t))
+\label{eq:ODE}
+\end{equation}
+where $\Phi_{i}^{r_{i,\tau}}(t)$ is the $i$th component of vector $\Phi(t)$ raised to the power of $r_{i,\tau}$, the $i$th component of vector $r_{\tau}$. The initial condition is $\Phi(0)=\frac{x_0}{N}$. It is known that Eqn \eqref{eq:ODE} is accurate in the limit of high populations \cite{ethier2009markov}. %, and therefore $\Phi(t) \in \mathbb{R}^{|\Lambda|}$ is the vector of the species concentrations at time $t$.
+
+\subsubsection{Stochastic Semantics.}
+The propensity rate $\alpha_{\tau}$ of a reaction $\tau$ is a function of the current configuration $x$ of the system such that $\alpha_{\tau}(x)dt$ is the probability that a reaction event occurs in the next infinitesimal interval $dt$.
+We assume mass action kinetics, therefore $\alpha_{\tau}(x)=k_{\tau}  \frac{\prod_{i=1}^{|\Lambda|} r_{i,\tau} !   }{N^{|r_{\tau}|-1}}\prod_{i=1}^{|\Lambda|} \binom{x(\lambda_i)}{r_{i,\tau}}$, where $r_{i,\tau}$ is the $i$th component of the vector $r_{\tau}$, $r_{i,\tau} !$ is its factorial, and $|r_{\tau}|=\sum_{i=1}^{|\Lambda|}r_{i,\tau}$  \cite{anderson2015models}.
+To simplify  the notation, $N$ is considered embedded inside the coefficient $k_{\tau}$ for any $\tau$.
+%Assuming constant volume, the volumetric factor, $N$, is a constant factor, and therefore, to simplify the notation, $N$ is considered embedded inside the coefficient $k$ for any reaction.
+The stochastic semantics of the CRN $C=(\Lambda,R)$ is represented by a \emph{time-homogeneous continuous-time Markov chain} (CTMC) \cite{ethier2009markov} $(X(t),t \in \mathbb{R}_{\geq 0})$ with state space $S \subseteq \mathbb{N}^{|\Lambda|}$.
+%\todo{Briefly define reachable states?}
+$X(t)$ is a random vector describing the molecular population of each species at time $t$.
+Let $x_0 \in \mathbb{N}^{|\Lambda|}$ be the initial condition of $X$ then $P(X(0)=x_0)=1$. For $x \in S$, we define $P(x,t)=P(X(t)=x \,|\,X(0)=x_0)$.
+The transient evolution of $X$ is described by the Chemical Master Equation (CME), a set of differential equations
+\begin{equation}\label{CME}
+\frac{\mathrm d}{\mathrm d t} \left( P(x,t)\ \right) = 
+	\sum_{\tau \in R} \{ \alpha_{\tau}(x-\upsilon_{\tau})P(x-\upsilon_{\tau},t)-\alpha_{\tau}(x)P(x,t)\}. 
+\end{equation}
+%The CME can be equivalently defined in terms of the infinitesimal generator matrix \cite{Wolf2010}, which admits computing an approximation of the CME using methods such as fast adaptive uniformisation (FAU) \cite{didier2009fast,DHK14} or the sliding window method \cite{Wolf2010}.
+Solving Eqn \eqref{CME} requires computing the solution of a differential equation for each reachable state. The size of the reachable states depends on the number of species and molecular populations and can be huge or even infinite. As a consequence, solving the CME is generally feasible only for CRNs with very few species and small molecular populations.
+
+\subsubsection{Linear Noise Approximation.}\label{lna-sec}
+A promising line of research is to consider continuous state-space approximations of  $X(t)$. The \emph{Linear Noise Approximation} (LNA)%as a second order approximation of the system size expansion of the CME 
+\cite{Kampen1992b} is a continuous approximation of the CME, which permits a \emph{stochastic} characterization of the evolution of a CRN, while still maintaining scalability comparable to that of deterministic models.
+The LNA is accurate for processes satisfying
+%In order to derive the LNA, we first consider the following conditions, namely 
+the \emph{leap conditions} \cite{Wallace2012}. Given a CRN $C=(\Lambda,R)$, we say that the Markov process $X(t)$ induced by $C$ satisfies the leap conditions at time $t$ if, for any $\tau \in R$, there exists a finite time interval $dt$ such that:
+\begin{equation} \label{leap1}
+\alpha_{\tau}(X(t)) \,\,\,\text{constant in $[t,t+dt]$ }
+\end{equation}
+\begin{equation} \label{leap2}
+\alpha_{\tau}(X(t))\cdot dt \gg 1. 
+\end{equation}
+
+In \cite{Gillespie2000},  Gillespie shows that if these conditions are satisfied then the solution of the CME can be approximated by a \emph{Chemical Langevin Equation (CLE)}.
+%It is possible to show that, assuming mass action kinetics, for $N$ large enough the leap conditions can always be satisfied \cite{Wallace2012}, and so Eqn \eqref{CLE} can be considered as an accurate approximation of the CME, at least for finite time.
+Then, under the assumption that stochastic fluctuations are of the order of $N^{\frac{1}{2}}$ \cite{Kampen1992b,ethier2009markov}, we can assume that $X(t)$ admits a solution of the form
+
+\begin{equation}
+	 X(t) = N\Phi(t) + N^{\frac{1}{2}}G(t)
+\label{eq:hypothsis}
+\end{equation}
+ where $G(t)=(G_1(t),G_2(t),...,G_{|\Lambda|})$ is a random vector, independent of $N$, representing the stochastic fluctuations at time $t$ and $\Phi(t)$ is the solution of Eqn \eqref{eq:ODE}.
+ %$\frac{d \Phi(t)}{dt}=F(\Phi(t))=\sum_{\tau \in R}\upsilon_{\tau}\alpha(\Phi(t))$ with initial condition $\Phi(0)=\frac{x_0}{N}$. That is $\Phi(t)$ is the solution of the 
+% rate equations \cite{cardelli2008process}. 
+%The system size expansion of the master equation is a systematic expansion of the CME in the system size. Indeed, stochastic fluctuations depend on $N$; specifically, for average concentrations, fluctuations are of the order of $N^{\frac{1}{2}}$ \cite{2003,pinsky2010introduction}. So, to proceed in the expansion VanKampen assumes that:
+It is possible to show that the probability distribution of $G(t)$ can be modelled by a linear Fokker-Planck equation \cite{Wallace2012}. For every $t \in \mathbb{R}_{\geq0}$, $G(t)$ has a multivariate normal distribution whose expected value $E[G(t)]$ and covariance matrix $C[G(t)]$ are the solution of the following differential equations:
+\begin{equation}
+		\frac{\mathrm d E[G(t)]}{\mathrm d t}  = J_F(\Phi(t))E[G(t)]
+\label{LNAEx}
+\end{equation}
+\begin{equation}
+		\frac{\mathrm d C[G(t)] }{\mathrm d t}  = J_F(\Phi(t))C[G(t)] + C[G(t)]J^T_F(\Phi(t))+W(\Phi(t))
+\label{LNAVar}
+\end{equation}
+where ${J}_F(\Phi(t))$ is the Jacobian of $F(\Phi(t))$, $J^T_F(\Phi(t))$ its transpose, $ W(\Phi(t))= \sum_{\tau \in R} \upsilon_{\tau} {\upsilon_{\tau}}^T \alpha_{c,\tau}(\Phi(t)) $ and $F_j(\Phi(t))$ the $j$th component of $F(\Phi(t))$. We assume $X(0)=x_0$ with probability $1$; as a consequence $E[G(0)]=0$ and $C[G(0)]=0$, which implies $E[G(t)]=0$ for every $t$.
+The following theorem %, from the work of Ethier and Kurtz \cite{ethier2009markov}, 
+illustrates the nature of the approximation using the LNA.
+\begin{theorem}{\cite{ethier2009markov}}\label{LNA-th}
+Let $C=(\Lambda,R)$ be a CRN and $X$ the CTMC induced by $C$. Let $\Phi(t)$ be the solution of Eqn \eqref{eq:ODE}
+%$\frac{d \Phi(t)}{dt}=F(\Phi(t))$ 
+with initial condition $\Phi(0)=\frac{x_0}{N}$ and $G$ be the Gaussian process with expected value and variance given by Eqns \eqref{LNAEx} and \eqref{LNAVar}. Then, for $t\in \mathbb{R}_{\geq 0}$
+\[ N^{\frac{1}{2}}|\frac{X(t)}{N}-\Phi(t)| \Rightarrow_N G(t)\]
+\end{theorem}
+In the above $\Rightarrow_N$ indicates convergence in distribution \cite{ethier2009markov}.
+%We emphasise that, for a large class of CRNs, for any molecular population size, the LNA accurately characterizes the first two moments of the species distribution \cite{grima2015linear}.
+Theorem \ref{LNA-th} shows that $G(t)$ models the stochastic fluctuations around the rate equations and guarantees that the leap conditions are always verified in the limit of high populations. However, they could be satisfied even for relatively small numbers of molecules \cite{Wallace2012}.
+To compute the LNA it is necessary to solve $O(|\Lambda|^2)$ first order differential equations, and the complexity is independent of the initial number of molecules of each species. %Clearly, it is not necessary to explore the state space to give a stochastic characterization of the network behavior. This is why LNA can be used to handle transient analysis of infinite CTMCs and is much more impervious to state-space explosion than methods based on uniformisation.
+Therefore, one can avoid the exploration of the state space that methods based on uniformization rely upon. 
+
+\section{Stochastic Hybrid Approximation}
+
+%We have shown that the solution given by the LNA is accurate if the leap conditions are satisfied.
+The key idea behind our approximation is to partition the species into two classes, those that satisfy the leap conditions, which we approximate by a continuous process using the LNA, and the remaining species, for which we need a discrete model. The stochastic process $X(t)$ induced by the CRN can then be approximated by a \emph{hybrid} combination of the continuous and discrete processes describing the evolution of the partitions. %The challenge is to ensure an accurate stochastic characterisation for multimodal distributions, which necessitates adapting the partitions over time. 
+The set of reactions satisfying the leap conditions may change with time and, as a consequence, the partitions of species and reactions need to adapt with time.
+
+%Let $C=(\Lambda,R)$ be a CRN. 
+%$\Lambda^f$ and $\Lambda^s$, respectively called \emph{continuous} (or fast) and \emph{discrete} (or slow), where $\Lambda^f$ satisfy the leap conditions and $\Lambda^s$. Since the LNA is accurate if the leap conditions are satisfied, the stochastic process $X(t)$ induced by $C$ can then be represented as $X(t)=(X^f(t),X^s(t))$, where $X^f$ is a continuous LNA-based approximation of $\Lambda^f$ and $X^s$ is discrete process that describes the evolution of $\Lambda^s$. 
+
+
+\subsubsection{Partitioning of Species and Reactions.}\label{Partition}
+Given a CRN $C=(\Lambda,R)$, condition \eqref{leap1} is satisfied for reaction $\tau \in R$ at time $t$ and during the interval $dt$ if $\alpha_{\tau}(X(t))$ is approximately constant during $dt$.
+% Assuming mass action kinetics, the propensity rate of each reaction is proportional to the number of molecules of its reactant species. As a consequence, the condition is satisfied if each reactant of $\tau$ is in large enough molecular counts.
+Reaction $\tau \in R$, at time $t$, satisfies condition \eqref{leap2} if it fires many times during $dt$. 
+%As a consequence, 
+%\todo{but we already have a definition of leap conditions, so what is this and where from?}
+Given $\sigma_1,\sigma_2 \in \mathbb{R}_{\geq 0}$, % Section \ref{Thresholds} below 
+it can be equivalently stated that a CRN $C=(\Lambda,R)$ satisfies the leap conditions at time $t$ for an interval $dt$ and reaction $\tau \in R$ if:
+\begin{equation}\label{leapC1}
+X_{\lambda_i}(t)\geq \sigma_1\cdot |\upsilon_{\tau}^{\lambda_i}| \,\,\,\,\,\, \text{for $\lambda_i$ such that $\upsilon_{\tau}^{\lambda_i} \neq 0$ and $r_{\tau}^{\lambda_i}\neq 0$ }
+\end{equation}
+\begin{equation}\label{leapC2}
+\alpha_{\tau}(X(t))\geq \sigma_2 
+\end{equation}
+%\todo{need to explain constants}
+where % $\sigma_1,\sigma_2 \in \mathbb{R}_{\geq 0}$ are constant chosen as we explain in Section \ref{Thresholds} below, 
+$\upsilon_{\tau}^{\lambda_i}$ represents the state change induced by the occurrence of reaction $\tau$ with respect to species $\lambda_i$, and $r_{\tau}^{\lambda_i}$ is the component of the reactant complex relative to species $\lambda_i$.
+A method for choosing $\sigma_1,\sigma_2 \in \mathbb{R}_{\geq 0}$ is given in \cite{salis2005accurate} for SSA (see also below).
+%In practice, these conditions are satisfied for a particular reaction if the reactant species are in larger molecular count than their state change during the next time interval $dt$, and if the reaction occurs many times during the next $dt$. 
+These criteria induce a partition $R=(R^f,R^s)$ over reactions,
+where $R^f$ includes reactions for which the leap conditions are satisfied and $R^s$ the remaining reactions, respectively called \emph{continuous} (or fast) reactions and \emph{discrete} (or slow).
+This %partition on the reactions 
+induces a partition $\Lambda=(\Lambda^{f},\Lambda^{s})$ over the species of the CRN,
+where $\Lambda^f$ and $\Lambda^s$ are respectively called \emph{continuous}  and \emph{discrete} species.
+ $\lambda \in \Lambda$ is in $\Lambda^f$ if and only if it is changed by at least one reaction in $R^f$ and it is not changed by reactions in $R^s$
+ whose propensity is of the same order of magnitude as
+ %that are comparable to 
+ the reactions in $R^f$ that change it, and otherwise it is in $\Lambda^s$. %Given a configuration $x \in \mathbb{N}^{|\Lambda|}$, we say that a reaction $\tau_1$ is comparable to a reaction $\tau_2$ if $\alpha_{\tau_1}(x)>\frac{\alpha_{\tau_2}(x)}{K}$, where $K>1$ is a constant. In practice, we generally consider $K=50$. 
+% \todo{Do you mean at least K=50?}
+ %In what follows, we illustrate that this partition guarantees that species in $\Lambda^f$  can be treated with the LNA. 
+ %Note that the partitioning depends on the particular configuration of the system. 
+ For some systems these criteria may result in species with large populations treated with a discrete %state-space 
+ stochastic process. This happens for systems where the LNA is not accurate.
+ %. And this is correct, because these conditions are all required in order to make the stochastic model work. This again shows that criteria for partitioning the species should not depend only on their molecular counts.
+ %which again illustrates the weakness of threshold conditions.
+% \todo{but large populations means states space explosion}
+We illustrate partitioning with the following example.
+
+
+\begin{example}\label{Gene Expression}
+We consider the gene expression model described in \cite{thattai2001}.
+There are two species, $mRNA$ and the protein $P$, and the following set of reactions
+
+\[ \tau_1:\emptyset \rightarrow^{0.5} mRNA; \, \, \,
+\tau_2: mRNA \rightarrow^{0.0058} mRNA + P;\,\,\,\]
+\[
+\tau_3: mRNA \rightarrow^{0.0029} \emptyset ; \,\,\,
+\tau_4: P \rightarrow^{0.0001} \emptyset .  \]
+
+All species are initialized with $0$ molecules.
+ %for the time interval of interest, we consider
+We consider $\sigma_1=30$ and $\sigma_2=0.05$. At time $t=0$, the initial partition is $\Lambda^f=\{ mRNA\}$ and $R^f=\{ \tau_1\}$, meaning that the continuous subsystem %induced by continuous species and reactions 
+is given by the only reaction $\tau_1$.
+In fact, in $\tau_1$ $mRNA$ is not a reagent but only a product. Note that, using a simple threshold on the molecular population of each species to decide if it has a discrete or continuous characterization, as done in \cite{henzinger2010hybrid}, would not consider $mRNA$ as a continuous species.
+After the first molecule of $mRNA$ is produced, the propensity rate of $\tau_3$ increases and its influence %on $\tau_3$ 
+needs to be considered. The new species partition becomes $\Lambda^f=\{\}$ and $\Lambda^s=\{ mRNA,P \}$. Under our initial conditions, there exists $t'$ such that $mRNA(t')>30$ with probability $1$. As a consequence, in $t'$ $\tau_3$ is a continuous reaction and the continuous subsystem is:
+
+\[    \tau_1:\emptyset \rightarrow^{0.5} mRNA; \, \, \,
+\tau_3: mRNA \rightarrow^{0.0029} \emptyset .    \]
+Thus, $P$ is considered a discrete species until both $\tau_2$ and $\tau_4$ become continuous reactions, and thus partitions change over time. %The example shows that, in general, partitions of species and reactions change with time.
+\end{example}
+
+%\todo{Structure needs rearranging}
+\subsubsection{Derivation of the Transient Probability in the Hybrid Model.}\label{NewCMEs}
+%\subsubsection{Derivation of the Stochastic Hybrid Model}\label{NewCMEs}
+
+Based on the partitioning described above, the stochastic process $X(t)$  induced by a CRN can be written as $X(t)=(X^f(t),X^s(t))$, where $X^f$ and $X^s$ respectively describe the evolution of species in $\Lambda^f$ and species in $\Lambda^s$. $X(t)$ is a Markov process, but $X^f(t)$  and $X^s(t)$, if taken separately, are \emph{not} Markovian because they depend on each other. 
+To tackle this issue, following Cao et al. \cite{cao2005slow}, we consider the \emph{virtual} process $\bar{X}^f(t)$ that describes the same species as $X^f$, but with all the discrete reactions turned off. Therefore, $\bar{X}^f$ is Markovian because it is independent of $X^s$, and species in $\Lambda^s$ are now only parameters.
+Note that $\bar{X}^f$ is only an approximation of the real stochastic process $X^f$. { This approximation is accurate when continuous and discrete species evolve in different time scales. Generally, partitioning using the leap conditions guarantees that. However, it may happen that some reactions satisfy the second leap condition (Eqn \ref{leap2}), but not the first one (Eqn \ref{leap1}). This particular scenario requires attention because these reactions would be classified as discrete, and, in this case, the introduction of the virtual process may introduce some inaccuracies.} 
+
+Now, we derive equations to study the transient evolution of the continuous and discrete species.
+Given $x^s \in S^s $ and  $x^f \in S^f $, where $S^s$ and $S^f$ are the state spaces of discrete and continuous species, then $P(X^s(t)=x^s,\bar{X}^f(t)=x^f)$, the joint distribution of $X^s(t)$ and $\bar{X}^f(t)$, can be described by the CME (Eqn \eqref{CME}). However, this would lead to state space explosion. As a consequence, in what follows, we first separate %the study of 
+the evolution of continuous and discrete species, and then approximate the continuous subsystem using the LNA. This enables analysis of the transient evolution of the resulting hybrid process.
+
+ We denote $P(X^s(t)=x^s,\bar{X}^f(t)=x^f|X^s(0)=x^s_0,\bar{X}^f(0)=x^f_0)=P(x^s,x^f,t)$, $P(X^s(t)=x^s|X^s(0)=x^s_0,\bar{X}^f(0)=x^f_0)=P(x^s,t)$ and  $P(\bar{X}^f(t)=x^f|X^s(t)=x^s,\bar{X}^f(0)=x^f_0)=P(x^f|x^s,t)$. Then, as illustrated in \cite{rao2003stochastic},  by using the axioms of probability we have the following equivalent representation for the CME.
+\begin{lemma}\label{Principal}
+Let $x^s \in S^s$ and $x^f \in S^f$. Then, for $t \in \mathbb{R}_{\geq 0}$
+\begin{equation*}
+ \frac{d P(x^f,x^s,t)}{dt}=\frac{d P(x^f|x^s,t)}{dt} P(x^s,t)+ P(x^f|x^s,t)\frac{ d P(x^s,t)}{dt}
+ \end{equation*}
+ \end{lemma}
+ So, to solve the CME in this form it is necessary to calculate $P(x^f|x^s,t)$ and $P(x^s,t)$. The first term is Markovian because of the assumption that in the virtual continuous subsystem the continuous species are independent of the discrete species, which are only parameters.
+ Thus, it can be described by the following master equation for continuous species
+ \begin{equation}\label{FastCond}
+ \frac{d P(x^f|x^s,t)}{dt}=\sum_{\tau \in R^f}\alpha_{\tau}(x^f-\upsilon_{\tau},x^s)P(x^f-\upsilon_{\tau}|x^s,t)- \alpha_{\tau}(x^f,x^s)P(x^f|x^s,t)
+ \end{equation}
+ where $\upsilon_{\tau}$ is considered restricted to the components relative to continuous species in $x^f-\upsilon_{\tau}$.
+Since the criteria for applicability of the LNA are ensured by partitioning, Eqn \eqref{FastCond} can be approximated by the LNA.
+
+On the other hand, $P(x^s,t)$ is not Markovian. However, Proposition \ref{DiscreteSpecies}, whose proof is in the Appendix, guarantees that $P(x^s,t)$ can be derived by solving a set of equations which have the same form as a master equation, and so numerical techniques developed for the CME can still be employed
+\begin{proposition}\label{DiscreteSpecies}
+Let $x^s \in S^s$ and $x^f \in S^f$. Then, for $t \in \mathbb{R}_{\geq 0}$ we have
+\begin{equation}\label{DIscreteSpecies}
+\frac{d P(x^s|t)}{dt}=\sum_{\tau \in R}\beta_{\tau}(x^s-\upsilon_{\tau},t)P(x^s-\upsilon_{\tau},t)- \beta_{\tau}(x^s,t)P(x^s,t)
+\end{equation}
+where $\beta_{\tau}(x^s,t)= \sum_{x^f \in S^f} \alpha_{\tau}(x^f,x^s)P(x^f|x^s,t)$. 
+\end{proposition}
+$\beta_{\tau}(x^s,t)$ is the conditional expectation of the propensity rate of $\tau$ at time $t$ given $X^s(t)=x^s$.
+ Reactions of higher order than bi-molecular are not likely \cite{cardelli2008process}, and they can always be simulated as a sequence of bi-molecular reactions. As a consequence, we can assume we are limited to at most bi-molecular reactions. Given $\lambda^s_i,\lambda^s_j \in \Lambda^s$ and $\lambda^f_i,\lambda^f_j \in \Lambda^f$, if $\alpha_{\tau}=k_\tau\cdot \lambda_i^f\cdot \lambda_j^{s}$ then 
+$ \beta_{\tau}(x^s,t)=  %\sum_{ x^f(\lambda_i) \, s.t. \, x^f \in S^f} k_{\tau} x^f(\lambda_i) x^s(\lambda_j) P(\bar{X}^f_{\lambda_i}=x^f(\lambda_i)|x^s,t)=
+k_{\tau}\cdot E[\bar{X}^f_{\lambda_i}(t)|x^s,t]\cdot x^s(\lambda_j).$
+Similarly, if $\alpha_{\tau}=k_\tau \cdot \lambda_i^f\cdot  \lambda_j^{f}$ then 
+$ \beta_{\tau}(x^s,t)=  %\sum_{x_{\lambda_i}^f,x_{\lambda_j}^f \, s.t. \,x^f \in S^f} k_{\tau} x^f_{\lambda_i} x^f_{\lambda_j} P(x_{\lambda_i}^f,x_{\lambda_j}^f|x^s,t)=
+k_{\tau} \cdot E[\bar{X}^f_{\lambda_i}(t)\cdot \bar{X}^f_{\lambda_j}(t)|x^s,t].                      $
+%\todo{Difference between the two $\beta$ equations unclear}
+If $\alpha_{\tau}=k_\tau \cdot \lambda_i^s \cdot \lambda_j^{s}$ then  $\beta_{\tau}(x^s)=k_{\tau}\cdot x^s(\lambda_i) \cdot x^s(\lambda_j)$. The uni-molecular case follows in a straightforward way.
+Therefore, to fully characterize $P(x^s,t)$ only the first two moments of the conditional distribution of $\bar{X}^f(t)$ given $x^s$ are needed.
+In general, this would require solving the entire CME (Eqn \eqref{CME}). However, thanks to our partitioning criteria, we can safely approximate Eqn \eqref{FastCond} by using the LNA and calculating  coefficients $\beta$ using Eqns \eqref{LNAEx} and \eqref{LNAVar}.
+% The criteria for the partition guarantee the quality of the approximation..
+\begin{example}\label{multimodal}
+Consider the following CRN, taken from \cite{cardelliprogramming}:
+
+\[ \lambda_z \rightarrow^{k_1} \lambda_1;\,\,\,\lambda_{z}\rightarrow^{k_2}\emptyset;\,\,\, \lambda_1 \rightarrow^{1}\lambda_1+\lambda_{out}  \]
+with $k_1,k_2 \in \mathbb{R}_{\geq 0}$ and initial condition $x_0$ such that $x_0(\lambda_z)=1$ and $x_0(\lambda_1)=x_0(\lambda_{out})=0$. According to the partitioning criteria, % described in Section \ref{Partition},
+%\todo{Use proper section references}
+for $\sigma_{1}>1$ and $\sigma_2<\frac{k_1}{k_1+k_2}$ there exists $t'>0$ such that for $t>t'$ the set of discrete species is $\Lambda^s=\{\lambda_z,\lambda_1 \}$ and the set of continuous species is $\Lambda^{f}=\{\lambda_{out}\}$ and the partition remains constant over time.
+A state of the discrete state space is a vector $x^s=(x^s(\lambda_z),x^s(\lambda_1))$. It is easy to verify that the discrete state space $S^s$ is composed of only $3$ states: $S^s=\{x^s_0=(1,0),x^s_1=(0,0),x^s_2=(0,1)\}$.
+According to Eqn \eqref{FastCond}, and using the law of total probability, the distribution of $\lambda_{out}$ for $t>t'$ is given by \begin{equation*}\label{MultiEx}
+\begin{split}
+&P(\bar{X}^f_{\lambda_{out}}(t)=k)=P(\bar{X}^f_{\lambda_{out}}(t)=k|x^s_0,t)P(x^s_0,t)+
+\\& \,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,P(\bar{X}^f_{\lambda_{out}}(t)=k|x^s_1,t)P(x^s_1,t)+P(\bar{X}^f_{\lambda_{out}}(t)=k|x^s_2,t)P(x^s_2,t)
+\end{split}
+\end{equation*}
+and $P(\bar{X}^f_{\lambda_{out}}(t)=k|x^s_0,t)=P(\bar{X}^f_{\lambda_{out}}(t)=k|x^s_1,t)=\begin{cases}
+    1       & \quad \text{if $k=0$}\\
+    0       & \quad \text{if $otherwise$}\\
+  \end{cases}$.
+  As explained in \cite{cardelliprogramming}, for $t \rightarrow \infty$ we have $P(X^s(t)=x^s_0)=0$ and $P(X^s(t)=x^s_1)=\frac{k_2}{k_2+k_1}$. As a consequence, our partitioned system correctly predicts that, for $t\rightarrow \infty$, $\lambda_{out}$ has a bimodal distribution that is $0$ with probability $\frac{k_2}{k_2+k_1}$.
+\end{example}
+As shown in Example \ref{multimodal}, the distribution of the continuous species can be derived using the law of total probability as $P(x^f,t)=\sum_{x^s \in S^s}P(x^f|x^s,t)P(x^s,t)$. Since each $P(x^f|x^s,t)$ is approximated with the Gaussian distribution given by the LNA, $P(x^f,t)$ is given by a mixture of Gaussian distributions weighted by the probability of being in a particular state of the discrete state space. This enables stochastic characterisation of multimodal distributions for continuous species. Note that the simple LNA, because of its unimodal nature, is unable to represent multimodal behaviours. The following remark shows that, if some assumptions are verified, we can further reduce the computational effort. % necessary to solve discrete and continuous subsystems.
+\begin{remark}\label{red}
+Eqn \eqref{DIscreteSpecies} requires solving the LNA once for each $x^s \in S^s$. 
+%\todo{Do you mean $x^s$ not $X^s$}
+This can be expensive. However, for a large class of systems, especially those where continuous species have a unimodal distribution, we can consider a reasonable approximation. We can assume $\beta_{\tau}(x^s,t)\approx \sum_{x^f \in S^f} \alpha_{\tau}(x^f,E[X^s(t)])$ and  $P(x^f,t)=\sum_{x^s \in S^s}$ $P(x^f|x^s,t)P(x^s,t)\approx P(x^f|E[X^s(t)],t)$. So, instead of solving the LNA many times, this requires solving the LNA only once and conditioned on the expectation of the discrete population. 
+\end{remark}
+%As a consequence, because $P(x^f|E[X^s(t)],t)$ is  then approximated with the LNA, Remark \ref{red} represents a valid approximation only when continuous species have a unimodal distribution. %, [which is typically true when continuous species are in much greater molecular population than the discrete species.]
+%If this is the case, as it is common that continuous species are in much greater molecular population than discrete species, this is an accurate approximation. In fact, discrete species are only fixed parameters for the virtual continuous system, and of much less influence than continuous species for the quantitative value of the propensity rates.
+\subsubsection{Ensuring Satisfaction of the Leap Conditions.}\label{Thresholds}%Choosing of $\sigma_1$ and $\sigma_2$}\label{Thresholds}
+%Given a CRN $C=(\Lambda,R)$, condition \eqref{leap1} is satisfied for reaction $\tau \in R$ at time $t$ and during the interval $dt$ if $\alpha_{\tau}(X(t))$ is approximately constant during $dt$. Assuming mass action kinetics, the propensity rate of each reaction is proportional to the number of molecules of its reactant species. As a consequence, the condition is satisfied if each reactant of $\tau$ is in much larger population than its expected state change during $[t,t+dt]$. That is, for each $\lambda_i$ reactant of $\tau$ we require $X_i(t)>K|\int_{t}^{t+dt} \sum_{\tau \in R} \upsilon^{\lambda_i}_{\tau} \alpha(X(s))ds |$ $\approx K|\sum_{\tau \in R} \upsilon^{\lambda_i}_{\tau} \alpha(X(t)) dt|$, where  $K\in \mathbb{R}$ is a constant. The approximation holds if the propensity rates of reactions are approximately constant during $[t,t+dt]$.  Note that production reactions (reactions with no reactant species) always satisfy this condition.
+
+%Reaction $\tau \in R$, at time $t$, satisfies condition \eqref{leap2} if it fires many times during $dt$. As a consequence, it is satisfied if $\alpha_{\tau}(X(t))\gg \frac{1}{dt}$. In practice, we can choose 
+%\[ \sigma_1=C_1 dt;\,\,\,\,\,\,\, \sigma_2= \frac{C_2}{dt}\]
+
+%where $C_1,C_2 \in \mathbb{R}_{\geq 0}$ are constant which determine the quality of the approximation, and $dt$ is chosen according to the system dynamics. As explained in \cite{salis2005accurate}, $dt$ can be chosen as the time increment for the numerical integration of the equations for the LNA. $C_1$ represents the maximum rate with whom a reactant species can change. $C_2$ represents the minimum number of times that $\tau$ needs to fire during $dt$. %Note that in general $\sigma_1$ and $\sigma_2$ should change with time as $dt$. In practice, considering $\sigma_1,\sigma_2$ constant is generally a good approximation.
+We now explain how to choose constants $\sigma_1$ and $\sigma_2$ introduced in Eqns \eqref{leapC1} and \eqref{leapC2}. % can be computed.
+Given a CRN $C=(\Lambda,R)$ and an infinitesimal time interval $dt$, then $\tau \in R$ satisfies the first leap condition at time $t$ if $\alpha_{\tau}(X(t))$ is approximately constant during the next $dt$. This is verified if the relative state change of each reactant species of $\tau$ is small enough during $dt$, that is, if
+
+\[  |X_{\lambda_i}(t+dt)-X_{\lambda_i}(t)|\leq max(\epsilon X_{\lambda_{i}}(t),1)    \,\,\, \text{for $\lambda_i\in \Lambda$ such that $r^{\lambda_i}_{\tau} \neq 0$}       \]
+where $0\geq \epsilon \geq 1$ is a parameter which quantifies the maximum relative change admitted in reactant species, extensively discussed in \cite{gillespie2008simulation} for SSA. Rearranging the terms, it is easy to verify that the condition holds if
+
+\[ X_{\lambda_i}(t)\geq \frac{|X_{\lambda_i}(t+dt)-X_{\lambda_i}(t)|}{\epsilon}\,\,\, \text{for $\lambda_i$ such that $r^{\lambda_i}_{\tau} \neq 0$ and $\upsilon^{\lambda_i}_{\tau}\neq 0$.}             \]
+Thus, for a given CRN, $\sigma_1$ in Eqn \eqref{leapC1} quantifies the minimum number of molecules for which we can assume the inequality is satisfied. This is reasonable, as $dt$ is considered to be small, and we assume there are no reactions with unbounded propensity rate.
+$\tau \in R$ satisfies Eqn \eqref{leapC2} if it fires many times during $dt$, that is, if $\alpha_{\tau}(X(t))>\frac{\delta_2}{dt}=\sigma_2$, where $\delta_2$ quantifies the number of times that $\tau$ must fire during $dt$ in order to assume the condition satisfied. { As a consequence, in order to choose $\sigma_1$ and $\sigma_2$, we need to tune three parameters: $\sigma_1,\delta_2$ and $dt$.} 
+%\todo{can we say how they can be tuned?}
+Empirical values for $\sigma_1$ and $\delta_2$ are given in \cite{salis2005accurate}; 
+%In order to make practical use of these conditions 
+$dt$ can be computed as for
+%This is not trivial, however, fortunately, this problem has been already addressed by Gillespie for
+tau-leaping (see Section 3 of \cite{gillespie2008simulation}). 
+%More specifically, we can compute $dt$ according to the algorithm in \cite{gillespie2008simulation} for each possible partition, and then choose $dt$ that maximises the size of the continuous partition $|R^f|$ while ensuring the satisfaction of leap conditions.
+% number of continuous reactions, is maximized and both leap conditions are verified.
+%A more efficient solution is to only compute the initial partition and %the infinitesimal time interval 
+A possible strategy is to compute $dt$  only once, at time $t_0$. Then, we can  consider $dt$ constant for any $t>t_0$ and make use of Eqns \eqref{leapC1},\eqref{leapC2}. Fixing $dt$ does not affect the correctness of the algorithm, but simply means that, for $t>0$, there could be a better choice of $dt'$ for which more reactions would be considered continuous. 
+\iffalse
+Given a set of reactions the author presents an algorithm that finds the smaller $dt$ that satisfies the first leap conditions for such reactions. Then, it verifies if the second leap condition is verified for such $dt$. In our case, we are not interested only in knowing if a particular set of reactions satisfies the leap conditions, but in how to choose $dt$. Given a CRN $C=(\Lambda,R)$,  we can consider all the possible partitions of reactions $R=(R^f,R^s)$. For any partition we can compute the algorithm in \cite{gillespie2008simulation}, and then we can choose $dt$ equals to the one for which $|R^f|$, number of continuous reactions, is maximized and both leap conditions are verified.
+The knowledge of the solution of the CME would enable using the algorithm at any time to compute the partitions. However, this would be inefficient. As a consequence, we use the algorithm only to compute the initial partition and the infinitesimal time interval $dt$ at time $t_0$. Then, we consider $dt$ constant for any $t>t_0$, and we make use of conditions \eqref{leapC1},\eqref{leapC2}. Fixing $dt$ does not affect the correctness of the algorithm. It only means that, for $t>0$ there could exist a more optimal $dt'$ for which more reactions would be considered as continuous. 
+\fi
+\section{Numerical Implementation}\label{ImplementationImpr}
+
+In this section, %using the theory developed in the paper, 
+we present an algorithm to calculate the marginal probability of discrete and continuous species. 
+We first present the general method, where continuous species are modelled as a mixture of Gaussian distributions, and then show how it can be simplified if Remark \ref{red} applies.
+Algorithm \ref{GeneralMix} presents the pseudo-code for our routine.
+{\footnotesize\begin{algorithm}[t]
+\caption{Compute Transient Probabilities at Time $t_{fin}$}\label{GeneralMix}
+\renewcommand{\baselinestretch}{.75}
+\begin{algorithmic}[1]
+\Require A CRN $C=(\Lambda,R)$ with initial condition $x_0=(x^f_0,x^s_0)$, a finite time interval $[t_0,t_{fin}]$, and parameters for leap conditions $\sigma_1,\delta_2.$
+\Function{ComputeProb}{$C$, $x_0,\sigma_1,\delta_2,[t_0,t_{fin}]$}
+%\State $(\sigma_1,\sigma_2) \gets setThresholds(C_1,C_2,C,x_0)$
+\State Compute partitions $\Lambda=(\Lambda^f,\Lambda^s)$, $R=(R^f,R^s)$ at time $t_0$
+
+\State $(S^s(t_0),X^f(t_0),t) \gets ((x^s_0,1),x^f_0,t_0)$ %\Comment{where $S^s(t)$ and $X^f(t)$ are discrete state space and continuous process at time $t$}
+\While{$t<t_{fin}$}{}
+\State Compute $\Delta t$ and solve discrete master equation for $[t,t+\Delta t]$
+
+\For{\textbf{each} $(x^s,p) \in S^s(t+\Delta t)$}
+\State Solve the LNA to compute $P(X^f(t+\Delta t)|X^s(t)=x^s)$ 
+
+\EndFor
+\State $t \gets t+\Delta t$
+
+\State Compute new partitions $\Lambda=(\bar{\Lambda}^f,\bar{\Lambda}^s)$, $R=(\bar{R^f},\bar{R^s})$ at time $t$
+
+\For{\textbf{each} $\lambda_i \in \Lambda$}
+\If {$\lambda_i \in \bar{\Lambda}^f \wedge \lambda_i \in \Lambda^s$}
+    \State Move $\lambda_i$ from $S^s(t)$ to $X^f(t)$
+\EndIf
+\If {$\lambda_i \in \bar{\Lambda}^s \wedge \lambda_i \in \Lambda^f$}
+    \State Move $\lambda_i$ from $X^f(t)$ to $S^s(t)$
+\EndIf
+
+\EndFor
+
+\State $({\Lambda}^f,{\Lambda}^s,{R}^f,{R}^s) \gets (\bar{\Lambda}^f,\bar{\Lambda}^s,\bar{R}^f,\bar{R}^s)$
+
+\EndWhile
+
+\State $P(X^f(t))\gets \sum_{(x^s,p)\in S^s(t)} P(X^f(t)|X^s(t)=x^s)\cdot p$ % $ \Comment{$P(X^f(t)|X^s(t)=x^s)$ is a Gaussian distribution}
+\State Compute $P(X^s(t))$ by exploration of $S^s(t)$
+\State $\textbf{return } (P(X^f(t)),P(X^s(t)))$ 
+\EndFunction
+\end{algorithmic}
+\end{algorithm}}
+%Given a CRN $C=(\Lambda^f,\Lambda^s)$ with initial condition $x_0$, 
+In Line $2$, we partition species and reactions according to the leap conditions (Eqns \eqref{leapC1},\eqref{leapC2}). %. as explained in Section \ref{Thresholds}.
+In Line $3$, we initialize discrete and continuous stochastic processes as follows. The discrete process $X^s(t)$ at time $t$ is represented by its state space, $S^s(t)$, given by a set of pairs $(x^s,p)$, where $x^s\in \mathbb{N}^{|\Lambda^s|}$ and $p$ is such that $P(X^s(t)=x^s)=p$. The continuous process $X^f(t)$ at time $0$ is equal to $x^f_0$ with probability $1$.   
+From Line $4$ to $19$, 
+%for $t<t_f$, the algorithm iteratively solves Eqns \eqref{DIscreteSpecies} and \eqref{FastCond} and updates the partitions. 
+the algorithm iteratively updates the partitions.
+$\Delta t$ is determined as the integration step of the numerical method used for characterizing discrete species; we use an explicit 4-th order Runge-Kutta algorithm with fixed time step, as in \cite{henzinger2010hybrid}. Alternatively, 
+%more complex 
+methods such as uniformisation \cite{didier2009fast,Kwiatkowska2007} or aggregation-based techniques \cite{abate2015adaptive} could also be used. 
+In Line $5$, Eqn \eqref{DIscreteSpecies} is solved numerically for the next $\Delta t$. %We do not employ these techniques to keep the presentation as simple as possible. And because, our focus is not in a particular numerical method for solving the CME, but in a systematic and general strategy that can be used for studying the stochastic evolution of biochemical systems that cannot be analysed with current techniques.
+In Lines $6-7$, for any $(x^s,p)\in S^s(t+\Delta t)$, the algorithm solves the LNA to compute Eqn \eqref{FastCond}. %To implement this routine, we build on the implementation presented in \cite{cardelli2015stochastic}.
+In Line $9$, the partitions are computed at time $t$ according to the leap conditions (Eqns \eqref{leapC1}, \eqref{leapC2}) at that time. In general, the probability mass at time $t$ is distributed over a set of states.
+%. As a consequence, in this routine, in order to verify for which species and reactions the leap conditions hold, 
+In some cases the leap conditions can be checked deterministically based on the expected values $E[X^f(t)]$ and $E[X^s(t)]$. 
+%expected value of discrete and continuous species at time $t$. This enables checking conditions \eqref{leapC1} and \eqref{leapC2} deterministically. However, sometimes the use of the expected values to check the partition can be not enough. For instance, a species may have a multi-modal distribution with modes in small and big molecular counts and expected value cannot exhaustively represent system dynamics.
+In a more general scenario, it may be necessary to compute the probability that the leap conditions are verified for any $\tau \in R$ and then partition according to these probabilities, which can be approximated as, at time $t$, we know the approximate solution of the CME \cite{anderson2015models}.
+%A more correct way to compute the partitions would be  computing the probability that the two leap conditions are verified for any $\tau \in R$ and then partitioning according to these probabilities, which can be estimated as, at time $t$, we know the approximated solution of the CME \cite{anderson2015models}.
+In Lines $11-15$, the species are reclassified and the partitions, $S^s(t)$ and $X^f(t)$, are modified accordingly. If $\lambda_i$  was previously a discrete species and is now assigned to the continuous set, then all states in $S^s(t)$ that are equal except for the number of molecules of $\lambda_i$ can now be merged. %In fact, $\lambda_i$ is now a continuous species.
+Then, for any state $x^s$ of the updated discrete state space, we compute $P(X^f_{\lambda_i}(t)|X^s(t)=x^s)$, which is Gaussian. In Line $14$, for any $(x^s,p) \in S^s(t)$ we discretize the Gaussian distribution $P(X^f_{\lambda_i}(t)|X^s(t)=x^s)$, where $X^f_{\lambda_i}$ is the component of $X^f(t)$ relative to $\lambda_i$.
+Finally, for $t\geq t_{fin}$, in Lines $16-17$, the probability distributions of interest are computed.
+%\todo{refer to eqns?}%$P(X^f(t))=\sum_{x^s \in S^s}P(X^f(t)|X^s(t)=x^s)P(X^s(t)=x^s)$ where each $P(X^f(t)|X^s(t)=x^s)$ is a Gaussian distribution with expected value and covariance matrix $E[X^f(t)|X^s(t)=x^s],C[X^f(t)|X^s(t)=x^s]$. %$computeDiscreteProb$ computes the distribution associated to discrete species by discrete state space exploration.
+
+\subsubsection{A Faster Algorithm.}
+If, for a particular CRN, Remark \ref{red} applies then we can assume that $P(X^f(t))\approx P(X^f(t)|X^s(t)=E[X^s(t)])$.
+%This approximation permits to modify the presented algorithm in a way to speed up the execution and simplify the implementation.
+%In fact, if the approximation holds, 
+Then we need to compute the LNA only once, and conditioned on the expectation of the discrete stochastic process.  
+%Others routines simplify 
+The remaining computation can be simplified as well because the virtual continuous process is modelled with a Gaussian distribution and not with a mixture of Gaussians.
+%In Section \ref{sec:exper}, we employ the simplified algorithm for CRNs that satisfy Remark \ref{red}.
+%this simplified version of the algorithm only when conditions for Remark \ref{red} are satisfied.
+
+\subsubsection{Complexity and Error Analysis.}
+The solution of Eqn \eqref{DIscreteSpecies} at time $t$, using our particular implementation, has a time cost linear in $|S^s(t)|$. We work with the numerical method of \cite{henzinger2010hybrid}, which, for each $(x^s,p)\in S^s(t)$, propagates the probability retaining only the $x^s$ such that $P(X^s(t)=x^s)=p>\zeta$. We fix $\zeta=10^{-14}$. %Thanks to this state truncation we can handle infinite discrete state spaces. 
+Solving the LNA requires solving a number of differential equations quadratic in the number of continuous species, and independent of the molecular population of such species.
+In the general case, at time $t$, we need to solve the LNA during the next $\Delta t$ a number of times that is of the same order as  the dimension of the discrete state space ($O(|S^s(t)||\Lambda^f|)$ differential equations). If Remark \ref{red} is applicable, then the LNA needs to be solved only once. 
+
+If all species are partitioned as discrete/continuous, then the solution of Algorithm \ref{GeneralMix} reduces to that of the CME/LNA.
+The accuracy depends on the choice of $\sigma_1,\sigma_2$, where it can be shown \cite{gillespie2008simulation} that, as $\sigma_1,\sigma_2 \rightarrow \infty$, then our algorithm guarantees an error equal to the error guaranteed by the numerical method used to solve the discrete master equation. 
+%The analysis performed in Section \ref{Thresholds} shows that if $\sigma_1,\sigma_2 \rightarrow \infty$, then our algorithm guarantees an error equals to the error guaranteed by the numerical method used to solve the discrete master equation. 
+%Error bounds can be computed both for aggregation and state-space truncation based techniques \cite{abate2015adaptive,didier2009fast}. 
+If, instead, both $\sigma_1,\sigma_2$ equal $0$, then the error of our hybrid algorithm reduces to the error in computing the LNA, which is model dependent and does not depend only on the molecular counts \cite{ethier2009markov}, but also on the validity of assumption \eqref{eq:hypothsis}, which needs to be verified a posteriori \cite{goutsias2013markovian}. 
+Error bounds would be a viable companion to estimate the committed error, but we are not aware of any explicit formulation of them for the convergence of the LNA. As a result, simulations may be used to validate the results.
+%To our knowledge, specific error bounds for the LNA %which can be of practical interest, 
+%are not known and its correctness is generally guaranteed empirically, with simulations.
+%This implies quantification of the error for our hybrid algorithm in function of  $\sigma_1,\sigma_2$ is not easy, and remains an open problem. 
+%Since our method is generally much more scalable than direct solution of the CME, one may need to try multiple simulations with increasing stringent values of $\sigma_1$ and  $\sigma_2$ until the desired accuracy is reached. %, which would result in more precise stochastic characterization at a price of a greater execution time. 
+
+%and allow for 
+%and and eventually increasing the value of $\sigma_1$ and $\sigma_2$ for a more precise stochastic characterization at a price of a generally greater execution time.
+%In practice, as our method is generally much more scalable than other approaches for solving the CME, we can use simulations to validate our results and \todo{what results?} and eventually increasing the value of $\sigma_1$ and $\sigma_2$ for a more precise stochastic characterization at a price of a generally greater execution time.
+
+\section{Model Checking of Stochastic Evolution Logic (SEL)}\label{logic-sec}
+
+Employing the hybrid semantics developed here, we present a fast probabilistic model checking algorithms for Stochastic Evolution Logic (SEL) \cite{cardelli2015stochastic}. SEL is a probabilistic logic for analysis of linear combinations of the species of a CRN.
+
+Let $C = (\Lambda,R)$ be a CRN with initial state $x_0$, then SEL enables evaluation of the probability, variance and expectation of linear combinations of populations of the species of $C$.
+The syntax of SEL is given by 
+\[
+\eta := P_{\sim p}[ B,I]_{[t_1,t_2]} \quad | \quad Q_{\sim v}[B]_{[t_1,t_2]} \quad |\quad \eta_1 \wedge \eta_2 \quad  | \quad \eta_1 \vee \eta_2 \quad
+\]
+\noindent
+where $Q=\{supV, infV,supE,infE\}$, $\sim=\{<,>\}$, $p \in [0,1]$, $v \in \mathbb{R}$, $B \in \mathbb{Z}^{|\Lambda|}$, $I$ is a finite set of disjoint intervals and $[t_1,t_2] \subseteq \mathbb{R}_{\geq 0}$. If $t_1=t_2$ the interval reduces to a singleton.
+
+Formulae $\eta$ describe global properties of the stochastic evolution of the system. 
+$(B,I)$ specifies a linear combination of the species, %of $C$ and a set of intervals, 
+where $B \in \mathbb{Z}^{|\Lambda|}$ is a vector defining the linear combination and $I$ represents a set of disjoint closed real intervals. $P_{\sim p}[ B,I]_{[t_1,t_2]}$ is the probabilistic operator, which specifies the average value of the probability that the linear combination defined by $B$ falls within the range $I$ over the time interval $[t_1,t_2]$ (we stress that this is not equivlent to reachability). 
+The operators $supE,infE,infV,supV$, see \cite{cardelli2015stochastic}, respectively, yield the supremum and infimum of expected value and variance of the random variables associated to $B$ within the specified time interval. The quantitative value associated to a formula can be computed by writing $=?$ instead of $\sim p$ or $\sim v$. For instance, $P_{=?}[ B,I]_{[t_1,t_2]}$ gives the probability value associated to the probabilistic property.
+
+\subsubsection{Model checking algorithm.}
+
+Given $Z(t)=B\cdot X(t)$, where $B$ is a linear combination of the species of $C$, then, according to the semantics of SEL \cite{cardelli2015stochastic}, in order to perform model checking, we need to compute $P(Z(t)=z|X(0)=x_0), E[Z(t)|X(0)=x_0]$ and $E[Z(t)\cdot Z(t)|X(0)=x_0]$ (transient probability, expected value and variance of $Z$), where $z \in \mathbb{Z}$, and $x_0 \in \mathbb{N}^{|\Lambda|}$.
+In general, this requires solving the CME, which leads to state space explosion ot the LNA, which is fast but not always accurate. However, we can use our hybrid approximation in order to derive a fast and approximate model checking algorithm of SEL.
+We approximate $Z$ with $Z^h$, which is the linear combination of the hybrid approximation of $X=(X^f,X^s)$.
+The following theorems, whose proofs are in the Appendix, show that model checking SEL  just requires computing the hybrid approximation of the CME. In fact, uni-dimensional Gaussian integrals can be computed numerically in constant time. We denote $\Lambda^s_t$ as the set of discrete species at time $t$.
+\begin{theorem}\label{Prob-Op}
+Assume $\Lambda^s_t$ is non-empty and $S^s$ is the state space of $X^s(t)$.
+Then, the stochastic process $Z^h:\Omega \times \mathcal{R}_{\geq 0}\rightarrow \mathcal{S}$, with $\Omega$ its sample space and $(\mathcal{S},\mathcal{B})$ a measurable space, is such that for $A\in \mathcal{B}$ and $t\in \mathbb{R}_{\geq 0}$ 
+\begin{equation*}
+P(Z^h(t)\in A|X(0)=x_0)=\sum_{x^s \in S^s} P(Z_{x^s}(t)\in A)P(X^s(t)=x_s)
+\end{equation*}
+where $Z_{x^s}(t)$ is a Gaussian random variable with expected value and variance 
+\begin{equation*}
+E[Z_{x^s}(t)]=B\cdot
+\begin{pmatrix}
+E[\bar{X}^f(t)]\\
+x^s
+\end{pmatrix}
+\quad
+C[Z_{x^s}(t)]=B\cdot
+\begin{pmatrix}
+C[\bar{X}^f(t)]&0\\
+0&0
+\end{pmatrix}
+\cdot B^T
+\end{equation*}
+where $\bar{X}^f$ is the virtual fast process introduced in Section \ref{NewCMEs}.
+\end{theorem}
+Note that if the linear combination, at time $t$, involves only slow species, then $Z_{x_0}(t)$ is distributed according to a delta-Dirac function.
+This theorem guarantees that the transient probabilities of $Z^h$ can be computed by solving a set of Guassian integrals, one for each reachable discrete state. The following theorem illustrates that expected value and variance of $Z^h$ can be computed by considering Gaussian properties, even if $Z^h$ is not Gaussian in general.
+\begin{theorem}\label{Var-Ex-Op}
+Assume $\Lambda^s_t$ is non-empty. Then, for $t\in \mathbb{R}_{\geq 0}$
+\begin{equation*}
+E[Z^h(t)|X(0)=x_0]=\sum_{x^s \in S^s} E[Z_{x^s}(t)\in A]P(X^s(t)=x_s)
+\end{equation*}
+\begin{equation*}
+C[Z^h(t)|X(0)=x_0]=\sum_{x^s \in S^s} C[Z_{x^s}(t)\in A]P(X^s(t)=x_s)
+\end{equation*}
+\end{theorem}
+ The basic tools used in the proofs are the law of total expectation and the fact that jointly Gaussian random variables are closed with respect to a linear combination, which is Gaussian \cite{adler1990introduction}.  Theorems \ref{Prob-Op} and \ref{Var-Ex-Op} assume that, at time $t$, the set of discrete species is not empty. In fact, if this is the case, all species are treated with the LNA and model checking algorithms for this scenario are given in \cite{cardelli2015stochastic}. { We stress that the presented model checking algorithms are accurate only for finite time. In fact, for unbounded time, events that can be neglected in a finite time horizon scenario may fire with probability one.} In the next section, SEL is employed in a set of case studies.
+
+\section{Experimental Results}\label{sec:exper}
+
+We present three case studies showing how our approach significantly improves stochastic analysis of biochemical systems.
+We implemented Algorithm \ref{GeneralMix} in Matlab. All the experiments were run on an Intel Dual Core i$7$ machine with $8$ GB of RAM. The first example is a CRN where we need to adaptively partition the species. The second example shows that our hybrid approach can be accurate in cases where the LNA is not, still maintaining comparable time complexity. The third is a system for which advanced numerical techniques for solving the CME such as fast adaptive uniformisation (FAU) \cite{didier2009fast}, as implemented in PRISM \cite{KNP11}, fail (out of memory) and using simulations would be too time consuming for comparable accuracy. However, we show that our approach still permits an accurate stochastic characterization. %of such a system. %This shows how our approach permits accurate analysis of CRNs for which is not possible solving the CME. 
+
+\subsubsection{Gene Expression.}
+We consider the CRN of Example \ref{Gene Expression}. All species in this example follow a unimodal distribution. As a consequence, we employ Remark \ref{red}. % to speed up the algorithm. 
+%We use this example to compare our hybrid algorithm with a full numerical solution of the CME. 
+To ensure a fair comparison, we use the same numerical method for solving the CME and for solving the discrete part of our hybrid model: an explicit $4$th order Runge-Kutta algorithm \cite{henzinger2010hybrid}. 
+Even though the stochastic semantics is an infinite CTMC, there are only $2$ species in the system with relatively small variance, and thus a numerical solution of the CME is feasible. 
+In Figure \ref{Gene}, in the Appendix, we compare $supE_{=?}[mRNA]_{[T,T]}$ and $supV_{=?}[mRNA]_{[T,T]]}$ for $T \in [0,200]$, the transient evolution of the expected value and variance of the $mRNA$, as calculated by direct solution of the CME and by our hybrid algorithm. 
+%This example is interesting because, 
+Our algorithm decides to use the LNA for around $70\%$ of the time points. Moreover, we need to adaptively recompute the partitions, as shown in Example \ref{Gene Expression}.
+In the table below we compare the performance of the same properties for different methods. % when calculating the variance of the $mRNA$ between $[0,200]$.
+We consider the following metrics:
+$ ||\epsilon||_{\infty}$ and
+$ ||\epsilon||_{1}$, respectively, average point-wise error and maximum point-wise error of LNA or hybrid approach with respect to the CME solution. $ProbLost$ is the probability lost by the numerical solution of the CME due to the truncation of states with probability mass smaller than $10^{-14}$.
+%$ ||\epsilon||_{\infty}=max_{t \in \Sigma } |C[X_{mRNA}(t)]-C[\tilde{X}_{mRNA}(t)]| $ and
+%$ ||\epsilon||_{1}=\frac{1}{|\Sigma|}\sum_{t\in \Sigma} |C[X_{mRNA}(t)]-C[\tilde{X}_{mRNA}(t)]|$,
+%where $C[X_{mRNA}(t)]$ is the variance of $mRNA$ at time $t$ as estimated by numerical solution of the CME, $C[\tilde{X}_{mRNA}(t)]$ is the variance of $mRNA$ at time $t$ as estimated by Algorithm \ref{GeneralMix} or by the LNA, and $\Sigma$ is the set of sampling points that occurred in the numerical solution of the CME between $[0,200]$. $ProbLost$ is the probability lost by the numerical solution of the CME due to the truncation of states with probability mass smaller than $10^{-14}$.
+{\footnotesize \begin{center}
+\renewcommand{\baselinestretch}{.8}
+	\begin{tabular}{|l|l|l|l|l|}
+	\hline
+	\emph{Semantics}            &  \,		\emph{Time}	 \,  & \, $||\epsilon||_{1}$ \, 	  & \,  	$||\epsilon||_{\infty}$ \, &	\, 	  \emph{ProbLost}    \\ 
+	\hline
+	CME        & 		  $205$ sec           	 & 	- & - & 	$<10^{-7}$    \\ 
+	Hybrid   & 		  $35$   sec      	 & 	 	$ <10^{-7}$     &  $<10^{-7}$ & -  \\  
+	LNA   & 		  $5$   sec      	 & 	 	$9\cdot 10^{-5}$     &  $0.0112$ & -  \\  
+	\hline
+	\end{tabular}
+\end{center}}
+The LNA yields good accuracy. However, our hybrid algorithm achieves accuracy comparable to that for CME and is faster by one order of magnitude.
+%This is an example for which the numerical solution of the LNA has good accuracy. However, solving the discrete subsystem, our hybrid algorithm achieve an accuracy comparable to the one of a direct numerical solution of the CME, still being faster. In the next examples we show that when exploration of the state space based techniques are inefficient then, for a large class of systems, our method is still scalable. 
+\subsubsection{Bimodal Switch.}
+We consider the CRN presented in Example \ref{multimodal} for $k_1=0.7$ and $k_2=0.3$. We are interested in analysing the probability distribution of $\lambda_{out}$ over time, more specifically the SEL property $P_{=?}[\lambda_{out}=K]_{[100,100]}$, for $K \in [0,200]$. Because of the bimodal nature of such a distribution, Remark \ref{red} is not applicable and the LNA alone is not able to correctly estimate such a distribution. However, our hybrid model, as described in Eqn \eqref{MultiEx}, correctly characterizes the distribution of $\lambda_{out}$.
+Figure \ref{DistrFig} compares the distribution of $\lambda_{out}$ at time $t=100$ as estimated by our hybrid approach against the LNA and a full solution of the CME. 
+\begin{figure}
+	\centering
+\begin{subfigure}{.33\textwidth}
+     \centering
+     \includegraphics[width=1\linewidth]{CMESemanticsDistr.eps}
+     \caption{CME}
+     \label{fig:CME}
+   \end{subfigure}%
+\begin{subfigure}{.33\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{HybridSemanticsDistr.eps}
+  \caption{Hybrid}
+  \label{fig:Hybrid}
+\end{subfigure}
+\begin{subfigure}{0.33\textwidth}
+  \centering
+  \includegraphics[width=0.99\linewidth]{LNASemanticsDistr.eps}
+  \caption{LNA}
+  \label{fig:LNA}
+\end{subfigure}
+\caption{Comparison of the probability distribution of $\lambda_{out}$ at time $t=100$, as estimated by a numerical solution of the CME (Fig.\ \ref{fig:CME}), by our hybrid semantics for $\sigma_1=2$, $\sigma_2=0.5$ (Fig.\ \ref{fig:Hybrid}) and by the LNA (Fig.\ \ref{fig:LNA}). { Note that in Fig. \ref{fig:CME} and  \ref{fig:Hybrid} there is non-zero probability of having exactly zero molecules.}}
+\label{DistrFig}
+\end{figure}%
+The following table compares our hybrid approach with the other semantics for different values of $\sigma_1$ and $\sigma_2$. 
+We consider the average point-wise error, $||\epsilon||_{1}$, and the maximum point-wise error, $||\epsilon||_{\infty}$, with respect the a numerical solution of the CME, whose error is due to state space truncation ($ProbLost$).
+%We consider the following metrics for evaluating the error: $||\epsilon||_{\infty}=max_{x\in \hat{S}^{\lambda_{out}} }|P(X_{\lambda_{out}}(100)=x)-P(\tilde{X}_{\lambda_{out}}(100)=x)|$ and $||\epsilon||_{1}=\frac{1}{|\hat{S^{\lambda_{out}}}|}\sum_{x\in \hat{S}^{\lambda_{out}} }|P(X_{\lambda_{out}}(100)=x)-P(\tilde{X}_{\lambda_{out}}(100)=x)|$, where $\hat{S}^{\lambda_{out}}$ is the set of integers such that the probability that $\lambda_{out}$ at time $100$ is greater than $10^{-14}$, according to the numerical solution of the CME. $P(X_{\lambda_{out}}(100)=x)$ is the probability that $\lambda_{out}$ at time $t$ is equal to $x$ as estimated by the CME and $P(\tilde{X}_{\lambda_{out}}(100)=x)$ is the same probability estimated by the LNA or by numerical solution of Algorithm \ref{GeneralMix}.
+For a fair comparison,  
+both for the solution of the master equations of discrete species and for the CME, 
+we use the same numerical method,  an explicit $4$th order Runge Kutta algorithm with fixed time step \cite{henzinger2010hybrid}. 
+{\footnotesize\begin{center}
+\renewcommand{\baselinestretch}{.8}
+	\begin{tabular}{|l|l|l|l|l|l|l|}
+	\hline
+	\emph{Semantics}          \,  &  \,	$\sigma_1$  \,  &   \, $\sigma_2$   \, &   \,	\emph{Time}	 \,  & \,  $||\epsilon||_{1}$ \, 	  & \,  	$||\epsilon||_{\infty}$ 	\, 	 & \,  \emph{ProbLost} \,      \\ 
+	\hline
+	CME        &  - & - &		  $100$ sec           	 & -& - & 	 	$<10^{-6}$     \\ 
+	LNA        & 	-&  -&	  $2.3$ sec           	 & 	 	$0.081$  &  $0.2971$ & -  \\ 
+	Hybrid   &  2   &  0.5  &		  $2.5$   sec      	 & 	 	$3.284\cdot 10^{-4}$     &  $0.0024$ &-  \\  
+	Hybrid   &  0.5   &  0.5  &		 $2.2$    sec      	 & 	 $0.081$	     &  $0.2971$ &- \\  
+	Hybrid   &  2   &  2  &		    $96$ sec      	 & 	 $<10^{-6}$	    &   $<10^{-6}$  & - \\  
+	\hline
+	\end{tabular}
+\end{center}}
+For $\sigma_1>1$ and $\sigma_2<0.7$, the hybrid approach improves the accuracy of the LNA by around two orders of magnitude, while still maintaining comparable execution time. Note that, for this choice of $\sigma_1$ and $\sigma_2$, the virtual continuous subsystem ignores the delay induced by the firing of the first reaction, which explains %. This is the reason why we have less accurate 
+why the accuracy of the hybrid method is worse than CME.
+%with respect to the CME. 
+For $\sigma_2>0.7$, all species are considered as discrete and the hybrid approach reduces to the solution of the CME. For $\sigma_1=\sigma_2=0.5$, all species are continuous and the accuracy of the hybrid approach is identical to that of the LNA. 
+
+\subsubsection{Viral Infection.}
+We consider the intracellular viral infection model proposed in \cite{srivastava2002stochastic}.
+This model of virus infection is given by the following set of reactions:
+
+\[\tau_1:  DNA + P \rightarrow^{0.00001125} V; \,\,\,\,\, \tau_2: DNA \rightarrow^{0.025} DNA + RNA; \,\,\,\,\,\tau_3: RNA \rightarrow^{0.25}                                   \]
+\[\tau_4: RNA \rightarrow^{1} RNA + DNA; \,\,\,\,\,\, \tau_5: RNA \rightarrow^{1000} RNA + P; \,\,\,\,\,\,\tau_6: P \rightarrow^{1.9985}                                   \]
+The initial condition is $RNA(0)=1$ and all other species initialized to $0$ molecules. We consider $\sigma_1=40$ and $\sigma_2=20$.
+%Under this initial condition, at time $0$ the only continuous reaction is $\tau_5$ (note that $RNA$ acts as a catalyst), and the only continuous species is $P$.
+%As a consequence, initially the virtual continuous system is given by
+%\[RNA \rightarrow^{1000} RNA + P; \]
+%However, as soon as $P$ reaches a sufficiently large molecular population, $\tau_6$ has to be considered. So, the virtual system becomes
+%\[ RNA \rightarrow^{1000} RNA + P;\,\,\,\,\,\, P \rightarrow^{1.9985}\]
+%This implies that the discrete master equation has to be solved only for the remaining species. As a consequence, it is solved for an extremely reduced state space, because $P$ has a high molecular population and huge variance, while the other species, at least initially, are in small population. We are interested in modelling the time evolution of $RNA$ in the time interval $[0,200]$. Note that $V$, which is a species appearing only as a product of reaction $\tau_1$, can always be considered as a continuous species.
+%During the time interval of interest both $DNA$ and $RNA$ always need a discrete characterization. 
+%If the first reaction to fire is $\tau_3$ or we get in a state where there are no molecules of $RNA$ and $DNA$, then no molecules of $DNA$ and $RNA$ will be produced. This implies multimodality in the probability evolution of such species. Consequently, Remark \ref{red} is not applicable for an accurate characterization of such a system.
+%Then, assuming $P(DNA(t)=0,RNA(t)=0)=p_A$, and using the law of total probability, the $RNA$ distribution at time $t$ is given by:
+%$P(RNA(t)=k)=P(RNA(t)=k,DNA(t)=0)+\sum_{x>0}P(RNA(t)=k,DNA(t)=x)$. For $t>0$ we can assume that $P(RNA(t)=k,DNA(t)=0)=p_A$ for $k=0$ and $0$ otherwise. This assumption is justified because the only reaction that consumes $DNA$ molecules is $\tau_1$, which is of much smaller coefficient rate than other reactions. Instead, $p_A$ takes into account the probability that $RNA$ is consumed before a single molecules of DNA is produced. As a consequence, \[P(RNA(t)=k)=\begin{cases}
+ %   p_A+\sum_{x>0}P(RNA(t)=0,DNA(t)=x)       & \quad \text{if $k=0$}\\
+  %  \sum_{x>0}P(RNA(t)=0,DNA(t)=x)       & \quad \text{if $k>0$}\\
+  %\end{cases}\]
+%[And,  $\sum_{x>0}P(RNA(t)=0,DNA(t)=x)$ can be treated with the LNA as shown in section \ref{}] Improve.
+%The propagation of the probability follows equations shown in Section \ref{NewCMEs}.
+This system, although apparently quite small ($6$ reactions), is very complex to analyse formally or using simulations. This is because it is extremely stiff, with all species presenting high variance and some also high molecular populations.
+As a consequence, solution of the full CME, even using advanced techniques such as FAU or finite state projection (FSP) \cite{munsky2006finite}, is prohibitive due to state-space explosion. % or at least extremely time consuming. 
+For all the properties we consider, FAU is out of memory on our hardware. Because of the stiffness of the system, simulations are time consuming and ensuring good accuracy is not feasible. Our hybrid approach, by considering $P$ as a continuous species for any time instant, enables an effective and efficient stochastic characterization of such a system.
+Note that, for this system, the LNA is clearly not accurate because of its multimodality.
+% \begin{figure}
+ %\vspace{-0.4cm}
+%	\centering
+%	\begin{subfigure}{.44\textwidth}
+%     \centering
+%     \includegraphics[width=1.1\linewidth]{mRNAt_200.eps}
+%     \caption{}
+%     \label{fig:sub3}
+%   \end{subfigure}%
+%\begin{subfigure}{.44\textwidth}
+ % \centering
+%  \includegraphics[width=1.1\linewidth]{LNAmRNAt_200.eps}
+%  \caption{}
+%  \label{fig:sub4}
+%\end{subfigure}
+%\caption{Comparison of the probability distribution of $RNA$ at time $t=200$ as calculated by our numerical hybrid algorithm (Fig.\ \ref{fig:sub3}) and by the LNA (Fig.\ \ref{fig:sub4}).}
+%\label{Virus}
+%\vspace{-0.5cm}
+%\end{figure}%
+
+In Figure \ref{Virus}, in the Appendix, we compare the distribution of the $RNA$ at time $t=200$ as estimated by our hybrid approach and the distribution of the same species with only the LNA. Results show that the LNA is not able to accurately characterize the distribution of interest, while our hybrid approach correctly predicts multimodality and confirms values obtained by Goutsias in \cite{goutsias2005quasiequilibrium} (Figure $5$) by using $4000$ simulations.
+%\todo{What is the accuracy of Goutsias?}
+%, and for improving the accuracy much more simulations are needed. This would be extremely time consuming. As a consequence, the evaluation of the referenced paper can only be used only as a validation of our approach. 
+
+Note that, although the original model is stiff, after species separation the resulting model is much less stiff. This remains true for a large class of systems, and it is a consequence of how we separate the  species of a CRN. As a result, for such systems, we need to solve a discrete master equation only for less stiff systems in a reduced state space. As we see in the following table, this results in a marked improvement.
+{\footnotesize\begin{center}
+	\begin{tabular}{|l|l|l|l|l|}
+	\hline
+	\emph{Property (SEL)}               &  		\emph{Time (Hy)}	 	 &   	\emph{Time (LNA)}	 	 &   	\emph{Time (FAU)}	 	  &    \emph{RelErr (Hy-LNA)}  	     \\ 
+	\hline
+	$P_{=?}[RNA=0]_{[200,200]}$        & 		  $4300$ sec         & $28$  	 & 	 	OutOfMem   &  0.215   \\ 
+	$P_{=?}[RNA=0]_{[50,50]}$        &   	  $1500$ sec   &  $20$	&      	  	 	OutOfMem   &  0.215  \\ 
+ 
+	\hline
+	\end{tabular}
+\end{center}}
+$Time(\cdot)$ represents the execution time of different algorithms. \emph{RelErr(Hy-LNA)} is the distance between the quantitative value of the property as computed by our hybrid algorithm (and validated by simulations) and by the LNA.
+
+
+\section{Conclusion}
+
+We presented a stochastic hybrid approximation of the CME based on automatically partitioning the species and reactions of a CRN according to the leap conditions, and treating the discrete species as a discrete stochastic process, while treating the continuous species as a mixture of Gaussian distributions. 
+The use of the leap conditions justifies the hybrid approximation compared to simple threshold conditions on molecular populations.
+Our method can be integrated with any numerical method to solve the CME, such as FAU \cite{didier2009fast}, FSP \cite{munsky2006finite} or aggregation based techniques \cite{abate2015adaptive}.
+We demonstrated through case studies that our method is efficient, scales well and can handle multimodality. The algorithm works particularly well for systems where species evolve on different time scales (i.e. stiff systems), which are common in biology.
+{It also works well when there are no reactions that satisfy the second leap condition, but not the first one. In this case, our hybrid model can introduce some inaccuracies due to the assumptions in partitioning of the species. As future work, we plan to handle this problem by dealing directly with the non-Markovian aspect of the process related to continuous species, without introducing any virtual process. Finally, we plan to implement an algorithm to automatically tune the parameters for species partitioning using stochastic simulations.
+}
+
+%\section*{Acknowledgements}
+%The authors would like to thank Alessandro Abate and Milan Ceska for helpful discussions.
+\vspace{-1.2em}
+
+ \bibliographystyle{abbrv}
+ {\tiny\bibliography{LanguagesForBiology.bib}}
+
+\appendix
+
+\section{Proofs}
+\addtocounter{proposition}{-1}
+\addtocounter{lemma}{-1}
+\addtocounter{theorem}{-2}
+
+\begin{proposition}
+Let $x^s \in S^s$ and $x^f \in S^f$. Then, for $t \in \mathbb{R}_{\geq 0}$
+\begin{equation*}
+\frac{d P(x^s|t)}{dt}=\sum_{\tau \in R}\beta_{\tau}(x^s-\upsilon_{\tau},t)P(x^s-\upsilon_{\tau},t)- \beta_{\tau}(x^s,t)P(x^s,t)
+\end{equation*}
+where $\beta_{\tau}(x^s,t)= \sum_{x^f \in S^f} \alpha_{\tau}(x^f,x^s)P(x^f|x^s,t)$. 
+\end{proposition}
+
+ \begin{proof}
+ By using the law of total probability we have
+ \begin{align*}
+\frac{d P(x^s|t)}{dt}=\sum_{x^f \in S^f}\frac{d P(x^s,x^f,t)}{dt}
+\end{align*}
+Then, using Eqn \eqref{CME}, and rearranging terms we have
+\begin{align*}
+    \sum_{x^f \in S^f}\frac{d P(x^s,x^f,t)}{dt}=
+\end{align*}
+\begin{align*}
+ \sum_{x^f \in S^f}\sum_{\tau \in R^f}\alpha_{\tau}(x^f-\upsilon_{\tau},x^s-\upsilon_{\tau})P(x^f-\upsilon_{\tau},x^s-\upsilon_{\tau},t)- \alpha_{\tau}(x^f,x^s)P(x^f,x^s,t)= 
+\end{align*}
+\begin{align*}
+\sum_{\tau \in R}\beta_{\tau}(x^s-\upsilon_{\tau},t)P(x^s-\upsilon_{\tau},t)- \beta_{\tau}(x^s,t)P(x^s,t)
+\end{align*}
+where $\beta_{\tau}(x^s,t)= \sum_{x^f \in S^f} \alpha_{\tau}(x^f,x^s)P(x^f|x^s,t)$, that is, the conditional expectation of the propensity rate of $\tau$ at time $t$ given $X^s(t)=x^s$.
+ \end{proof}
+\begin{theorem}
+Assume $\Lambda^s_t$ is non-empty and $S^s$ is the state space of $X^s(t)$.
+Then, the stochastic process $Z^h:\Omega \times \mathcal{R}_{\geq 0}\rightarrow \mathcal{S}$, with $\Omega$ its sample space and $(\mathcal{S},\mathcal{B})$ a measurable space, is such that for $A\in \mathcal{B}$ and $t\in \mathbb{R}_{\geq 0}$ 
+\begin{equation*}
+P(Z^h(t)\in A|X(0)=x_0)=\sum_{x^s \in S^s} P(Z_{x^s}(t)\in A)P(X^s(t)=x_s)
+\end{equation*}
+where $Z_{x^s}(t)$ is a Gaussian random variable with expected value and variance 
+\begin{equation*}
+E[Z_{x^s}(t)]=B\cdot
+\begin{pmatrix}
+E[\bar{X}^f(t)]\\
+x^s
+\end{pmatrix}
+\quad
+C[Z_{x^s}(t)]=B\cdot
+\begin{pmatrix}
+C[\bar{X}^f(t)]&0\\
+0&0
+\end{pmatrix}
+\cdot B^T
+\end{equation*}
+where $\bar{X}^f$ is the virtual fast process introduced in Section \ref{NewCMEs}.
+\end{theorem}
+\begin{proof}
+By the law of total probability we have 
+\[
+P(Z(t)\in A|X(0)=x_0)=\sum_{x^s \in S^s}P(Z(t)\in A|X^s(t)=x^s,X(0)=x_0)P(X^s(t)=x^s|X(0)=x_0).
+\]
+By application of the LNA it follows that $X^f(t)$ conditioned on the event $X^s(t)=x^s$ is a Gaussian random variable with expected value and variance 
+\[
+E[X^f(t)|X^s(t)=x^s]=\begin{pmatrix}
+E[\bar{X}^f(t)]\\
+x^s
+\end{pmatrix}
+\]
+and covariance matrix 
+\[ C[X^f(t)|X^s(t)=x^s]=\begin{pmatrix}
+C[\bar{X}^f(t)]&0\\
+0&0
+\end{pmatrix}
+\]
+Given a multidimensional Gaussian distribution, each linear combination of its components is still Gaussian. As a consequence, $E[Z^h(t)|X^s(t)=x^s]=B\cdot E[X^f(t)|X^s(t)=x^s]$ and $C[Z^h(t)|X^s(t)=x^s]=B\cdot C[X^f(t)|X^s(t)=x^s]\cdot B^T$.
+
+\end{proof}
+
+
+\begin{theorem}
+Assume $\Lambda^s_t$ is non-empty. Then, for $t\in \mathbb{R}_{\geq 0}$
+\begin{equation*}\label{Eq-a1}
+E[Z^h(t)|X(0)=x_0]=\sum_{x^s \in S^s} E[Z_{x^s}(t)\in A]P(X^s(t)=x_s)
+\end{equation*}
+\begin{equation*}\label{Eq-a2}
+C[Z^h(t)|X(0)=x_0]=\sum_{x^s \in S^s} C[Z_{x^s}(t)\in A]P(X^s(t)=x_s)
+\end{equation*}
+\end{theorem}
+\begin{proof}
+The proof follows from the application of the law of total expectation for random variables with mutually exclusive and exhaustive events.  
+\end{proof}
+
+\vspace{-1em}
+\section{Figures}
+\vspace{-1em}
+\begin{figure}
+	\centering
+	\begin{subfigure}{.5\textwidth}
+     \centering
+     \includegraphics[width=0.7\linewidth]{mRNAGECGeneExression.eps}
+     \caption{}
+     \label{fig:sub1}
+   \end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.8\linewidth]{GeneExpressionmRNATime200Matlab.eps}
+  \caption{}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{Comparison of expected value and variance of $mRNA$ in Example \ref{Gene} in interval $[0,200]$ as calculated by direct solution of the CME (Fig.\ \ref{fig:sub1}) and by our algorithm (Fig.\ \ref{fig:sub2}).}
+\label{Gene}
+\end{figure}%
+
+ \begin{figure}
+	\centering
+	\begin{subfigure}{.5\textwidth}
+     \centering
+     \includegraphics[width=0.8\linewidth]{mRNAt_200.eps}
+     \caption{}
+     \label{fig:sub3}
+   \end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.9\linewidth]{LNAmRNAt_200.eps}
+  \caption{}
+  \label{fig:sub4}
+\end{subfigure}
+\caption{Comparison of the probability distribution of $RNA$ at time $t=200$ as calculated by numerical hybrid algorithm (Fig.\ \ref{fig:sub3}) and by the LNA (Fig.\ \ref{fig:sub4}).}
+\label{Virus}
+\vspace{-0.5cm}
+\end{figure}%
+
+
+\end{document}

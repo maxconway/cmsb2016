@@ -1,0 +1,290 @@
+% This is LLNCS.DEM the demonstration file of
+% the LaTeX macro package from Springer-Verlag
+% for Lecture Notes in Computer Science,
+% version 2.4 for LaTeX2e as of 16. April 2010
+%
+\documentclass{llncs}
+%
+\usepackage{makeidx}  % allows for indexgeneration
+\usepackage{graphicx}  % allows for indexgeneration
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{lipsum}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{color}
+\usepackage{chngcntr}
+\counterwithout{figure}{section}
+
+\setlength\abovedisplayshortskip{0pt}
+\setlength\belowdisplayshortskip{0pt}
+\setlength\abovedisplayskip{20pt}
+\setlength\belowdisplayskip{20pt}
+\newcommand{\x}{\vec{x}}
+\newcommand{\y}{\vec{y}}
+\newcommand{\vtheta}{\boldsymbol{\theta}}
+\newcommand{\vpsi}{\boldsymbol{\psi}}
+\newcommand{\vxi}{\boldsymbol{\xi}}
+\newcommand{\argmax}{\mathrm{argmax}}
+\newcommand{\todo}{\textbf{\color{red}{todo}}}
+
+\newcommand{\af}[1]{{\color{blue}#1}}%{{\color{blue}#1}}
+\usepackage{color}
+\definecolor{cols1}{rgb}{ 0.4667   , 0.2471   , 0.6078}
+\definecolor{cols2}{rgb}{0.8706   ,   0.4157  ,  0.0627}
+%\definecolor{revcol}{rgb}{0.85   ,   0.19  ,  0.19}
+\definecolor{revcol}{rgb}{0,0,0}
+
+%
+\begin{document}
+\mainmatter              % start of the contributions
+%
+\title{Parameter Estimation for Reaction Rate Equation Constrained Mixture Models}
+%
+\titlerunning{Parameter estimation for RRE constrained mixture models}  
+\author{Carolin Loos\inst{1,2}, Anna Fiedler \inst{1,2}, Jan Hasenauer \inst{1,2}}
+%
+\authorrunning{Loos et al.} 
+
+\tocauthor{Carolin Loos, Anna Fiedler, Jan Hasenauer}
+%
+\institute{Helmholtz Zentrum M\"unchen - German Research Center for Environmental Health, Institute of Computational Biology, 85764 Neuherberg, Germany\and
+Technische Universit\"at M\"unchen, Center for Mathematics, Chair of Mathematical Modeling of Biological Systems, 85748 Garching, Germany}
+
+\maketitle              % typeset the title of the contribution
+
+\begin{abstract}
+The elucidation of sources of heterogeneity in cell populations is crucial to fully understand biological processes. A suitable method to identify causes of heterogeneity is reaction rate equation (RRE) constrained mixture modeling, which enables the analysis of subpopulation structures and dynamics. These mixture models are calibrated using single cell snapshot data to estimate model parameters which are not measured or which cannot be assessed experimentally. In this manuscript, we evaluate different optimization methods for estimating the parameters of RRE constrained mixture models under the normal distribution assumption. We compare gradient-based optimization using sensitivity analysis with two other optimization methods -- gradient-based optimization with finite differences and a stochastic optimization method -- for simulation examples with artificial data. Furthermore, we compare different numerical schemes for the evaluation of the log-likelihood function. We found that gradient-based optimization using sensitivity analysis outperforms the other optimization methods in terms of convergence and computation time.
+\keywords{parameter estimation, reaction rate equations, mixture models, sensitivity analysis}
+\end{abstract}
+%
+\pagenumbering{arabic}
+\section{Introduction}
+In the past years, methods for studying biological processes on a single cell level have been developed and improved. It is possible to quantify the (relative) abundance of molecular species in single cells using, e.g. flow cytometry~\cite{Davey1996} or single cell microscopy~\cite{Myashiro2007}. With these techniques, it is possible to also detect heterogeneity in expression for cells of a same cell population. This heterogeneity has been shown to play an important role for e.g. cancer cells or neurons~\cite{Michor2010,Torres2014}. For homogeneous cell populations, dynamic mathematical models are convenient tools to study biological systems~\cite{Kitano2002}.\color{revcol}~However, they only capture the dynamic of the mean response in the cell population and cannot account for possible subpopulations. To exploit the information available in single cell data, dynamical models that are able to account for subpopulation structures of the cells are needed.
+
+A suitable method to study subpopulation structures of heterogeneous cell populations is the method of RRE constrained mixture modeling introduced by Hasenauer et al.~\cite{Hasenauer2014}.\color{black}~These models can in principle be fitted to experimental single cell data to estimate unknown parameters of the biological system, such as kinetic rates, initial conditions or subpopulation weights. Subsequently, hypotheses about mechanistic differences between individual subpopulations can be tested. However, it has not yet been discussed how the parameters of RRE constrained mixture models can be estimated in an efficient and accurate way and there is no comparison of methods available.
+
+In this manuscript, we consider maximum likelihood methods for parameter estimation. For this, a likelihood function which provides a measure of how well the data is explained by the current parametrization of the model is maximized. This maximization can be performed using e.g. local deterministic or global stochastic optimization techniques~\cite{Gabor2015,Raue2013,Vaz2006}. Most deterministic optimizers employ information about the gradient of the likelihood function. This gradient with respect to the parameters can be approximated by finite differences or, if possible, calculated with sensitivity analysis \cite{Raue2013,Sengupta2014}. An example of a global stochastic optimizer is particle swarm optimization presented in~\cite{Vaz2006}. This optimizer does not rely on information about the gradient and has been shown to outperform other global optimizers~\cite{Vaz2006}.
+
+We describe the concept of RRE constrained mixture models and provide the likelihood function and the sensitivity equations for the calculation of its gradient with respect to the parameters. Additionally, we explain the standard and a robust approach for the evaluation of a mixture likelihood. We compare the deterministic optimization using sensitivities to the deterministic method using finite differences and to the stochastic particle swarm optimization algorithm for artificial single cell snapshot data of a one stage and three stage cascade.
+\section{Methods}\label{sec:methods}
+In this section, we outline the method of RRE constrained mixture modeling for single cell snapshot data and the corresponding likelihood formulation for the parameter estimation. We establish the gradient of the likelihood with respect to the model parameters and the sensitivity equations. Further, a numerically robust evaluation of the log-likelihood is presented.
+\subsection{RRE Constrained Mixture Models}
+\begin{figure}[tb]
+\centering
+\includegraphics[width=1\textwidth]{figures/RREMM}
+\caption{Illustration of RRE constrained mixture modeling for an example of two subpopulations. The means of measurement $y$ for the individual subpopulations are calculated with RREs and plotted as \color{cols1}purple \color{black}and \color{cols2}orange \color{black}lines for the high and low responsive subpopulation, respectively. The overall cell distribution $\Phi$ is plotted as black curve and is calculated by a weighted mixture of the individual distributions for the subpopulations (purple and orange areas). }\label{fig:concept}
+\end{figure}
+RRE modeling provides the temporal evolution for the mean concentrations $\x=\left(x_1,\ldots,x_{n_x}\right)$ of $n_x$ chemical species involved in a biological process, which is stimulated by an external stimulus $u$. These RREs can be written as 
+\begin{equation}
+\dot{\x}=f(\x,\vpsi,u)\,, \qquad \x(0)=\x_0(\vpsi,u)\,, \label{eq:RRE}
+\end{equation}
+an ODE system with initial conditions $\x_0(\vpsi,u)$ and vector field $f$. The parameter vector $\vpsi$ comprises e.g. kinetic rates, initial concentrations \color{revcol}or observation parameters. \color{black} Often, the concentrations $\x$ of the species cannot be measured directly or only a subset of them can be observed. In most experiments, only a single property is assessed. Therefore, we considered an observable 
+\begin{align*}
+y = h(\x,\vpsi,u)\,,
+\end{align*}
+with $h$ denoting the mapping.\color{revcol}~The observation process depends on observation parameters included in $\vpsi$ such as scaling and offset constants. \color{black}
+
+Mixture models enable the depiction of subpopulations within an overall population. The probability distribution is described by the weighted sum of probability density functions $\phi$ for individual mixture components, i.e., subpopulations
+\begin{align*}
+p(y|w_s,\mu_s,\sigma_s) = \sum_{s=1}^{n_s}w_s \phi(y|\mu_s,\sigma_s^2)\,. 
+\end{align*}
+In this manuscript, we assumed $\phi$ to be a normal distribution, which is parametrized by its mean $\mu$ and variance $\sigma^2$.
+
+Combining these, every subpopulation is treated as a mixture component for which the mean concentration is simulated using RREs~\cite{Hasenauer2014}. This yields the following model for the distribution of an observable $y$ for some given parameters~$\vtheta$ at a time point $t_k$,
+\begin{align*}
+p(y|\vtheta,t_k) &=\sum_{s=1}^{n_s} w_s(\vtheta)\,\phi\left(y|\mu_s, \sigma_s^2(\vtheta,t_k)\right) \\
+\mbox{with } \dot{\x}_s &= f\left(\x_s, \boldsymbol{\psi}_s(\vtheta), u\right),~\x_s(0) = \x_0(\boldsymbol{\psi}_s(\vtheta), u)\,, \\ 
+\mu_s &= h\left(\x_s, \boldsymbol{\psi}_s(\vtheta), u\right)\,.
+\end{align*}
+The parameter vector can comprise e.g. $\vtheta = \left(\{w_s, \sigma_s, \vxi_s\}_{s=1}^{n_s}, \vxi\right)$, the subpopulation specific mixture weights $w_s$, standard deviations $\sigma_s$ and mechanistic parameters $\vxi_s$ as well as mechanistic parameters $\vxi$ that are shared across subpopulations.\color{revcol}~The mean of the mixture distribution is linked to the RREs, while the mixture weights and standard deviations do not depend on the RREs.\color{black}~The parameters for the RREs of an individual subpopulation as defined in~\eqref{eq:RRE} are thus given by $\vpsi_s = (\vxi_s,\vxi)$. The concept of RRE constrained mixture models is illustrated in Figure~\ref{fig:concept}. For a more detailed explanation of these models, we refer to \cite{Hasenauer2014}. 
+
+\subsection{Single Cell Snapshot Data}
+We considered single cell snapshot data
+\begin{align*}
+\mathcal{D}= \left\{\left\{{y}_{j}^k\right\}_{j=1}^{n_c}\right\}_{k=1}^{n_t}\,. 
+\end{align*} 
+These data contain the measurements ${y}$ for $n_c$ cells, indexed by $j$, at $n_t$ time points, indexed by $k$. In the case considered, the data captures the dynamics of the population on a single cell level after stimulation with some input $u$.
+%flow cytometry \cite{Davey1996} or single cell microscopy \cite{Myashiro2007} 
+\subsection{Parameter Estimation for RRE Constrained Mixture of Normal Distributions}
+To obtain the parameters of a RRE constrained mixture model, the model needs to be fitted to experimental data $\mathcal{D}$. This is done by maximum likelihood estimation. A likelihood function 
+$\mathcal{L}(\vtheta)$ describes the probability of observing the data $\mathcal{D}$ given the parameters $\vtheta$. For the case of RRE constrained mixture models, this function is given by
+\begin{align*}
+\mathcal{L}(\vtheta) &:= \prod_{k,j} \sum_{s=1}^{n_s} w_s(\vtheta)\,\phi\left(y_j^{k}|\mu_s, \sigma_{s}^2(\vtheta,t_k)\right) \\
+\mbox{with } \dot{\x}_s &= f\left(\x_s, \vpsi_s(\vtheta), u\right),~\x_s(0) = \x_{0}(\vpsi_s(\vtheta), u)\,, \\ 
+\mu_s &= h\left(\x_s, \boldsymbol{\psi}_s(\vtheta), u\right). 
+\end{align*}
+The mixture parameters $\mu_s$ implicitly depend on the parameter vector $\vtheta$. A different variance parameter $\sigma_{s}$ can be used for every measured time point $t_k$ and subpopulation $s$. Since the number of parameters increases with the number of measured time points and the number subpopulations, an efficient method for parameter estimation is required. Due to its better numerical properties, we used the negative log-likelihood function 
+\begin{align*}
+J(\vtheta) &= -\log\mathcal{L}\left(\vtheta\right)\\
+&= -\sum_{k,j}\log\sum_{s=1}^{n_s}w_s(\vtheta)\,\phi\left(y_j^{k}|\mu_s, \sigma_{s}^2(\vtheta,t_k)\right)
+\end{align*}
+in the optimization, \color{revcol}which has the same extrema as the likelihood function.\color{black}~In the following, we derive the gradient of $J$ with respect to $\vtheta$, which can be employed by deterministic local optimization methods.
+\subsubsection{Gradient of Negative Log-likelihood Function.}
+For a simpler notation, we neglect the arguments of $w_s$ and $\sigma_s$. The gradient of the log-likelihood with respect to parameters $\vtheta=\left(\theta_1,\ldots,\theta_{n_\theta}\right)$, with $\theta$ denoting an entry of the vector, is given by
+\begin{align*}
+\frac{d J}{d \theta} &= -\sum_{k,j} \frac{d}{d\theta} \log\left(\sum_{s=1}^{n_s} w_s\,\phi\left(y_j^{k}|\mu_s, \sigma_s^2\right)\right)\\
+&= -\sum_{k,j} \frac{1}{\sum_{s=1}^{n_s} w_s\,\phi\left(y_j^{k}|\mu_s, \sigma_s^2\right)} \frac{d}{d\theta}  \sum_{s=1}^{n_s} w_s\,\phi\left(y_j^{k}|\mu_s, \sigma_s^2\right)\\
+&= -\sum_{k,j} \frac{1}{\sum_{s=1}^{n_s} w_s\,\phi\left(y_j^{k}|\mu_s, \sigma_s^2\right)} \sum_{s=1}^{n_s} \left(\frac{d w_s}{d\theta}\,\phi\left(y_j^{k}|\mu_s, \sigma_s^2\right) + w_s \frac{d \phi\left(y_j^{k}|\mu_s, \sigma_s^2\right)}{d\theta}  \right)\,.
+\end{align*}
+Under the assumption that $\phi$ is a normal distribution, it holds that
+\begin{align*}
+\frac{d \phi\left(y_j^{k}|\mu_s, \sigma_s^2\right)}{d\theta} &= \frac{1}{\sigma_s}\phi\left(y_j^{k}|\mu_s, \sigma_s^2\right)\left(\frac{y_j^k-\mu_s}{\sigma_s}\frac{d \mu_s}{d\theta}+ \left(\left(\frac{y_j^k-\mu_s}{\sigma_s}\right)^2-1\right)\frac{d\sigma_s}{d\theta}\right)\,,
+\end{align*}
+with
+\begin{align*}
+\frac{d \sigma_s^k}{d \theta} = \begin{cases} 
+1 & \theta =  \sigma_s^k\\ 
+0 & \mbox{otherwise} 
+\end{cases}\,,\qquad
+\frac{d w_s}{d \theta} = \begin{cases} 
+1 & \theta =  w_s\\ 
+0 & \mbox{otherwise} 
+\end{cases}\,.
+\end{align*}
+The gradient of the objective function comprises $\frac{d \mu_s}{d\theta}$, which can be calculated using sensitivity analysis. The sensitivities $z^{\x_s} = \left(\frac{\partial x_{s,1}}{ \partial\theta},\ldots,\frac{\partial x_{s,n_x}}{\partial \theta}\right)$ are defined by
+\begin{align*}
+\frac{\partial z^{\x_s}}{\partial t} &= \frac{\partial f}{\partial \x_s}z^{\x_s} + \frac{\partial \x_s}{d\theta}\,, \quad z^{\x_s}(0) = \frac{\partial \x_0}{\partial \theta}\,,\\
+z^{\mu_s} &= \frac{\partial h}{\partial \x_s}z^{\x_s} + \frac{\partial h}{\partial \theta}\,,
+\end{align*}
+with $\frac{\partial f}{\partial \x_s} = \left(\frac{\partial f_m}{\partial x_{s,l}}\right)_{m,l} \in \mathbb{R}^{n_x \times n_x}$ and
+$\frac{\partial h}{\partial \x_s} = \left(\frac{\partial h_m}{\partial x_{s,l}}\right)_{m,l} \in \mathbb{R}^{n_x \times n_y}$. 
+For the case of RRE constrained mixture models, we obtain $\mu_s$ and $\frac{d \mu_s}{d \theta} = z^{\mu_s}$ by simulating an ODE system comprising the RREs and sensitivity equations. 
+
+\subsubsection{Robust Evaluation of the Log-Likelihood Function and Its Gradient.}
+We explain and tackle the problem occuring when numerically evaluating (log-) \mbox{likelihood} functions of mixture distributions. For this, we formulate the standard and robust approach to evaluate the log-likelihood function following~\cite{Loos2016}. As already mentioned, rather the log-likelihood than the likelihood function is calculated due to numerical properties. This means, instead of the probability density $p$, the logarithm $\log(p)$ is evaluated. For the assumption of a normal distribution this circumvents e.g. exponentiation of the difference between measurement and simulation. This is especially advantageous for high differences, since $e^{-x}$ might be numerically evaluated to zero for finite values of $x$. However, for mixture models, if $n_s > 1$ and $p_s := \phi(y|\mu_s,\sigma_s^2)$, it holds that
+ \begin{align*}
+\log(p) = \log\left(\sum_{s=1}^{n_s} w_s p_s\right) \neq \sum_{s=1}^{n_s}\log\left(w_s p_s\right)\,,
+\end{align*}
+i.e., for these cases it is not possible to use the logarithm of the probability density of an individual mixture component directly. This problem also occurs in the calculation of the gradient. We refer to this approach of evaluating the likelihood function as standard approach. 
+
+A more robust approach for the log-likelihood calculation is given in the following. With $q_s = \log(p_s)$ and $\hat{s} = \argmax_{s}{q_s}$, we reformulate
+\begin{align}
+\log(p) &= \log\left(\sum_{s=1}^{n_s} w_s e^{q_s} \right)\nonumber \\ 
+ &= \log\left(1+ \sum_{s\neq \hat{s}} \frac{w_s}{w_{\hat{s}}}\left(e^{q_s - q_{\hat{s}}}\right)\right) + \log(w_{\hat{s}}) + q_{\hat{s}}\,.\label{eq:ll}
+\end{align}
+Considering $p_s$ to be a normal distribution it follows that
+\begin{align*}
+log(p_s) = q_s = -\frac{1}{2}\left(\frac{y-\mu_s}{\sigma_s}\right)^2 - \log(\sqrt{2\pi}) - \log(\sigma_s)\,.
+\end{align*}
+Regarding the calculation of the gradient it holds that
+\begin{align}
+\frac{d\log(p)}{d \theta} &= \frac{1}{p}\frac{dp}{d\theta} = \sum_{s=1}^{n_s}\frac{p_s}{\sum_{j=1}^{n_s}w_jp_j} H_s \nonumber\\
+&= \frac{1}{\sum_{j=1}^{n_s}w_je^{q_j-q_{\hat{s}}}}\sum_{s=1}^{n_s} e^{q_s-q_{\hat{s}}}H_s\,,\label{eq:grad}
+\end{align}
+with $H_s$ defined by
+\begin{align*}
+H_s  &= \frac{1}{p_s}\frac{d w_sp_s}{d\theta} = \frac{dw_s}{d\theta}+ \frac{w_s}{p_s}\frac{d p_s}{d\theta}\,.
+\end{align*}
+Under the assumption that $p_s$ is a normal distribution this is
+\begin{align*}
+H_s &= \frac{dw_s}{d\theta } + \frac{w_s}{\sigma_s}\left(\frac{y-\mu_s}{\sigma_s}\frac{d\mu_s}{d\theta} + \left(\left(\frac{y-\mu_s}{\sigma_s}\right)^2-1\right)\frac{d\sigma_s}{d\theta}\right).
+\end{align*}
+The proposed reformulations \eqref{eq:ll} and \eqref{eq:grad} are used for the robust evaluation of the log-likelihood function and its gradient. For further details we refer to \cite{Loos2016}.
+
+\subsection{Implementation}
+The RRE constrained mixture models were implemented in MATLAB. The sensitivity equations were derived and simulated using the toolbox CERENA~\cite{CERENA}. For parameter estimation with deterministic optimization, we used the toolbox PESTO\footnote{available at \url{https://github.com/ICB-DCM/PESTO}}, which employs the MATLAB function \texttt{fmincon}. For stochastic global optimization we employed a toolbox for the algorithm PSwarm~\cite{Vaz2006}. 
+
+\section{Results}\label{sec:results}
+\begin{figure}[tb]
+\centering
+\includegraphics[width=1\textwidth]{figures/cr}
+\caption{\textbf{Artificial data of a conversion process.} \textbf{(A)} Illustration of a conversion process between chemical species $A$ and $B$ in a cell population. The conversion from A to B is enhanced by a stimulus $u$. $30\%$ of the cells show a higher response to the external stimulus $u$ than the other cells. Only the concentration of $B$ denoted by $[B]$ is measured. \textbf{(B)}~ Artificial data for the conversion process. The system is stimulated with $u=0$ for $t<0$ and  $u=1$ for $t\geq0$.}\label{fig:cr}
+\end{figure}
+We compared the different optimizers in terms of convergence and computation time for artificial data of a one stage and a three stage cascade.
+\subsection{One Stage Cascade}
+For a first comparison of the optimizers we considered a small example of a one stage cascade comprising a conversion between two species $A$ and $B$.
+\subsubsection{Model and Artificial Data.}
+A conversion process describes a reversible reaction between two species, $A$ and $B$ that have the concentrations $[A]$ and $[B]$, respectively. In our example, we assumed that the conversion from $A$ to $B$ takes place with a basal rate $k_2[A]$ and is additionally increased by external stimulus $u$. Furthermore, $B$ is converted back to $A$ with kinetic parameter $k_3$ yielding the reactions
+\begin{align*}
+&\mbox{R}_{1}:\quad  \text{A} \to \text{B} , \quad \mbox{rate} = k_{1}u \big[ \text{A}  \big]\,, \\
+&\mbox{R}_{2}:\quad  \text{A} \to \text{B} , \quad \mbox{rate} = k_{2} \big[ \text{A}  \big]\,,\\
+&\mbox{R}_{3}: \quad \text{B} \to \text{A},  \quad \mbox{rate} = k_{3} \big[ \text{B}   \big]\,.
+\end{align*}
+We considered that there exist two subpopulations, $s_{1}$ and $s_{2}$, differing in the stimulus-dependent conversion from $A$ to $B$. This is described by the kinetic parameter $k_1$, i.e., the subpopulations share the parameters $k_2$ and $k_3$ but have individual parameters $k_{1,s_1}$ and $k_{1,s_2}$ with $s_1$ and $s_2$ indicating the kinetic parameters of subpopulation 1 and 2, respectively. The system is in steady state before stimulation ($u=0$ for $t<0$). To generate the artificial data we used the parameters $(k_{1,s_1},k_{1,s_2},k_2,k_3,w)= $ $(0.1,0.75,0.5,1.5,0.7)$ and assumed that only the concentration of species $B$ can be measured, yielding the observation model $y = h(\x,\vpsi,u) = x_2$, with $\x = (x_1,x_2)^T = ([A),[B])^T$. An illustration of the system including the subpopulations is given in Figure~\ref{fig:cr}A. This system was simulated using the stochastic simulation algorithm \cite{Gillespie2007}, which models random births and deaths of individual molecules. We considered a system size of $\Omega =1000$ and divided the number of molecules by $\Omega$ to obtain the concentration of the species. Moreover, the external stimulus is set to $u=1$ at $t\geq0$ and measurements of the concentration of $B$ are recorded at $t=0, 0.1, 0.2, 0.3, 0.5, 1$ minutes. The data are shown in Figure~\ref{fig:cr}B:  For $t=0$, the system is in steady state and no subpopulation structure is visible, since the subpopulations differ only in the response to stimulation. For $t=0.1$, the subpopulation structure becomes visible, but the subpopulations still highly overlap. However, for later time points the subpopulations are clearly separated. 
+
+The mean of the stochastic single cell trajectories can be described by RREs, i.e., the temporal evolution of $x_2$ can be described by the ODE
+\begin{align*}
+\dot{x}_2 = k_1u+k_2-\left(k_1u+k_2+k_3\right)x_2\,,\qquad x_2(0) = \frac{k_2}{k_2+k_3}\,,
+\end{align*}
+using mass conservation, $[A]+[B] = 1$. We then assumed the parameters $\vtheta = (k_{1,s_1},k_{1,s_2},k_2,k_3,w,\{\{\sigma_{s(t_k)}\}_{s=1}^{2}\}_{k=1}^{6})$ to be unknown and estimated them from the data. Since the data comprised six time points and we accounted for two subpopulations, $12$ parameters for the standard deviation $\sigma_{s}(t_k)$ need to be estimated. 
+
+\subsubsection{Convergence of Optimization Methods.}\label{sec:compare}
+\begin{figure}[tb]
+\centering
+\includegraphics[width=1\textwidth]{figures/optimresults}
+\caption{\textbf{Comparison of optimization methods.} \textbf{(A)} Convergence plot for the final negative log-likelihood values for $100$ starts. The values are sorted from lowest to highest implying a decreasing goodness of fit. \textbf{(B)} Data and fit for the optimal value, which was found by all methods. Percentage of starts for which the initial value was $\infty$ \textbf{(C)} and converged starts \textbf{(D)}.}\label{fig:optimresults}
+\end{figure}
+To evaluate the optimizers, we compared deterministic gradient-based optimization using sensitivities with deterministic gradient-based optimization using finite differences and a stochastic particle swarm algorithm~\cite{Vaz2006}. For all optimizers, the parameter values for the kinetic rates $k_i$ were restricted to the interval $[10^{-6},10^{4}]$, the mixture weight $w$ to $[0,1]$ and the parameters for the standard deviation of the normal distributions $\sigma_{s}(t_k)$ to $[10^{-2.5},10^{2.5}]$. Each algorithm was started $100$ times and the deterministic optimizers were started from the same randomly drawn start points. 
+
+The final negative log-likelihood values for every start are sorted with decreasing goodness of fit and shown in Figure~\ref{fig:optimresults}A. The data and fit, which correspond to the optimal value found by all methods, are shown in Figure~\ref{fig:optimresults}B. The model shows a good agreement with the data. For a detailed comparison of the results obtained by the different optimization methods, we assessed the percentage of failed starts, i.e., the starts for which the log-likelihood function was infinite at the start point (Figure~\ref{fig:optimresults}C). For almost $20\%$ of all drawn start points the log-likelihood has an infinite value when using the standard evaluation of the log-likelihood. However, the log-likelihood can be evaluated for all start points when using the robust calculation approach. Since for PSwarm an initial particle population is used instead of a single initial value, there are no failed starts and it is not possible to compare this property with the deterministic optimizers. We expect the percentage of failed log-likelihood evaluations for the initial particle population to be similar to the percentages found for the failed starts in the deterministic optimization using the standard approach. The likelihood was numerically evaluated to zero for all start points. For the log-likelihood, we counted the number of objective function values that are close to the minimal objective function value found, i.e., below a statistical threshold according to a likelihood ratio test~\cite{Hross2016}. These starts are then likely to have converged to the global optimum. The percentage of converged starts determined for each optimizer is depicted in Figure~\ref{fig:optimresults}D. Clearly, the best convergence is obtained by deterministic local optimization with an analytical gradient that is calculated with sensitivities. For this optimizer, the robust calculation of the log-likelihood and the gradient yielded better convergence compared to the standard approach. For both approaches, standard and robust evaluation of the log-likelihood function, deterministic local optimiziation with finite difference approximation to the gradient shows less convergence than when using sensitivites. The stochastic optimization with PSwarm has even less converged runs than the deterministic optimization with finite differences. 
+\subsubsection{Computation Time of Optimization Methods.}
+\begin{figure}[tb]
+\centering
+\includegraphics[width=1\textwidth]{figures/violins}
+\caption{\textbf{Performance comparison of optimization methods.} \textbf{(A)}~Time needed for one optimization start. \textbf{(B)}~Number of objective function evaluations for one optimization start. \textbf{(C)}~Average computation time needed per converged start.} \label{fig:evals}
+\end{figure}
+We compared the performance of the optimizers in terms of computation time (Figure~\ref{fig:evals}A). The best computation time was achieved for the deterministic optimization with sensitivities, while the highest computation time is needed for stochastic optimization. Also regarding the number of function evaluations, the stochastic optimization needed most function evaluation and the deterministic optimization with sensitivities performed best (Figure~\ref{fig:evals}B). Furthermore, regarding the average computation time needed per converged start shown in Figure~\ref{fig:evals}C, the deterministic optimizer using sensitivities outperforms the other optimizers. However, there were almost no additional computational costs when using the robust approach instead of the standard approach to evaluate the log-likelihood function for all optimizers.  \color{revcol}
+\subsection{Three Stage Cascade}
+To validate the results obtained for the simple conversion process, we studied artificial data of a three stage cascade, namely the Raf/Mek/Erk cascade.
+\subsubsection{Model and Artificial Data.}
+The considered pathway comprises the protein kinases Raf, Mek and Erk and their corresponding phosphorylated/active forms pRaf, pMek and pErk. Raf is activated with a stimulus-dependent rate $k_{1}u \big[ \text{Raf}  \big]$ and a basal rate $k_2\big[ \text{Raf}  \big]$. The activation rate of Mek is proportional to the amount of phosphorylated Raf, while active Mek in turn phosphorylates Erk. These reactions and the dephosphorylation of the active kinases are given by
+\begin{align*}
+&\mbox{R}_{1}:\quad  \text{Raf} \to \text{pRaf} , \quad &&\mbox{rate} = k_{1}u \big[ \text{Raf}  \big]\,, \\
+&\mbox{R}_{2}:\quad  \text{Raf} \to \text{pRaf} , \quad &&\mbox{rate} = k_{2} \big[ \text{Raf}  \big]\,, \\
+&\mbox{R}_{3}:\quad  \text{pRaf} \to \text{Raf} , \quad &&\mbox{rate} = k_{3} \big[ \text{pRaf}  \big]\,, \\
+&\mbox{R}_{4}:\quad  \text{Mek} \to \text{pMek} , \quad &&\mbox{rate} = k_{4} \big[ \text{pRaf}  \big]\big[ \text{Mek}  \big]\,,\\
+&\mbox{R}_{5}: \quad \text{pMek} \to \text{Mek},  \quad &&\mbox{rate} = k_{5} \big[ \text{pMek}   \big]\,,\\
+&\mbox{R}_{6}:\quad  \text{Erk} \to \text{pErk} , \quad &&\mbox{rate} = k_{6}  \big[ \text{pMek}  \big]\big[ \text{Erk}  \big]\,,\\
+&\mbox{R}_{7}: \quad \text{pErk} \to \text{Erk},  \quad &&\mbox{rate} = k_{7} \big[ \text{pErk}   \big]\,,
+\end{align*}
+with mass conservation
+\begin{align*}
+\big[ \text{Raf}  \big]+\big[ \text{pRaf}  \big] &= \big[ \text{Raf}  \big]_0\,,\\
+\big[ \text{Mek}  \big]+\big[ \text{pMek}  \big] &= \big[ \text{Mek}  \big]_0\,,\\
+\big[ \text{Erk}  \big]+\big[ \text{pErk}  \big] &= \big[ \text{Erk}  \big]_0\,.
+\end{align*}
+For the data generation, we assumed to observe $y = h(\x,\vpsi,u) = s \big[ \text{pErk}  \big]\,.$ To circumvent structural non-identifiabilities, we consider the reformulations
+\begin{align*}
+x_1 &= k_4\big[ \text{pRaf}  \big]\,,\\
+x_2 &= k_6\big[ \text{pMek}  \big]\,,\\
+x_3 &= s\big[ \text{pErk}  \big]\,.
+\end{align*}
+This yields the ODE system
+\begin{align*}
+\dot{x}_1 &= (k_1u+k_2)(k_4\big[ \text{Raf}  \big]_0-x_1)-k_3x_1\,,\qquad &&x_1(0) =\frac{k_2k_4\big[ \text{Raf}  \big]_0}{k_3+k_2} \,,\\
+\dot{x}_2 &= x_1(k_6\big[ \text{Mek}  \big]_0-x_2)-k_5x_2\,,\qquad&& x_2(0) = \frac{x_1(0)k_6\big[ \text{Mek}  \big]_0}{x_1(0) + k_5}\,,\\
+\dot{x}_3 &= x_2(s\big[ \text{Erk}  \big]_0-x_3)-k_7x_3\,,\qquad &&x_3(0) =\frac{x_2(0)s\big[ \text{Erk}  \big]_0}{x_2(0)+k_7} \,,
+\end{align*}
+with $y = x_3$ and parameters $(k_1,k_2,k_3,k_5,k_7,k_4\big[ \text{Raf}  \big]_0,k_6\big[ \text{Mek}  \big]_0,s\big[ \text{Erk}  \big]_0)$. For details regarding the model we refer to \cite{Hasenauer2014}. In this example, we considered two subpopulations that differ in their response to stimulus $u$, captured by parameter $k_1$ (Figure~\ref{fig:cascade}A). We generated measurements of $1000$ cells by simulating the ODE system for $\log_{10}(k_{1,s_1},k_{1,s_2},k_2,k_3,k_5,k_7,$ $k_4\big[ \text{Raf}  \big]_0,k_6\big[ \text{Mek}  \big]_0,s\big[ \text{Erk}  \big]_0)= $ $(\textrm{-}2,\textrm{-}1,\textrm{-}2,\textrm{-}0.15,\textrm{-}0.15,\textrm{-}0.15,\textrm{-}2,2,3)$, $w = 0.7$ and normally-distributed measurement noise (Figure~\ref{fig:cascade}B). The stimulus $u $ is set to $0$ for $t<0$ and to $1$ for $t\geq0$. 
+\begin{figure}[tb]
+\centering
+\includegraphics[width=1\textwidth]{figures/cascade}
+\caption{\color{revcol}\textbf{Artificial data of the Raf/Mek/Erk cascade.} \textbf{(A)} Illustration of the considered signaling pathway, which comprises the kinases Raf, Mek and Erk and its corresponding actived forms. The model comprises two subpopulations differing in their response to stimulus $u$. \textbf{(B)}~Artificially generated data of the Raf/Mek/Erk cascade for measurements of pErk levels. }\label{fig:cascade}
+\end{figure}
+\subsubsection{Convergence of Optimization Methods.}
+\begin{figure}[tb]
+\centering
+\includegraphics[width=1\textwidth]{figures/optimresults_cascade}
+\caption{\color{revcol}\textbf{Comparison of optimization methods.} \textbf{(A)}~Final negative log-likelihood values for $100$ runs, sorted according to a decreasing goodness of fit. \textbf{(B)}~Zoom for the five best starts. The black line indicates the statistical threshold according to a likelihood ratio test, which was used to obtain the number of converged starts. \textbf{(C)}~Data and fit for the optimal parameter value found by deterministic optimization with sensitivities and a robust evaluation of the log-likelihood function.}\label{fig:optimresults_cascade}
+\end{figure}
+For parameter estimation, the intervals for the parameters were set to $[10^{-3},10^{5}]$ for the kinetic parameters, to $[0,1]$ for the mixture weight and to $[10^{-3},10^{2}]$ for $\sigma_{s}(t_k)$. The resulting objective function values for $100$ runs of the optimization procedures are shown in Figure~\ref{fig:optimresults_cascade}A, and a zoom in of the five best runs in Figure~\ref{fig:optimresults_cascade}B. The optimization with sensitivities and a robust evaluation of the log-likelihood function converged to the optimal value $44$ times. This optimal value yields a good fit to the data (Figure~\ref{fig:optimresults_cascade}C). Using deterministic optimization with sensitivities and the standard evaluation of the log-likelihood function the same optimal value as with the robust evaluation was found only once. The other optimizers were not able to find the optimal value at all. For the deterministic optimization and the standard evaluation of the log-likelihood function, only three out of $100$ initial parameter values yielded a finite log-likelihood value. Consequently, the remaining runs could not be started. These findings indicate that for higher-dimensional estimation problems, the use of sensitivity-based methods and robust log-likelihood evaluation becomes increasingly important. 
+\subsubsection{Performance of Optimization Methods.}
+\begin{figure}[tb]
+\centering
+\includegraphics[width=1\textwidth]{figures/cpu_cascade}
+\caption{\color{revcol}\textbf{Performance of optimization methods.} \textbf{(A)}~CPU time needed for one optimization start. \textbf{(B)}~Number of objective function evaluations for one optimization start. The representation is based on three starts for deterministic optimization with the standard approach to evaluate the log-likelihood (grey shaded), while it is based on $100$ starts for the other optimizers.}\label{fig:cpu_cascade}
+\end{figure}
+We compared the computation times and needed function evaluations of the different optimization methods (Figure~\ref{fig:cpu_cascade}). Since only the deterministic optimization with sensitivities and robust evaluation reached a sufficient number of converged starts, we did not compare the optimizers in terms of average computation time per converged starts. The analysis for the deterministic optimization with standard evaluations is only based on three starts that have not failed and is therefore not meaningful for the comparison. Among the optimizers for which $100$ starts could be analyzed in terms of their computation time and number of function evaluations, the optimization with sensitivities and the robust evaluation of the log-likelihood function performs best. The proposed approach therefore yields better optimization results and is also more efficient than the other optimizers.\color{black}
+
+\section{Conclusion}\label{sec:discussion} 
+In this manuscript, we summarized the concept of RRE constrained mixture modeling and studied the calibration of those models to  experimental data under the normal distribution assumption. \color{revcol}An often used approach to estimate the parameters of mixture models in general is the Expectation-Maximization (EM) algorithm (see e.g. \cite{Bishop2006}). This algorithm highly depends on the initialization of the mixture components, which is challenging for RRE constrained mixture models since the components depend on the dynamic parameters of the model. In preliminary studies the EM algorithm showed poor convergence. Therefore, we did not consider the EM algorithm in this manuscript and focused on a maximum likelihood approach.  \color{black}
+
+We derived the log-likelihood function and its gradient, which can be used to perform gradient-based deterministic optimization. Additionally, a robust approach of numerically evaluating these terms has been provided. We compared three optimization schemes, two deterministic gradient-based methods, one using the analytical gradient and one using an approximation of the gradient by finite differences, and a stochastic particle swarm algorithm. For each optimizer, we assessed performance and convergence for the standard and robust approach to evaluate the log-likelihood function. The comparison was carried out for examples of artificial single cell snapshot data of a one stage and a three stage cascade. We found that deterministic gradient-based optimization with sensitivities and robust calculation of the mixture probability outperformed all other methods in terms of robustness and convergence. This is especially important, since the complexity of RRE constrained mixture models increases with the number of measured time points. \color{revcol}For the example of the three stage cascade only gradient-based optimization with sensitivites and a robust evaluation of the log-likelihood function yielded a reasonable calibration of  RRE constrained mixture models to the data. We expect this also to hold when considering even more complicated systems. \color{black}Accordingly, the proposed approach facilitates a robust and efficient calibration of RRE constrained mixture models to elucidate the sources of heterogeneity. 
+
+\bibliographystyle{acm}
+\bibliography{RefsCMSB} 
+
+
+\end{document}
