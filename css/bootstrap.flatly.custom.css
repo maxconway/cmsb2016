@@ -50,7 +50,9 @@ padding: 30px 0;
     font-weight: bold;
 
 }
-
+.fixHeaderOffset{
+  position: relative; display: block; top:-250px;
+}
 .splash h2 {
   font-size: 30px;
 }
